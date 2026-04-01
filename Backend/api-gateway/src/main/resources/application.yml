@@ -1,5 +1,15 @@
 server:
   port: 8080
+
 spring:
   application:
     name: api-gateway
+
+services:
+  auth-url: http://localhost:8081
+  tenant-url: http://localhost:8082
+  project-url: http://localhost:8083
+
+jwt:
+  secret: ${JWT_SECRET:8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=}
+  expiration: 86400000

@@ -1,5 +1,22 @@
 server:
   port: 8081
+
 spring:
   application:
     name: auth-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/trackify_master?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: ${JWT_SECRET:8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=}
+  expiration: 86400000
