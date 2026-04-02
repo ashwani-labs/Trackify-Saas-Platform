@@ -1,5 +1,19 @@
 server:
   port: 8082
+
 spring:
   application:
     name: tenant-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/trackify_master?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  secret: ${JWT_SECRET:8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=}
+  expiration: 86400000
