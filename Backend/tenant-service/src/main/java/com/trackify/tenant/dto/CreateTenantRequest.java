@@ -8,16 +8,15 @@ import lombok.Data;
 @Data
 public class CreateTenantRequest {
 
-    @NotBlank(message = "Name is required")
-    private String name;
+  @NotBlank(message = "Name is required")
+  private String name;
 
-    @NotBlank(message = "Code is required")
-    private String code;
+  @NotBlank(message = "Code is required")
+  private String code;
 
-    @NotBlank(message = "Admin email is required")
-    @Email(message = "Invalid email format")
-    private String adminEmail;
+  @NotBlank(message = "Admin email is required")
+  @Email(message = "Invalid email format")
+  private String adminEmail;
 
-    // Optional, can default to FREE if not provided
-    private Plan plan;
+  private Plan plan;
 }

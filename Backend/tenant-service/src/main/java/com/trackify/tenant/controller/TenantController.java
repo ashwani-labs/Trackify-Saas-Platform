@@ -6,38 +6,42 @@ import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
 import com.trackify.tenant.service.TenantService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/tenants")
 @RequiredArgsConstructor
 public class TenantController {
 
-    private final TenantService tenantService;
+  private final TenantService tenantService;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<TenantResponse>> createTenant(@Valid @RequestBody CreateTenantRequest request) {
-        TenantResponse response = tenantService.createTenant(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok("Tenant created successfully", response));
-    }
+  @PostMapping
+  public ResponseEntity<ApiResponse<TenantResponse>> createTenant(
+      @Valid @RequestBody CreateTenantRequest request) {
+    TenantResponse response = tenantService.createTenant(request);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ApiResponse.ok("Tenant created successfully", response));
+  }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<TenantResponse>>> getAllTenants() {
-        return ResponseEntity.ok(ApiResponse.ok(tenantService.getAllTenants()));
-    }
+  @GetMapping
+  public ResponseEntity<ApiResponse<List<TenantResponse>>> getAllTenants() {
+    return ResponseEntity.ok(ApiResponse.ok(tenantService.getAllTenants()));
+  }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<TenantResponse>> getTenant(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(tenantService.getTenantById(id)));
-    }
+  @GetMapping("/{id}")
+  public ResponseEntity<ApiResponse<TenantResponse>> getTenant(@PathVariable Long id) {
+    return ResponseEntity.ok(ApiResponse.ok(tenantService.getTenantById(id)));
+  }
 
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<ApiResponse<TenantResponse>> updateTenantStatus(@PathVariable Long id, @Valid @RequestBody UpdateTenantStatusRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok("Tenant status updated successfully", tenantService.updateTenantStatus(id, request)));
-    }
+  @PatchMapping("/{id}/status")
+  public ResponseEntity<ApiResponse<TenantResponse>> updateTenantStatus(
+      @PathVariable Long id, @Valid @RequestBody UpdateTenantStatusRequest request) {
+    return ResponseEntity.ok(
+        ApiResponse.ok(
+            "Tenant status updated successfully", tenantService.updateTenantStatus(id, request)));
+  }
 }

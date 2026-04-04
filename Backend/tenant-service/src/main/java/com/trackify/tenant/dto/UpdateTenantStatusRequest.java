@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 public class UpdateTenantStatusRequest {
-    @NotNull(message = "Status is required")
-    private TenantStatus status;
+  @NotNull(message = "Status is required")
+  private TenantStatus status;
 }
