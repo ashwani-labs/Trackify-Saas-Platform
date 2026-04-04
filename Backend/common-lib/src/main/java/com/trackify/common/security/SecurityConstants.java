@@ -1,8 +1,7 @@
 package com.trackify.common.security;
 
 public final class SecurityConstants {
-  private SecurityConstants() {
-  }
+  private SecurityConstants() {}
 
   public static final String AUTH_HEADER = "Authorization";
   public static final String BEARER_PREFIX = "Bearer ";
