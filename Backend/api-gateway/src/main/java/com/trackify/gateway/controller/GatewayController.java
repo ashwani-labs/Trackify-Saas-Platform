@@ -1,6 +1,8 @@
 package com.trackify.gateway.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.URI;
+import java.util.Enumeration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,64 +17,61 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.util.Enumeration;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 public class GatewayController {
 
-    private final RestTemplate restTemplate;
+  private final RestTemplate restTemplate;
 
-    @Value("${services.auth-url}")
-    private String authUrl;
+  @Value("${services.auth-url}")
+  private String authUrl;
 
-    @Value("${services.tenant-url}")
-    private String tenantUrl;
+  @Value("${services.tenant-url}")
+  private String tenantUrl;
 
-    @Value("${services.project-url}")
-    private String projectUrl;
+  @Value("${services.project-url}")
+  private String projectUrl;
 
-    @RequestMapping("/**")
-    public ResponseEntity<String> proxyRequest(HttpServletRequest request, @RequestBody(required = false) String body, HttpMethod method) {
-        String path = request.getRequestURI();
-        String queryParams = request.getQueryString() != null ? "?" + request.getQueryString() : "";
-        String targetBaseUrl;
+  @RequestMapping("/**")
+  public ResponseEntity<String> proxyRequest(
+      HttpServletRequest request, @RequestBody(required = false) String body, HttpMethod method) {
+    String path = request.getRequestURI();
+    String queryParams = request.getQueryString() != null ? "?" + request.getQueryString() : "";
+    String targetBaseUrl;
 
-        // Determine target service based on path prefix
-        if (path.startsWith("/auth")) {
-            targetBaseUrl = authUrl;
-        } else if (path.startsWith("/tenants")) {
-            targetBaseUrl = tenantUrl;
-        } else if (path.startsWith("/projects") || path.startsWith("/issues")) {
-            targetBaseUrl = projectUrl;
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-
-        String targetUrl = targetBaseUrl + path + queryParams;
-
-        HttpHeaders headers = new HttpHeaders();
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            // Optional: Filter out specific headers if needed
-            headers.add(headerName, request.getHeader(headerName));
-        }
-
-        HttpEntity<String> entity = new HttpEntity<>(body, headers);
-
-        try {
-            log.info("Proxying request: {} {}", method, targetUrl);
-            return restTemplate.exchange(URI.create(targetUrl), method, entity, String.class);
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            return ResponseEntity.status(e.getStatusCode())
-                    .headers(e.getResponseHeaders())
-                    .body(e.getResponseBodyAsString());
-        } catch (Exception e) {
-            log.error("Proxy error", e);
-            return ResponseEntity.internalServerError().body("{\"success\":false,\"message\":\"Internal Gateway Error\"}");
-        }
+    if (path.startsWith("/auth")) {
+      targetBaseUrl = authUrl;
+    } else if (path.startsWith("/tenants")) {
+      targetBaseUrl = tenantUrl;
+    } else if (path.startsWith("/projects") || path.startsWith("/issues")) {
+      targetBaseUrl = projectUrl;
+    } else {
+      return ResponseEntity.notFound().build();
     }
+
+    String targetUrl = targetBaseUrl + path + queryParams;
+
+    HttpHeaders headers = new HttpHeaders();
+    Enumeration<String> headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      String headerName = headerNames.nextElement();
+      headers.add(headerName, request.getHeader(headerName));
+    }
+
+    HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
+    try {
+      log.info("Proxying request: {} {}", method, targetUrl);
+      return restTemplate.exchange(URI.create(targetUrl), method, entity, String.class);
+    } catch (HttpClientErrorException | HttpServerErrorException e) {
+      return ResponseEntity.status(e.getStatusCode())
+          .headers(e.getResponseHeaders())
+          .body(e.getResponseBodyAsString());
+    } catch (Exception e) {
+      log.error("Proxy error", e);
+      return ResponseEntity.internalServerError()
+          .body("{\"success\":false,\"message\":\"Internal Gateway Error\"}");
+    }
+  }
 }
