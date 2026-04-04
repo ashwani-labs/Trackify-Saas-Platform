@@ -6,10 +6,13 @@ import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
 import com.trackify.tenant.entity.Tenant;
+import com.trackify.tenant.entity.UserLookup;
 import com.trackify.tenant.repository.TenantRepository;
+import com.trackify.tenant.repository.UserLookupRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,24 +25,26 @@ import java.util.stream.Collectors;
 public class TenantService {
 
     private final TenantRepository tenantRepository;
+    private final UserLookupRepository userLookupRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public TenantResponse createTenant(CreateTenantRequest request) {
-        if (tenantRepository.existsByDomain(request.getDomain())) {
-            throw AppException.conflict("Domain already exists");
+        if (tenantRepository.existsByDomain(request.getCode())) {
+            throw AppException.conflict("Code already exists");
         }
 
-        String dbName = "trackify_tenant_" + request.getDomain();
-        String dbUsername = request.getDomain() + "_admin";
+        String dbName = "trackify_tenant_" + request.getCode();
+        String dbUsername = request.getCode() + "_admin";
         
         // In reality, password should be generated securely.
         String dbPassword = "pw_" + System.currentTimeMillis(); 
 
         Tenant tenant = Tenant.builder()
                 .name(request.getName())
-                .domain(request.getDomain())
-                .plan(request.getPlan())
+                .domain(request.getCode())
+                .plan(request.getPlan() != null ? request.getPlan() : com.trackify.common.enums.Plan.FREE)
                 .status(TenantStatus.ACTIVE)
                 .dbName(dbName)
                 .dbHost("localhost")
@@ -50,7 +55,13 @@ public class TenantService {
 
         tenant = tenantRepository.save(tenant);
         
-        provisionTenantDatabase(dbName, dbUsername, dbPassword);
+        provisionTenantDatabase(dbName, dbUsername, dbPassword, request.getAdminEmail());
+        
+        UserLookup userLookup = UserLookup.builder()
+                .email(request.getAdminEmail())
+                .tenantId(tenant.getId())
+                .build();
+        userLookupRepository.save(userLookup);
         
         return mapToResponse(tenant);
     }
@@ -77,7 +88,7 @@ public class TenantService {
         return mapToResponse(tenant);
     }
 
-    private void provisionTenantDatabase(String dbName, String dbUsername, String dbPassword) {
+    private void provisionTenantDatabase(String dbName, String dbUsername, String dbPassword, String adminEmail) {
         try {
             log.info("Provisioning database: {}", dbName);
             jdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
@@ -100,6 +111,15 @@ public class TenantService {
                 )
             """;
             jdbcTemplate.execute(createUserTable);
+            
+            // Insert initial admin user with hashed password
+            String defaultPassword = "admin123";
+            String hashedPassword = passwordEncoder.encode(defaultPassword);
+            String insertAdminUser = String.format(
+                "INSERT INTO users (email, password, full_name, role, status) VALUES ('%s', '%s', '%s', 'ADMIN', 'ACTIVE')",
+                adminEmail, hashedPassword, "Admin User"
+            );
+            jdbcTemplate.execute(insertAdminUser);
             
             log.info("Provisioned database successfully: {}", dbName);
         } catch (Exception e) {
