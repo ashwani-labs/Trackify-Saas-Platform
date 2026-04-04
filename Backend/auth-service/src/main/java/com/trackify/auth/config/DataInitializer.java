@@ -14,23 +14,24 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-    private final MasterUserRepository masterUserRepository;
-    private final PasswordEncoder passwordEncoder;
+  private final MasterUserRepository masterUserRepository;
+  private final PasswordEncoder passwordEncoder;
 
-    @Override
-    public void run(String... args) throws Exception {
-        String defaultEmail = "master@trackify.com";
-        if (!masterUserRepository.existsByEmail(defaultEmail)) {
-            log.info("Creating default master user: {}", defaultEmail);
-            MasterUser master = MasterUser.builder()
-                    .email(defaultEmail)
-                    .password(passwordEncoder.encode("admin123"))
-                    .role(Role.MASTER)
-                    .isActive(true)
-                    .build();
-            masterUserRepository.save(master);
-        } else {
-            log.info("Default master user already exists.");
-        }
+  @Override
+  public void run(String... args) throws Exception {
+    String defaultEmail = "master@trackify.com";
+    if (!masterUserRepository.existsByEmail(defaultEmail)) {
+      log.info("Creating default master user: {}", defaultEmail);
+      MasterUser master =
+          MasterUser.builder()
+              .email(defaultEmail)
+              .password(passwordEncoder.encode("admin123"))
+              .role(Role.MASTER)
+              .isActive(true)
+              .build();
+      masterUserRepository.save(master);
+    } else {
+      log.info("Default master user already exists.");
     }
+  }
 }

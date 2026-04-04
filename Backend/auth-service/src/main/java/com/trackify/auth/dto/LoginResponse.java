@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResponse {
-    
-    private String token;
-    private String role;
-    
-    @JsonProperty("tenant_id")
-    private Long tenantId;
+
+  private String token;
+  private String role;
+
+  @JsonProperty("tenant_id")
+  private Long tenantId;
 }
