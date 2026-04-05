@@ -3,7 +3,7 @@ package com.trackify.project;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.trackify")
 public class ProjectServiceApplication {
 
   public static void main(String[] args) {

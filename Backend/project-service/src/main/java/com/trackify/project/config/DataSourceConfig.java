@@ -1,6 +1,7 @@
 package com.trackify.project.config;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
@@ -69,7 +70,9 @@ public class DataSourceConfig implements WebMvcConfigurer {
      */
     @Bean
     @Primary
-    public DataSource dataSource(@Qualifier("masterJdbcTemplate") JdbcTemplate masterJdbcTemplate) {
+    public DataSource dataSource(
+            @Qualifier("masterJdbcTemplate") JdbcTemplate masterJdbcTemplate,
+            @Qualifier("masterDataSource") DataSource masterDataSource) {
         TenantRoutingDataSource routingDataSource = new TenantRoutingDataSource() {
             @Override
             protected Object determineCurrentLookupKey() {
@@ -81,7 +84,9 @@ public class DataSourceConfig implements WebMvcConfigurer {
             }
         };
 
-        routingDataSource.setDefaultTargetDataSource(masterDataSource());
+        routingDataSource.setDefaultTargetDataSource(masterDataSource);
+        routingDataSource.setTargetDataSources(new HashMap<>());
+        routingDataSource.afterPropertiesSet();
         return routingDataSource;
     }
 
