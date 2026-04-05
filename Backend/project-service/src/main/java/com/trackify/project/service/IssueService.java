@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class IssueService {
 
-    private static final Logger log = LoggerFactory.getLogger(IssueService.class);
     private final IssueRepository issueRepository;
     private final ProjectRepository projectRepository;
     private final IssueCommentRepository commentRepository;
