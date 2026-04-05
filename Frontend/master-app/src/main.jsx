@@ -8,9 +8,7 @@ import './index.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* Redux store — wraps entire app */}
     <Provider store={store}>
-      {/* React Router — single BrowserRouter at the top */}
       <BrowserRouter>
         <App />
       </BrowserRouter>
