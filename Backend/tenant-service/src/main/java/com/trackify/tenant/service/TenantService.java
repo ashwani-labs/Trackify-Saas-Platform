@@ -113,7 +113,39 @@ public class TenantService {
                   status       ENUM('PENDING','ACTIVE','INACTIVE') DEFAULT 'PENDING',
                   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
                   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                )
+                );
+
+                CREATE TABLE IF NOT EXISTS projects (
+                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+                  name         VARCHAR(255) NOT NULL,
+                  description  TEXT,
+                  owner_id     BIGINT,
+                  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                );
+
+                CREATE TABLE IF NOT EXISTS issues (
+                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+                  title        VARCHAR(255) NOT NULL,
+                  description  TEXT,
+                  status       ENUM('TODO', 'IN_PROGRESS', 'DONE', 'CANCELLED') DEFAULT 'TODO',
+                  priority     ENUM('LOW', 'MEDIUM', 'HIGH', 'URGENT') DEFAULT 'MEDIUM',
+                  project_id   BIGINT NOT NULL,
+                  reporter_id  BIGINT,
+                  assignee_id  BIGINT,
+                  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                  FOREIGN KEY (project_id) REFERENCES projects(id)
+                );
+
+                CREATE TABLE IF NOT EXISTS issue_comments (
+                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+                  issue_id     BIGINT NOT NULL,
+                  user_id      BIGINT,
+                  content      TEXT NOT NULL,
+                  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY (issue_id) REFERENCES issues(id)
+                );
             """;
       jdbcTemplate.execute(createUserTable);
 

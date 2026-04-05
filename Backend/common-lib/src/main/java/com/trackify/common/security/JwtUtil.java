@@ -43,10 +43,11 @@ public class JwtUtil {
     return generateToken(subject, claims);
   }
 
-  public String generateToken(String subject, String role, Long tenantId) {
+  public String generateToken(String subject, String role, Long tenantId, Long userId) {
     Map<String, Object> claims = new HashMap<>();
     claims.put("role", role);
     if (tenantId != null) claims.put("tenantId", tenantId);
+    if (userId != null) claims.put("userId", userId);
     return generateToken(subject, claims);
   }
 
@@ -82,6 +83,17 @@ public class JwtUtil {
         token,
         claims -> {
           Object v = claims.get("tenantId");
+          if (v instanceof Integer i) return i.longValue();
+          if (v instanceof Long l) return l;
+          return null;
+        });
+  }
+
+  public Long extractUserId(String token) {
+    return extractClaim(
+        token,
+        claims -> {
+          Object v = claims.get("userId");
           if (v instanceof Integer i) return i.longValue();
           if (v instanceof Long l) return l;
           return null;

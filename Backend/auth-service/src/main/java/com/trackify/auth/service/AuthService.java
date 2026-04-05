@@ -39,7 +39,7 @@ public class AuthService {
       if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
         throw AppException.unauthorized("Invalid email or password");
       }
-      String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+      String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name(), null, user.getId());
       return LoginResponse.builder().token(token).role(user.getRole().name()).build();
     }
 
@@ -54,12 +54,16 @@ public class AuthService {
             .findById(lookup.getTenantId())
             .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
 
-    // Connect to tenant DB to verify password
     Map<String, Object> userData =
         checkTenantUserCredentials(tenant, request.getEmail(), request.getPassword());
 
     String role = (String) userData.get("role");
-    String token = jwtUtil.generateToken(request.getEmail(), role, tenant.getId());
+    Long userId = null;
+    Object idObj = userData.get("id");
+    if (idObj instanceof Integer i) userId = i.longValue();
+    else if (idObj instanceof Long l) userId = l;
+    
+    String token = jwtUtil.generateToken(request.getEmail(), role, tenant.getId(), userId);
 
     return LoginResponse.builder().token(token).role(role).tenantId(tenant.getId()).build();
   }
@@ -81,7 +85,7 @@ public class AuthService {
 
     try {
       Map<String, Object> user =
-          tenantJdbc.queryForMap("SELECT password, role, status FROM users WHERE email = ?", email);
+          tenantJdbc.queryForMap("SELECT id, password, role, status FROM users WHERE email = ?", email);
 
       String status = (String) user.get("status");
       if ("INACTIVE".equals(status)) {

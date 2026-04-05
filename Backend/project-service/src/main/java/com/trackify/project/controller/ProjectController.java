@@ -1,0 +1,58 @@
+package com.trackify.project.controller;
+
+import com.trackify.common.dto.ApiResponse;
+import com.trackify.common.security.JwtUtil;
+import com.trackify.project.dto.ProjectRequest;
+import com.trackify.project.dto.ProjectResponse;
+import com.trackify.project.service.ProjectService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/projects")
+@RequiredArgsConstructor
+public class ProjectController {
+
+    private final ProjectService projectService;
+    private final JwtUtil jwtUtil;
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<ProjectResponse>> createProject(
+            @RequestHeader("Authorization") String authHeader,
+            @Valid @RequestBody ProjectRequest request) {
+        
+        Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+        ProjectResponse response = projectService.createProject(request, userId);
+        return ResponseEntity.ok(ApiResponse.ok("Project created successfully", response));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAllProjects() {
+        List<ProjectResponse> response = projectService.getAllProjects();
+        return ResponseEntity.ok(ApiResponse.ok("Projects fetched successfully", response));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProjectResponse>> getProjectById(@PathVariable Long id) {
+        ProjectResponse response = projectService.getProjectById(id);
+        return ResponseEntity.ok(ApiResponse.ok("Project fetched successfully", response));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProjectResponse>> updateProject(
+            @PathVariable Long id,
+            @Valid @RequestBody ProjectRequest request) {
+        ProjectResponse response = projectService.updateProject(id, request);
+        return ResponseEntity.ok(ApiResponse.ok("Project updated successfully", response));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteProject(@PathVariable Long id) {
+        projectService.deleteProject(id);
+        return ResponseEntity.ok(ApiResponse.ok("Project deleted successfully", null));
+    }
+}
