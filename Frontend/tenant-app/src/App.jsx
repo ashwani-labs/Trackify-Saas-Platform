@@ -7,6 +7,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import UserApprovalPage from './pages/UserApprovalPage';
+import ProjectsPage from './pages/ProjectsPage';
 import './styles/variables.css';
 
 const MainDashboard = () => (
@@ -55,6 +56,31 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserApprovalPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <ProjectsPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/projects/:id"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <div style={{ padding: '2rem' }}>
+                    <h1>Project Details</h1>
+                    <p>Coming soon: Kanban Board and Issue List.</p>
+                  </div>
+                </DashboardLayout>
               </ProtectedRoute>
             }
           />
