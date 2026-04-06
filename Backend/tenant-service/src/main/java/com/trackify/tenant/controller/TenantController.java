@@ -1,9 +1,12 @@
 package com.trackify.tenant.controller;
 
 import com.trackify.common.dto.ApiResponse;
+import com.trackify.common.enums.UserStatus;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
+import com.trackify.tenant.dto.UserRegistrationRequest;
+import com.trackify.tenant.dto.UserResponse;
 import com.trackify.tenant.service.TenantService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -43,5 +46,26 @@ public class TenantController {
     return ResponseEntity.ok(
         ApiResponse.ok(
             "Tenant status updated successfully", tenantService.updateTenantStatus(id, request)));
+  }
+
+  @PostMapping("/users/register")
+  public ResponseEntity<ApiResponse<UserResponse>> registerUser(
+      @Valid @RequestBody UserRegistrationRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ApiResponse.ok("User registered successfully. Pending approval.", tenantService.registerUser(request)));
+  }
+
+  @GetMapping("/{id}/users/pending")
+  public ResponseEntity<ApiResponse<List<UserResponse>>> getPendingUsers(@PathVariable Long id) {
+    return ResponseEntity.ok(ApiResponse.ok(tenantService.getPendingUsers(id)));
+  }
+
+  @PatchMapping("/{id}/users/{userId}/status")
+  public ResponseEntity<ApiResponse<UserResponse>> updateUserStatus(
+      @PathVariable Long id,
+      @PathVariable Long userId,
+      @RequestParam UserStatus status) {
+    return ResponseEntity.ok(
+        ApiResponse.ok("User status updated successfully", tenantService.updateUserStatus(id, userId, status)));
   }
 }

@@ -1,19 +1,26 @@
 package com.trackify.tenant.service;
 
+import com.trackify.common.enums.Role;
 import com.trackify.common.enums.TenantStatus;
+import com.trackify.common.enums.UserStatus;
 import com.trackify.common.exception.AppException;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
+import com.trackify.tenant.dto.UserRegistrationRequest;
+import com.trackify.tenant.dto.UserResponse;
 import com.trackify.tenant.entity.Tenant;
 import com.trackify.tenant.entity.UserLookup;
 import com.trackify.tenant.repository.TenantRepository;
 import com.trackify.tenant.repository.UserLookupRepository;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,6 +91,109 @@ public class TenantService {
     tenant.setStatus(request.getStatus());
     tenant = tenantRepository.save(tenant);
     return mapToResponse(tenant);
+  }
+
+  @Transactional
+  public UserResponse registerUser(UserRegistrationRequest request) {
+    // 1. Check if user already exists
+    if (userLookupRepository.findByEmail(request.getEmail()).isPresent()) {
+      throw AppException.conflict("A user with this email already exists");
+    }
+
+    // 2. Fetch Tenant
+    Tenant tenant =
+        tenantRepository
+            .findById(request.getTenantId())
+            .orElseThrow(() -> AppException.notFound("Tenant not found"));
+
+    if (tenant.getStatus() != TenantStatus.ACTIVE) {
+      throw AppException.forbidden("Tenant is not active");
+    }
+
+    // 3. Insert into User Lookup (Master DB)
+    UserLookup lookup =
+        UserLookup.builder().email(request.getEmail()).tenantId(tenant.getId()).build();
+    userLookupRepository.save(lookup);
+
+    // 4. Insert into Tenant Database (Status: PENDING)
+    String hashedPassword = passwordEncoder.encode(request.getPassword());
+    JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
+
+    try {
+      String sql =
+          "INSERT INTO users (email, password, full_name, role, status) VALUES (?, ?, ?, ?, ?)";
+      tenantJdbc.update(
+          sql,
+          request.getEmail(),
+          hashedPassword,
+          request.getFullName(),
+          Role.USER.name(),
+          UserStatus.PENDING.name());
+
+      Map<String, Object> userMap =
+          tenantJdbc.queryForMap("SELECT * FROM users WHERE email = ?", request.getEmail());
+      return mapToUserResponse(userMap, tenant.getId());
+    } catch (Exception e) {
+      log.error("Failed to register user in tenant DB: {}", e.getMessage());
+      throw AppException.internalError("Registration failed");
+    }
+  }
+
+  public List<UserResponse> getPendingUsers(Long tenantId) {
+    Tenant tenant =
+        tenantRepository.findById(tenantId).orElseThrow(() -> AppException.notFound("Tenant not found"));
+
+    JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
+    List<Map<String, Object>> users =
+        tenantJdbc.queryForList("SELECT * FROM users WHERE status = 'PENDING'");
+
+    return users.stream()
+        .map(map -> mapToUserResponse(map, tenantId))
+        .collect(Collectors.toList());
+  }
+
+  @Transactional
+  public UserResponse updateUserStatus(Long tenantId, Long userId, UserStatus status) {
+    Tenant tenant =
+        tenantRepository.findById(tenantId).orElseThrow(() -> AppException.notFound("Tenant not found"));
+
+    JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
+    try {
+      tenantJdbc.update("UPDATE users SET status = ? WHERE id = ?", status.name(), userId);
+      Map<String, Object> userMap =
+          tenantJdbc.queryForMap("SELECT * FROM users WHERE id = ?", userId);
+      return mapToUserResponse(userMap, tenantId);
+    } catch (Exception e) {
+      log.error("Failed to update user status: {}", e.getMessage());
+      throw AppException.internalError("Status update failed");
+    }
+  }
+
+  private JdbcTemplate getTenantJdbcTemplate(Tenant tenant) {
+    String dbUrl =
+        String.format(
+            "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true",
+            tenant.getDbHost(), tenant.getDbPort(), tenant.getDbName());
+
+    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+    dataSource.setUrl(dbUrl);
+    dataSource.setUsername(tenant.getDbUsername());
+    dataSource.setPassword(tenant.getDbPassword());
+
+    return new JdbcTemplate(dataSource);
+  }
+
+  private UserResponse mapToUserResponse(Map<String, Object> map, Long tenantId) {
+    return UserResponse.builder()
+        .id((Long) map.get("id"))
+        .email((String) map.get("email"))
+        .fullName((String) map.get("full_name"))
+        .role(Role.valueOf((String) map.get("role")))
+        .status(UserStatus.valueOf((String) map.get("status")))
+        .createdAt(((Timestamp) map.get("created_at")).toLocalDateTime())
+        .tenantId(tenantId)
+        .build();
   }
 
   private void provisionTenantDatabase(
