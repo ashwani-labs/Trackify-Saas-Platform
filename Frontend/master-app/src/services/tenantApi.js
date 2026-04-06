@@ -1,0 +1,28 @@
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:8080'; // API Gateway
+
+const getAuthHeaders = () => ({
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+  },
+});
+
+export const fetchAllTenants = async () => {
+  const response = await axios.get(`${API_BASE_URL}/tenants`, getAuthHeaders());
+  return response.data;
+};
+
+export const createTenant = async (tenantData) => {
+  const response = await axios.post(`${API_BASE_URL}/tenants`, tenantData, getAuthHeaders());
+  return response.data;
+};
+
+export const updateTenantStatus = async (tenantId, status) => {
+  const response = await axios.patch(
+    `${API_BASE_URL}/tenants/${tenantId}/status`,
+    { status },
+    getAuthHeaders()
+  );
+  return response.data;
+};

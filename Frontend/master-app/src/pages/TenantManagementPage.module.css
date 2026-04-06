@@ -1,0 +1,240 @@
+.container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #f0f6fc;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #8b949e;
+  font-size: 1rem;
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #238636;
+  color: #fff;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.addBtn:hover {
+  background: #2ea043;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.statIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  color: #8b949e;
+  font-size: 0.875rem;
+}
+
+.statValue {
+  color: #f0f6fc;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.tableCard {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tableHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid #30363d;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tableTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+.refreshBtn {
+  padding: 0.5rem;
+  color: #8b949e;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.refreshBtn:hover {
+  background: #30363d;
+  color: #f0f6fc;
+}
+
+.spinning {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding: 1rem 1.5rem;
+  background: #0d1117;
+  color: #8b949e;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #30363d;
+  color: #c9d1d9;
+}
+
+.tenantInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tenantAvatar {
+  width: 32px;
+  height: 32px;
+  background: #30363d;
+  color: #f0f6fc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.tenantName {
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+.code {
+  background: #30363d;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: #58a6ff;
+}
+
+.planBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.plan-free { background: rgba(139, 148, 158, 0.1); color: #8b949e; }
+.plan-pro { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
+.plan-enterprise { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusActive { background: rgba(35, 134, 54, 0.1); color: #3fb950; }
+.statusInactive { background: rgba(248, 81, 73, 0.1); color: #f85149; }
+
+.actionBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.deactivateBtn {
+  color: #f85149;
+}
+
+.deactivateBtn:hover {
+  background: rgba(248, 81, 73, 0.1);
+  border-color: rgba(248, 81, 73, 0.2);
+}
+
+.activateBtn {
+  color: #2ea043;
+}
+
+.activateBtn:hover {
+  background: rgba(35, 134, 54, 0.1);
+  border-color: rgba(35, 134, 54, 0.2);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem !important;
+  color: #8b949e;
+}
