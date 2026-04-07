@@ -1,0 +1,77 @@
+.card {
+  background: var(--bg-primary, #1a1d2e);
+  border: 1px solid var(--border-color, #2a2d3e);
+  border-radius: 0.6rem;
+  padding: 0.85rem 1rem;
+  cursor: grab;
+  transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.card:hover {
+  border-color: var(--primary-color, #6c63ff);
+  box-shadow: 0 4px 20px rgba(108, 99, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.card:active {
+  cursor: grabbing;
+  opacity: 0.7;
+  transform: rotate(1.5deg) scale(0.98);
+}
+
+.title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary, #e2e8f0);
+  margin: 0 0 0.4rem 0;
+  line-height: 1.4;
+}
+
+.description {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #94a3b8);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+}
+
+.issueKey {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #64748b);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+}
+
+.priority {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.priorityHigh {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.priorityMedium {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.priorityLow {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
