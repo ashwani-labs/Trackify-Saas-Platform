@@ -1,68 +1,103 @@
-import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../app/hooks';
-import { logout } from '../features/auth/authSlice';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loadTenants, selectAllTenants, selectTenantLoading } from '../features/tenants/tenantSlice';
 import { useAuth } from '../hooks/useAuth';
-import { ROUTES } from '../constants/routes';
-import Button from '../components/ui/Button';
+import { Users, Globe, Activity, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import styles from './DashboardPage.module.css';
 
-/**
- * DashboardPage — placeholder for Phase 2.
- * Demonstrates that the protected route and Redux logout work correctly.
- */
 const DashboardPage = () => {
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-
-  // Require auth — redirects to /login if not authenticated
+  const dispatch = useDispatch();
   const { role } = useAuth({ requireAuth: true });
+  const tenants = useSelector(selectAllTenants);
+  const isLoading = useSelector(selectTenantLoading);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate(ROUTES.LOGIN, { replace: true });
-  };
+  useEffect(() => {
+    dispatch(loadTenants());
+  }, [dispatch]);
+
+  const activeTenants = tenants.filter(t => t.status === 'ACTIVE').length;
+  const inactiveTenants = tenants.filter(t => t.status === 'INACTIVE').length;
+  const totalTenants = tenants.length;
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
-        {/* Logo mark */}
-        <div className={styles.logo} aria-label="Trackify">
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <path d="M16 3L29 9.5V22.5L16 29L3 22.5V9.5L16 3Z" fill="url(#g2)"/>
-            <path d="M11 16l3.5 3.5L21 12" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-            <defs>
-              <linearGradient id="g2" x1="3" y1="3" x2="29" y2="29" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#7c6fff"/>
-                <stop offset="1" stopColor="#a78bfa"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-
-        <div className={styles.badge}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
-          </svg>
-          Authenticated as {role || 'MASTER'}
-        </div>
-
-        <h1 className={styles.title}>Master Dashboard</h1>
+    <div className={styles.dashboardWrapper}>
+      <section className={styles.welcomeSection}>
+        <h1 className={styles.title}>Platform Overview</h1>
         <p className={styles.subtitle}>
-          You&apos;re logged in. The full dashboard experience — tenant management, billing, and platform analytics — is coming in Phase 2.
+          Welcome back. You are authenticated as {role || 'MASTER'}. Monitor global platform metrics here.
         </p>
+      </section>
 
-        <div className={styles.phases}>
-          {['Phase 1: Auth + Tenant ✓', 'Phase 2: Project + Issue', 'Phase 3: Board + Notifications', 'Phase 4: Scaling + Optimization'].map((phase, i) => (
-            <div key={i} className={`${styles.phase} ${i === 0 ? styles['phase--done'] : ''}`}>
-              {phase}
-            </div>
-          ))}
+      <section className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: 'rgba(124, 111, 255, 0.1)', color: '#a78bfa' }}>
+            <Globe size={26} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statValue}>{isLoading ? '-' : totalTenants}</span>
+            <span className={styles.statLabel}>Total Organizations</span>
+          </div>
         </div>
 
-        <Button variant="ghost" onClick={handleLogout} id="logout-btn">
-          Sign out
-        </Button>
-      </div>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#34d399' }}>
+            <CheckCircle2 size={26} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statValue}>{isLoading ? '-' : activeTenants}</span>
+            <span className={styles.statLabel}>Active Workspaces</span>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#fb7185' }}>
+            <ShieldAlert size={26} />
+          </div>
+          <div className={styles.statInfo}>
+            <span className={styles.statValue}>{isLoading ? '-' : inactiveTenants}</span>
+            <span className={styles.statLabel}>Inactive / Suspended</span>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.recentSection}>
+        <h2 className={styles.sectionTitle}>Recent Organizations</h2>
+        {tenants.length === 0 ? (
+          <div className={styles.emptyState}>
+            No tenants provisioned yet. Switch to the Tenants tab to create one.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {tenants.slice(0, 3).map(tenant => (
+              <div key={tenant.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+                padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ 
+                    width: '40px', height: '40px', borderRadius: '8px', 
+                    background: '#1e293b', display: 'flex', alignItems: 'center', 
+                    justifyContent: 'center', fontWeight: 'bold' 
+                  }}>
+                    {tenant.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 style={{ margin: 0, color: '#f8fafc' }}>{tenant.name}</h4>
+                    <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{tenant.domain}.trackify.io</span>
+                  </div>
+                </div>
+                <span style={{
+                  padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '600',
+                  background: tenant.status === 'ACTIVE' ? 'rgba(52, 211, 153, 0.1)' : 'rgba(244, 63, 94, 0.1)',
+                  color: tenant.status === 'ACTIVE' ? '#34d399' : '#fb7185'
+                }}>
+                  {tenant.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

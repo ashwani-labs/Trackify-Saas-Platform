@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadTenants, toggleTenantStatus, selectAllTenants, selectTenantLoading } from '../features/tenants/tenantSlice';
+import CreateTenantModal from '../components/tenants/CreateTenantModal';
 import styles from './TenantManagementPage.module.css';
 import { Users, Globe, Activity, ShieldCheck, ShieldAlert, RefreshCw, Plus } from 'lucide-react';
 
 const TenantManagementPage = () => {
   const dispatch = useDispatch();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const tenants = useSelector(selectAllTenants);
   const isLoading = useSelector(selectTenantLoading);
 
@@ -26,7 +28,7 @@ const TenantManagementPage = () => {
           <h1 className={styles.title}>Tenant Management</h1>
           <p className={styles.subtitle}>View and manage all active organizations on the platform.</p>
         </div>
-        <button className={styles.addBtn}>
+        <button className={styles.addBtn} onClick={() => setIsModalOpen(true)}>
           <Plus size={18} />
           Create Tenant
         </button>
@@ -114,6 +116,11 @@ const TenantManagementPage = () => {
           </table>
         </div>
       </div>
+
+      <CreateTenantModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 };

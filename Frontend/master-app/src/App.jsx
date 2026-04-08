@@ -4,6 +4,7 @@ import LoginPage     from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import TenantManagementPage from './pages/TenantManagementPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import DashboardLayout from './layouts/DashboardLayout';
 
 /**
  * App — defines all application routes.
@@ -29,7 +30,9 @@ function App() {
         path={ROUTES.DASHBOARD}
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <DashboardLayout>
+              <DashboardPage />
+            </DashboardLayout>
           </ProtectedRoute>
         }
       />
@@ -37,7 +40,9 @@ function App() {
         path={ROUTES.TENANTS}
         element={
           <ProtectedRoute>
-            <TenantManagementPage />
+            <DashboardLayout>
+              <TenantManagementPage />
+            </DashboardLayout>
           </ProtectedRoute>
         }
       />

@@ -14,6 +14,18 @@ export const loadTenants = createAsyncThunk(
   }
 );
 
+export const createTenantAsync = createAsyncThunk(
+  'tenants/create',
+  async (tenantData, { rejectWithValue }) => {
+    try {
+      const response = await tenantApi.createTenant(tenantData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to create tenant');
+    }
+  }
+);
+
 export const toggleTenantStatus = createAsyncThunk(
   'tenants/toggleStatus',
   async ({ id, currentStatus }, { rejectWithValue }) => {
@@ -60,6 +72,18 @@ const tenantSlice = createSlice({
         if (index !== -1) {
           state.list[index] = action.payload;
         }
+      })
+      .addCase(createTenantAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createTenantAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.list.push(action.payload);
+      })
+      .addCase(createTenantAsync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });
