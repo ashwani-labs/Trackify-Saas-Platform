@@ -21,6 +21,6 @@ public class NotificationController {
     public ResponseEntity<ApiResponse<String>> sendEmail(@RequestBody EmailRequest request) {
         // Run in separate thread or handle normally, kept synchronous for simplicity right now
         emailService.sendEmail(request);
-        return ResponseEntity.ok(ApiResponse.success("Email request processed"));
+        return ResponseEntity.ok(ApiResponse.ok("Email request processed", null));
     }
 }
