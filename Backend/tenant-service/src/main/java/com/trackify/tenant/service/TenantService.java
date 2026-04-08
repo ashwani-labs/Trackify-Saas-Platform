@@ -162,10 +162,32 @@ public class TenantService {
       tenantJdbc.update("UPDATE users SET status = ? WHERE id = ?", status.name(), userId);
       Map<String, Object> userMap =
           tenantJdbc.queryForMap("SELECT * FROM users WHERE id = ?", userId);
+          
+      if (status == UserStatus.ACTIVE) {
+          sendApprovalEmail(
+              (String) userMap.get("email"), 
+              (String) userMap.get("full_name")
+          );
+      }
+          
       return mapToUserResponse(userMap, tenantId);
     } catch (Exception e) {
       log.error("Failed to update user status: {}", e.getMessage());
       throw AppException.internalError("Status update failed");
+    }
+  }
+
+  private void sendApprovalEmail(String email, String fullName) {
+    try {
+      org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+      java.util.Map<String, String> request = new java.util.HashMap<>();
+      request.put("to", email);
+      request.put("subject", "Account Approved");
+      request.put("body", "Hello " + fullName + ",\n\nYour account has been approved. You can now log in.\n\nBest,\nTrackify Team");
+      
+      restTemplate.postForEntity("http://localhost:8084/api/notifications/email", request, String.class);
+    } catch (Exception e) {
+      log.error("Failed to send approval email to notification service: {}", e.getMessage());
     }
   }
 

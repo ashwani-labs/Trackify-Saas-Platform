@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.jdbc.core.JdbcTemplate;
+import javax.sql.DataSource;
 
 @Service
 public class IssueService {
@@ -25,13 +27,16 @@ public class IssueService {
     private final IssueRepository issueRepository;
     private final ProjectRepository projectRepository;
     private final IssueCommentRepository commentRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     public IssueService(IssueRepository issueRepository, 
                         ProjectRepository projectRepository, 
-                        IssueCommentRepository commentRepository) {
+                        IssueCommentRepository commentRepository,
+                        DataSource dataSource) {
         this.issueRepository = issueRepository;
         this.projectRepository = projectRepository;
         this.commentRepository = commentRepository;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Transactional
@@ -50,6 +55,11 @@ public class IssueService {
                 .build();
 
         issue = issueRepository.save(issue);
+        
+        if (request.getAssigneeId() != null) {
+            sendAssignmentEmail(request.getAssigneeId(), issue.getTitle());
+        }
+        
         return mapToResponse(issue);
     }
 
@@ -77,6 +87,11 @@ public class IssueService {
         issue.setAssigneeId(request.getAssigneeId());
 
         issue = issueRepository.save(issue);
+        
+        if (request.getAssigneeId() != null) {
+            sendAssignmentEmail(request.getAssigneeId(), issue.getTitle());
+        }
+        
         return mapToResponse(issue);
     }
 
@@ -107,6 +122,23 @@ public class IssueService {
         return commentRepository.findAllByIssueIdOrderByCreatedAtDesc(issueId).stream()
                 .map(this::mapToCommentResponse)
                 .collect(Collectors.toList());
+    }
+
+    private void sendAssignmentEmail(Long assigneeId, String issueTitle) {
+        try {
+            String email = jdbcTemplate.queryForObject("SELECT email FROM users WHERE id = ?", String.class, assigneeId);
+            if (email != null) {
+                org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+                java.util.Map<String, String> request = new java.util.HashMap<>();
+                request.put("to", email);
+                request.put("subject", "Task Assigned: " + issueTitle);
+                request.put("body", "You have been assigned to: " + issueTitle + "\n\nLog in to your dashboard to view details.");
+                
+                restTemplate.postForEntity("http://localhost:8084/api/notifications/email", request, String.class);
+            }
+        } catch (Exception e) {
+            LoggerFactory.getLogger(IssueService.class).error("Failed to send assignment email: {}", e.getMessage());
+        }
     }
 
     private IssueResponse mapToResponse(Issue issue) {

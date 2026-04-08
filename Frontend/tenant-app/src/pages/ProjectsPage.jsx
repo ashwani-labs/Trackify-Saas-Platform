@@ -9,7 +9,10 @@ const ProjectsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { projects, isLoading, error } = useSelector((state) => state.projects);
+  const { user } = useSelector((state) => state.auth);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     dispatch(fetchProjects());
@@ -38,12 +41,14 @@ const ProjectsPage = () => {
           <h1>Projects</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Manage and track your organization's work</p>
         </div>
-        <button 
-          className={styles.createButton}
-          onClick={() => setIsModalOpen(true)}
-        >
-          <span>+</span> Create Project
-        </button>
+        {isAdmin && (
+          <button 
+            className={styles.createButton}
+            onClick={() => setIsModalOpen(true)}
+          >
+            <span>+</span> Create Project
+          </button>
+        )}
       </header>
 
       {error && <div className={styles.error}>{error}</div>}
@@ -52,13 +57,15 @@ const ProjectsPage = () => {
         <div className={styles.empty}>
           <h2>No projects found</h2>
           <p>Get started by creating your first project.</p>
-          <button 
-            className={styles.createButton} 
-            style={{ marginTop: '1.5rem', alignSelf: 'center' }}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Create Your First Project
-          </button>
+          {isAdmin && (
+            <button 
+              className={styles.createButton} 
+              style={{ marginTop: '1.5rem', alignSelf: 'center' }}
+              onClick={() => setIsModalOpen(true)}
+            >
+              Create Your First Project
+            </button>
+          )}
         </div>
       ) : (
         <div className={styles.grid}>

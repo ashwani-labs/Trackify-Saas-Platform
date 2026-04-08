@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
+import { Toaster } from 'react-hot-toast';
 import { store } from './store';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -34,6 +35,7 @@ const MainDashboard = () => (
 function App() {
   return (
     <Provider store={store}>
+      <Toaster position="top-right" />
       <Router>
         <Routes>
           {/* Public Routes */}
@@ -55,7 +57,7 @@ function App() {
           <Route
             path="/pending-users"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['ADMIN']}>
                 <UserApprovalPage />
               </ProtectedRoute>
             }

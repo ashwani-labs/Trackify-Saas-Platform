@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios from '../../utils/axios';
 
 const API_BASE_URL = 'http://localhost:8080'; // API Gateway
 
