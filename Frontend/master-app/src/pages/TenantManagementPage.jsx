@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadTenants, toggleTenantStatus, selectAllTenants, selectTenantLoading } from '../features/tenants/tenantSlice';
+import { loadTenants, toggleTenantStatus, selectAllTenants, selectTenantLoading, selectTenantCurrentPage, selectTenantTotalPages } from '../features/tenants/tenantSlice';
 import CreateTenantModal from '../components/tenants/CreateTenantModal';
 import styles from './TenantManagementPage.module.css';
+import Pagination from '../components/common/Pagination';
 import { Users, Globe, Activity, ShieldCheck, ShieldAlert, RefreshCw, Plus } from 'lucide-react';
 
 const TenantManagementPage = () => {
@@ -10,9 +11,11 @@ const TenantManagementPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const tenants = useSelector(selectAllTenants);
   const isLoading = useSelector(selectTenantLoading);
+  const currentPage = useSelector(selectTenantCurrentPage);
+  const totalPages = useSelector(selectTenantTotalPages);
 
   useEffect(() => {
-    dispatch(loadTenants());
+    dispatch(loadTenants({ page: 0, size: 10 }));
   }, [dispatch]);
 
   const handleToggleStatus = (id, currentStatus) => {
@@ -58,7 +61,7 @@ const TenantManagementPage = () => {
       <div className={styles.tableCard}>
         <div className={styles.tableHeader}>
           <h2 className={styles.tableTitle}>Organization List</h2>
-          <button className={styles.refreshBtn} onClick={() => dispatch(loadTenants())} disabled={isLoading}>
+          <button className={styles.refreshBtn} onClick={() => dispatch(loadTenants({ page: currentPage, size: 10 }))} disabled={isLoading}>
             <RefreshCw size={16} className={isLoading ? styles.spinning : ''} />
           </button>
         </div>
@@ -115,6 +118,14 @@ const TenantManagementPage = () => {
             </tbody>
           </table>
         </div>
+        
+        {tenants.length > 0 && totalPages > 1 && (
+          <Pagination 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => dispatch(loadTenants({ page, size: 10 }))}
+          />
+        )}
       </div>
 
       <CreateTenantModal 

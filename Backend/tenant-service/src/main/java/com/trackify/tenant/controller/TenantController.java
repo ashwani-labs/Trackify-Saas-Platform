@@ -11,6 +11,8 @@ import com.trackify.tenant.service.TenantService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +33,8 @@ public class TenantController {
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<List<TenantResponse>>> getAllTenants() {
-    return ResponseEntity.ok(ApiResponse.ok(tenantService.getAllTenants()));
+  public ResponseEntity<ApiResponse<Page<TenantResponse>>> getAllTenants(Pageable pageable) {
+    return ResponseEntity.ok(ApiResponse.ok(tenantService.getAllTenants(pageable)));
   }
 
   @GetMapping("/{id}")
@@ -56,8 +58,8 @@ public class TenantController {
   }
 
   @GetMapping("/{id}/users/pending")
-  public ResponseEntity<ApiResponse<List<UserResponse>>> getPendingUsers(@PathVariable Long id) {
-    return ResponseEntity.ok(ApiResponse.ok(tenantService.getPendingUsers(id)));
+  public ResponseEntity<ApiResponse<Page<UserResponse>>> getPendingUsers(@PathVariable Long id, Pageable pageable) {
+    return ResponseEntity.ok(ApiResponse.ok(tenantService.getPendingUsers(id, pageable)));
   }
 
   @PatchMapping("/{id}/users/{userId}/status")

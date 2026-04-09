@@ -5,10 +5,10 @@ const API_BASE_URL = 'http://localhost:8080'; // API Gateway
 
 export const fetchProjects = createAsyncThunk(
   'projects/fetchAll',
-  async (_, { rejectWithValue }) => {
+  async ({ page = 0, size = 10, ...rest } = {}, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('tenantToken');
-      const response = await axios.get(`${API_BASE_URL}/projects`, {
+      const response = await axios.get(`${API_BASE_URL}/projects?page=${page}&size=${size}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return response.data.data;
@@ -50,6 +50,9 @@ export const fetchProjectById = createAsyncThunk(
 
 const initialState = {
   projects: [],
+  currentPage: 0,
+  totalPages: 0,
+  totalElements: 0,
   currentProject: null,
   isLoading: false,
   error: null,
@@ -74,7 +77,14 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProjects.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.projects = action.payload;
+        if (action.payload && action.payload.content !== undefined) {
+          state.projects = action.payload.content;
+          state.currentPage = action.payload.number;
+          state.totalPages = action.payload.totalPages;
+          state.totalElements = action.payload.totalElements;
+        } else {
+          state.projects = action.payload || [];
+        }
       })
       .addCase(fetchProjects.rejected, (state, action) => {
         state.isLoading = false;

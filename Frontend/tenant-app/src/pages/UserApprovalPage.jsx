@@ -3,16 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchPendingUsers, updateUserStatus } from '../features/users/userSlice';
 import DashboardLayout from '../layouts/DashboardLayout';
 import styles from './UserApprovalPage.module.css';
+import Pagination from '../components/common/Pagination';
 import { UserCheck, UserX, Clock, User, Mail, RefreshCw } from 'lucide-react';
 
 const UserApprovalPage = () => {
   const dispatch = useDispatch();
   const { tenantId } = useSelector((state) => state.auth);
-  const { pendingUsers, isLoading, error } = useSelector((state) => state.users);
+  const { pendingUsers, currentPage, totalPages, isLoading, error } = useSelector((state) => state.users);
 
   useEffect(() => {
     if (tenantId) {
-      dispatch(fetchPendingUsers(tenantId));
+      dispatch(fetchPendingUsers({ tenantId, page: 0, size: 10 }));
     }
   }, [dispatch, tenantId]);
 
@@ -33,7 +34,7 @@ const UserApprovalPage = () => {
           </div>
           <button 
             className={styles.refreshBtn} 
-            onClick={() => dispatch(fetchPendingUsers(tenantId))}
+            onClick={() => dispatch(fetchPendingUsers({ tenantId, page: currentPage, size: 10 }))}
             disabled={isLoading}
           >
             <RefreshCw size={18} className={isLoading ? styles.spinning : ''} />
@@ -93,6 +94,14 @@ const UserApprovalPage = () => {
               <h3 className={styles.emptyTitle}>All caught up!</h3>
               <p className={styles.emptySubtitle}>There are no pending user requests at the moment.</p>
             </div>
+          )}
+
+          {pendingUsers.length > 0 && totalPages > 1 && (
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => dispatch(fetchPendingUsers({ tenantId, page, size: 10 }))}
+            />
           )}
         </div>
       </div>

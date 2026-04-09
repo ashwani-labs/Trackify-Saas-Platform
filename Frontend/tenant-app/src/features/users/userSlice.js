@@ -5,10 +5,10 @@ const API_BASE_URL = 'http://localhost:8080'; // API Gateway
 
 export const fetchPendingUsers = createAsyncThunk(
   'users/fetchPending',
-  async (tenantId, { rejectWithValue }) => {
+  async ({ tenantId, page = 0, size = 10 }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('tenantToken');
-      const response = await axios.get(`${API_BASE_URL}/tenants/${tenantId}/users/pending`, {
+      const response = await axios.get(`${API_BASE_URL}/tenants/${tenantId}/users/pending?page=${page}&size=${size}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return response.data.data;
@@ -37,6 +37,9 @@ export const updateUserStatus = createAsyncThunk(
 
 const initialState = {
   pendingUsers: [],
+  currentPage: 0,
+  totalPages: 0,
+  totalElements: 0,
   isLoading: false,
   error: null,
 };
@@ -57,7 +60,14 @@ const userSlice = createSlice({
       })
       .addCase(fetchPendingUsers.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.pendingUsers = action.payload;
+        if (action.payload && action.payload.content !== undefined) {
+          state.pendingUsers = action.payload.content;
+          state.currentPage = action.payload.number;
+          state.totalPages = action.payload.totalPages;
+          state.totalElements = action.payload.totalElements;
+        } else {
+          state.pendingUsers = action.payload || [];
+        }
       })
       .addCase(fetchPendingUsers.rejected, (state, action) => {
         state.isLoading = false;

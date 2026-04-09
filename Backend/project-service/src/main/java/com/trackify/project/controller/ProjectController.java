@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/projects")
@@ -31,8 +33,8 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAllProjects() {
-        List<ProjectResponse> response = projectService.getAllProjects();
+    public ResponseEntity<ApiResponse<Page<ProjectResponse>>> getAllProjects(Pageable pageable) {
+        Page<ProjectResponse> response = projectService.getAllProjects(pageable);
         return ResponseEntity.ok(ApiResponse.ok("Projects fetched successfully", response));
     }
 

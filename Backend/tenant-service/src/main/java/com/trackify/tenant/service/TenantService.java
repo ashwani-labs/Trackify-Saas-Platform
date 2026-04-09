@@ -15,6 +15,8 @@ import com.trackify.tenant.repository.TenantRepository;
 import com.trackify.tenant.repository.UserLookupRepository;
 import java.sql.Timestamp;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -71,10 +73,8 @@ public class TenantService {
     return mapToResponse(tenant);
   }
 
-  public List<TenantResponse> getAllTenants() {
-    return tenantRepository.findAll().stream()
-        .map(this::mapToResponse)
-        .collect(Collectors.toList());
+  public Page<TenantResponse> getAllTenants(Pageable pageable) {
+    return tenantRepository.findAll(pageable).map(this::mapToResponse);
   }
 
   public TenantResponse getTenantById(Long id) {
@@ -139,17 +139,22 @@ public class TenantService {
     }
   }
 
-  public List<UserResponse> getPendingUsers(Long tenantId) {
+  public Page<UserResponse> getPendingUsers(Long tenantId, Pageable pageable) {
     Tenant tenant =
         tenantRepository.findById(tenantId).orElseThrow(() -> AppException.notFound("Tenant not found"));
 
     JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
-    List<Map<String, Object>> users =
-        tenantJdbc.queryForList("SELECT * FROM users WHERE status = 'PENDING'");
+    Long total = tenantJdbc.queryForObject("SELECT COUNT(*) FROM users WHERE status = 'PENDING'", Long.class);
 
-    return users.stream()
+    String sql = "SELECT * FROM users WHERE status = 'PENDING' LIMIT ? OFFSET ?";
+    List<Map<String, Object>> users =
+        tenantJdbc.queryForList(sql, pageable.getPageSize(), pageable.getOffset());
+
+    List<UserResponse> userResponses = users.stream()
         .map(map -> mapToUserResponse(map, tenantId))
         .collect(Collectors.toList());
+
+    return new org.springframework.data.domain.PageImpl<>(userResponses, pageable, total != null ? total : 0);
   }
 
   @Transactional

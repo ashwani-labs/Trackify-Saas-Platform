@@ -4,18 +4,19 @@ import { fetchProjects, clearProjectError } from '../features/projects/projectSl
 import CreateProjectModal from '../components/projects/CreateProjectModal';
 import styles from './ProjectsPage.module.css';
 import { useNavigate } from 'react-router-dom';
+import Pagination from '../components/common/Pagination';
 
 const ProjectsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { projects, isLoading, error } = useSelector((state) => state.projects);
+  const { projects, currentPage, totalPages, isLoading, error } = useSelector((state) => state.projects);
   const { user } = useSelector((state) => state.auth);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
-    dispatch(fetchProjects());
+    dispatch(fetchProjects({ page: 0, size: 10 }));
     return () => dispatch(clearProjectError());
   }, [dispatch]);
 
@@ -92,6 +93,14 @@ const ProjectsPage = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {projects.length > 0 && totalPages > 1 && (
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={(page) => dispatch(fetchProjects({ page, size: 10 }))} 
+        />
       )}
 
       {isModalOpen && (

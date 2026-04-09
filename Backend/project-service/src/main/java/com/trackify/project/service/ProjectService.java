@@ -6,6 +6,8 @@ import com.trackify.project.dto.ProjectResponse;
 import com.trackify.project.entity.Project;
 import com.trackify.project.repository.ProjectRepository;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +38,8 @@ public class ProjectService {
         return mapToResponse(project);
     }
 
-    public List<ProjectResponse> getAllProjects() {
-        return projectRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public Page<ProjectResponse> getAllProjects(Pageable pageable) {
+        return projectRepository.findAll(pageable).map(this::mapToResponse);
     }
 
     public ProjectResponse getProjectById(Long id) {

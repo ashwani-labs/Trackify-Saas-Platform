@@ -3,9 +3,9 @@ import * as tenantApi from '../../services/tenantApi';
 
 export const loadTenants = createAsyncThunk(
   'tenants/fetchAll',
-  async (_, { rejectWithValue }) => {
+  async ({ page = 0, size = 10 } = {}, { rejectWithValue }) => {
     try {
-      const response = await tenantApi.fetchAllTenants();
+      const response = await tenantApi.fetchAllTenants(page, size);
       // Ensure we extract the data correctly from the ApiResponse structure
       return response.data;
     } catch (error) {
@@ -41,6 +41,9 @@ export const toggleTenantStatus = createAsyncThunk(
 
 const initialState = {
   list: [],
+  currentPage: 0,
+  totalPages: 0,
+  totalElements: 0,
   isLoading: false,
   error: null,
 };
@@ -61,7 +64,14 @@ const tenantSlice = createSlice({
       })
       .addCase(loadTenants.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.list = action.payload;
+        if (action.payload && action.payload.content !== undefined) {
+          state.list = action.payload.content;
+          state.currentPage = action.payload.number;
+          state.totalPages = action.payload.totalPages;
+          state.totalElements = action.payload.totalElements;
+        } else {
+          state.list = action.payload || [];
+        }
       })
       .addCase(loadTenants.rejected, (state, action) => {
         state.isLoading = false;
@@ -93,5 +103,7 @@ export const { clearTenantError } = tenantSlice.actions;
 // Selectors
 export const selectAllTenants = (state) => state.tenants.list;
 export const selectTenantLoading = (state) => state.tenants.isLoading;
+export const selectTenantCurrentPage = (state) => state.tenants.currentPage;
+export const selectTenantTotalPages = (state) => state.tenants.totalPages;
 
 export default tenantSlice.reducer;
