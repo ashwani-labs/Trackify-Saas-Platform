@@ -3,6 +3,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loadTenants, selectAllTenants, selectTenantLoading } from '../features/tenants/tenantSlice';
 import { useAuth } from '../hooks/useAuth';
 import { Users, Globe, Activity, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from 'recharts';
 import styles from './DashboardPage.module.css';
 
 const DashboardPage = () => {
@@ -15,9 +27,21 @@ const DashboardPage = () => {
     dispatch(loadTenants());
   }, [dispatch]);
 
+  const totalTenants = tenants.length;
   const activeTenants = tenants.filter(t => t.status === 'ACTIVE').length;
   const inactiveTenants = tenants.filter(t => t.status === 'INACTIVE').length;
-  const totalTenants = tenants.length;
+
+  const statusData = [
+    { name: 'Active', value: activeTenants, color: '#34d399' },
+    { name: 'Inactive', value: inactiveTenants, color: '#fb7185' },
+  ];
+
+  // Mock distribution by month for visualization
+  const distributionData = [
+    { month: 'Jan', count: Math.max(0, totalTenants - 4) },
+    { month: 'Feb', count: Math.max(0, totalTenants - 2) },
+    { month: 'Mar', count: totalTenants },
+  ];
 
   return (
     <div className={styles.dashboardWrapper}>
@@ -56,6 +80,50 @@ const DashboardPage = () => {
           <div className={styles.statInfo}>
             <span className={styles.statValue}>{isLoading ? '-' : inactiveTenants}</span>
             <span className={styles.statLabel}>Inactive / Suspended</span>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.chartsGrid}>
+        <div className={styles.chartCard}>
+          <h3 className={styles.chartTitle}>Workspace Status Distribution</h3>
+          <div className={styles.chartContainer}>
+            <ResponsiveContainer width="100%" height={240}>
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ background: '#1e293b', border: 'none', borderRadius: '8px' }}
+                  itemStyle={{ color: '#f8fafc' }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className={styles.chartCard}>
+          <h3 className={styles.chartTitle}>Provisioning Trend</h3>
+          <div className={styles.chartContainer}>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={distributionData}>
+                <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  contentStyle={{ background: '#1e293b', border: 'none', borderRadius: '8px' }}
+                />
+                <Bar dataKey="count" fill="#7c3aed" radius={[4, 4, 0, 0]} barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </section>

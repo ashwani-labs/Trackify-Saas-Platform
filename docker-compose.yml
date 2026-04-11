@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: trackify-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: trackify_master
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  api-gateway:
+    build: 
+      context: ./Backend
+      dockerfile: api-gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=
+    depends_on:
+      db:
+        condition: service_healthy
+
+  auth-service:
+    build:
+      context: ./Backend
+      dockerfile: auth-service/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/trackify_master
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - JWT_SECRET=8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tenant-service:
+    build:
+      context: ./Backend
+      dockerfile: tenant-service/Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/trackify_master
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - JWT_SECRET=8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=
+    depends_on:
+      db:
+        condition: service_healthy
+
+  project-service:
+    build:
+      context: ./Backend
+      dockerfile: project-service/Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/trackify_master
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - JWT_SECRET=8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=
+    depends_on:
+      db:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: ./Backend
+      dockerfile: notification-service/Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/trackify_master
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - JWT_SECRET=8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=
+    depends_on:
+      db:
+        condition: service_healthy
+
+  master-app:
+    build:
+      context: ./Frontend/master-app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+
+  tenant-app:
+    build:
+      context: ./Frontend/tenant-app
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    depends_on:
+      - api-gateway
+
+networks:
+  default:
+    name: trackify-network

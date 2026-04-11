@@ -5,6 +5,7 @@ import {
   optimisticStatusUpdate,
 } from '../../features/issues/issueSlice';
 import IssueCard from './IssueCard';
+import Skeleton from '../common/Skeleton';
 import styles from './KanbanBoard.module.css';
 
 const COLUMNS = [
@@ -54,9 +55,19 @@ const KanbanBoard = ({ projectId, onCreateIssue }) => {
 
   if (isLoading && issues.length === 0) {
     return (
-      <div className={styles.loadingWrapper}>
-        <div className="spinner" />
-        <p>Loading board...</p>
+      <div className={styles.board}>
+        {COLUMNS.map(({ status, label, colorClass }) => (
+          <div key={status} className={styles.column}>
+            <div className={`${styles.columnHeader} ${styles[colorClass]}`}>
+              <Skeleton type="text" className={styles.columnLabel} />
+            </div>
+            <div className={styles.cardList}>
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} type="card" style={{ marginBottom: '1rem' }} />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     );
   }

@@ -1,0 +1,45 @@
+.skeleton {
+  background: var(--bg-tertiary, #272e3f);
+  background: linear-gradient(
+    90deg,
+    #1e2330 25%,
+    #2d3446 50%,
+    #1e2330 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.card {
+  height: 180px;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.text {
+  height: 1rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  height: 1.5rem;
+  width: 60%;
+  margin-bottom: 1rem;
+}
+
+.circle {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+}

@@ -1,0 +1,59 @@
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary, #1e2330);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #2d3446);
+}
+
+.pageList {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.navButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 8px;
+  background: #272e3f;
+  color: #a0aec0;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.navButton:hover:not(:disabled) {
+  color: white;
+  background: #323a4f;
+}
+
+.navButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageButton {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #a0aec0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pageButton:hover:not(.active) {
+  background: #272e3f;
+  color: white;
+}
+
+.active {
+  background: var(--primary-color, #6c63ff);
+  color: white;
+}

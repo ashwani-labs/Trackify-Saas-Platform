@@ -5,6 +5,7 @@ import CreateProjectModal from '../components/projects/CreateProjectModal';
 import styles from './ProjectsPage.module.css';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../components/common/Pagination';
+import Skeleton from '../components/common/Skeleton';
 
 const ProjectsPage = () => {
   const dispatch = useDispatch();
@@ -27,9 +28,13 @@ const ProjectsPage = () => {
   if (isLoading && projects.length === 0) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className="spinner"></div>
-          <p>Loading your workspace...</p>
+        <header className={styles.header}>
+          <Skeleton type="title" />
+        </header>
+        <div className={styles.grid}>
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} type="card" />
+          ))}
         </div>
       </div>
     );
