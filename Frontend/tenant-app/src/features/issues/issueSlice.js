@@ -100,6 +100,60 @@ export const addComment = createAsyncThunk(
   }
 );
 
+export const fetchIssueAttachments = createAsyncThunk(
+  'issues/fetchAttachments',
+  async (issueId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/issues/${issueId}/attachments`,
+        { headers: getAuthHeader() }
+      );
+      return { issueId, attachments: response.data.data };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch attachments');
+    }
+  }
+);
+
+export const addAttachment = createAsyncThunk(
+  'issues/addAttachment',
+  async ({ issueId, file }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await axios.post(
+        `${API_BASE_URL}/issues/${issueId}/attachments`,
+        formData,
+        {
+          headers: {
+            ...getAuthHeader(),
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return { issueId, attachment: response.data.data };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to upload attachment');
+    }
+  }
+);
+
+export const deleteAttachment = createAsyncThunk(
+  'issues/deleteAttachment',
+  async ({ issueId, attachmentId }, { rejectWithValue }) => {
+    try {
+      await axios.delete(
+        `${API_BASE_URL}/issues/attachments/${attachmentId}`,
+        { headers: getAuthHeader() }
+      );
+      return { issueId, attachmentId };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete attachment');
+    }
+  }
+);
+
 // ── Slice ────────────────────────────────────────────────────────────────────
 
 const initialState = {
@@ -108,6 +162,7 @@ const initialState = {
   selectedIssue: null,  // issue open in detail panel
   isLoading: false,
   isCommentLoading: false,
+  isAttachmentLoading: false,
   error: null,
 };
 
@@ -193,6 +248,42 @@ const issueSlice = createSlice({
         const { issueId, comment } = action.payload;
         if (!state.comments[issueId]) state.comments[issueId] = [];
         state.comments[issueId].unshift(comment);
+      })
+
+      // Attachments Handling
+      .addCase(addAttachment.pending, (state) => { state.isAttachmentLoading = true; })
+      .addCase(addAttachment.fulfilled, (state, action) => {
+        state.isAttachmentLoading = false;
+        const { issueId, attachment } = action.payload;
+        
+        // Update attachments in selectedIssue if it's the one we're editing
+        if (state.selectedIssue && state.selectedIssue.id === issueId) {
+          if (!state.selectedIssue.attachments) state.selectedIssue.attachments = [];
+          state.selectedIssue.attachments.push(attachment);
+        }
+        
+        // Update in global issues list as well
+        const issue = state.issues.find(i => i.id === issueId);
+        if (issue) {
+          if (!issue.attachments) issue.attachments = [];
+          issue.attachments.push(attachment);
+        }
+      })
+      .addCase(addAttachment.rejected, (state, action) => {
+        state.isAttachmentLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(deleteAttachment.fulfilled, (state, action) => {
+        const { issueId, attachmentId } = action.payload;
+        
+        if (state.selectedIssue && state.selectedIssue.id === issueId) {
+          state.selectedIssue.attachments = state.selectedIssue.attachments.filter(a => a.id !== attachmentId);
+        }
+        
+        const issue = state.issues.find(i => i.id === issueId);
+        if (issue && issue.attachments) {
+          issue.attachments = issue.attachments.filter(a => a.id !== attachmentId);
+        }
       });
   },
 });

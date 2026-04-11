@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -25,4 +26,5 @@ public class IssueResponse {
     private Long assigneeId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<IssueAttachmentResponse> attachments;
 }

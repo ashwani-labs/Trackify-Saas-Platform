@@ -6,8 +6,19 @@ import {
   addComment,
   updateIssue,
   deleteIssue,
+  addAttachment,
+  deleteAttachment,
 } from '../../features/issues/issueSlice';
 import styles from './IssueDetailPanel.module.css';
+
+const formatBytes = (bytes, decimals = 2) => {
+  if (!+bytes) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+};
 
 const STATUS_OPTIONS = ['TODO', 'IN_PROGRESS', 'DONE'];
 const PRIORITY_OPTIONS = ['HIGH', 'MEDIUM', 'LOW'];
@@ -21,7 +32,7 @@ const PRIORITY_COLORS = {
 
 const IssueDetailPanel = () => {
   const dispatch = useDispatch();
-  const { selectedIssue, comments, isCommentLoading } = useSelector((s) => s.issues);
+  const { selectedIssue, comments, isCommentLoading, isAttachmentLoading } = useSelector((s) => s.issues);
 
   const [commentText, setCommentText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -75,6 +86,23 @@ const IssueDetailPanel = () => {
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      dispatch(addAttachment({ issueId: selectedIssue.id, file }));
+    }
+  };
+
+  const handleDeleteAttachment = (attachmentId) => {
+    if (window.confirm('Delete this attachment?')) {
+      dispatch(deleteAttachment({ issueId: selectedIssue.id, attachmentId }));
+    }
+  };
+
+  const handleDownload = (attachmentId) => {
+    window.open(`http://localhost:8080/issues/attachments/${attachmentId}/download`, '_blank');
   };
 
   return (
@@ -192,6 +220,76 @@ const IssueDetailPanel = () => {
                 )}
               </p>
             )}
+          </div>
+
+          {/* ── Attachments ── */}
+          <div className={styles.section}>
+            <h4 className={styles.sectionTitle}>
+              Attachments ({selectedIssue.attachments?.length || 0})
+            </h4>
+
+            {/* Upload Zone */}
+            <div className={styles.uploadZone}>
+              {isAttachmentLoading ? (
+                <div className={styles.uploadingOverlay}>
+                  <div className="spinner-small" />
+                  <span>Uploading...</span>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="file"
+                    className={styles.uploadZoneInput}
+                    onChange={handleFileChange}
+                    title=""
+                  />
+                  <div className={styles.uploadContent}>
+                    <span className={styles.uploadIcon}>📁</span>
+                    <span className={styles.uploadText}>Click to upload a file</span>
+                    <span className={styles.uploadSubtext}>Max size: 10MB</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Attachment List */}
+            <div className={styles.attachmentList}>
+              {!selectedIssue.attachments || selectedIssue.attachments.length === 0 ? (
+                <p className={styles.noAttachments}>No attachments yet.</p>
+              ) : (
+                selectedIssue.attachments.map((a) => (
+                  <div key={a.id} className={styles.attachmentItem}>
+                    <div className={styles.fileIcon}>
+                      {a.contentType?.startsWith('image/') ? '🖼️' : '📄'}
+                    </div>
+                    <div className={styles.fileInfo}>
+                      <span className={styles.fileNameLabel} title={a.fileName}>
+                        {a.fileName}
+                      </span>
+                      <span className={styles.fileMeta}>
+                        {formatBytes(a.fileSize)} • {new Date(a.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className={styles.fileActions}>
+                      <button 
+                        className={styles.downloadBtn} 
+                        onClick={() => handleDownload(a.id)}
+                        title="Download"
+                      >
+                        ⬇️
+                      </button>
+                      <button 
+                        className={styles.removeAttachmentBtn} 
+                        onClick={() => handleDeleteAttachment(a.id)}
+                        title="Delete"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           {/* ── Comments ── */}

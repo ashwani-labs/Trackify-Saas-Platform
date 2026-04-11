@@ -1,25 +1,31 @@
 package com.trackify.project.service;
 
-import com.trackify.common.exception.AppException;
 import com.trackify.project.dto.CommentRequest;
 import com.trackify.project.dto.CommentResponse;
+import com.trackify.project.dto.IssueAttachmentResponse;
 import com.trackify.project.dto.IssueRequest;
 import com.trackify.project.dto.IssueResponse;
 import com.trackify.project.entity.Issue;
+import com.trackify.project.entity.IssueAttachment;
 import com.trackify.project.entity.IssueComment;
 import com.trackify.project.entity.Project;
 import com.trackify.project.enums.IssueStatus;
+import com.trackify.project.repository.IssueAttachmentRepository;
 import com.trackify.project.repository.IssueCommentRepository;
 import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class IssueService {
@@ -27,15 +33,21 @@ public class IssueService {
     private final IssueRepository issueRepository;
     private final ProjectRepository projectRepository;
     private final IssueCommentRepository commentRepository;
+    private final IssueAttachmentRepository attachmentRepository;
+    private final StorageService storageService;
     private final JdbcTemplate jdbcTemplate;
 
     public IssueService(IssueRepository issueRepository, 
                         ProjectRepository projectRepository, 
                         IssueCommentRepository commentRepository,
+                        IssueAttachmentRepository attachmentRepository,
+                        StorageService storageService,
                         DataSource dataSource) {
         this.issueRepository = issueRepository;
         this.projectRepository = projectRepository;
         this.commentRepository = commentRepository;
+        this.attachmentRepository = attachmentRepository;
+        this.storageService = storageService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -124,6 +136,49 @@ public class IssueService {
                 .collect(Collectors.toList());
     }
 
+    // --- Attachments ---
+
+    @Transactional
+    public IssueAttachmentResponse addAttachment(Long issueId, MultipartFile file, Long uploaderId) {
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> AppException.notFound("Issue not found"));
+
+        String fileKey = storageService.store(file);
+
+        IssueAttachment attachment = IssueAttachment.builder()
+                .issue(issue)
+                .fileName(file.getOriginalFilename())
+                .fileKey(fileKey)
+                .contentType(file.getContentType())
+                .fileSize(file.getSize())
+                .uploaderId(uploaderId)
+                .build();
+
+        attachment = attachmentRepository.save(attachment);
+        return mapToAttachmentResponse(attachment);
+    }
+
+    public List<IssueAttachmentResponse> getIssueAttachments(Long issueId) {
+        return attachmentRepository.findAllByIssueId(issueId).stream()
+                .map(this::mapToAttachmentResponse)
+                .collect(Collectors.toList());
+    }
+    
+    public Resource downloadAttachment(Long attachmentId) {
+        IssueAttachment attachment = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> AppException.notFound("Attachment not found"));
+        return storageService.loadAsResource(attachment.getFileKey());
+    }
+
+    @Transactional
+    public void deleteAttachment(Long attachmentId) {
+        IssueAttachment attachment = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> AppException.notFound("Attachment not found"));
+        
+        storageService.delete(attachment.getFileKey());
+        attachmentRepository.delete(attachment);
+    }
+
     private void sendAssignmentEmail(Long assigneeId, String issueTitle) {
         try {
             String email = jdbcTemplate.queryForObject("SELECT email FROM users WHERE id = ?", String.class, assigneeId);
@@ -154,6 +209,20 @@ public class IssueService {
                 .assigneeId(issue.getAssigneeId())
                 .createdAt(issue.getCreatedAt())
                 .updatedAt(issue.getUpdatedAt())
+                .attachments(issue.getAttachments() != null ? 
+                    issue.getAttachments().stream().map(this::mapToAttachmentResponse).collect(Collectors.toList()) : 
+                    Collections.emptyList())
+                .build();
+    }
+
+    private IssueAttachmentResponse mapToAttachmentResponse(IssueAttachment attachment) {
+        return IssueAttachmentResponse.builder()
+                .id(attachment.getId())
+                .fileName(attachment.getFileName())
+                .contentType(attachment.getContentType())
+                .fileSize(attachment.getFileSize())
+                .uploaderId(attachment.getUploaderId())
+                .createdAt(attachment.getCreatedAt())
                 .build();
     }
 

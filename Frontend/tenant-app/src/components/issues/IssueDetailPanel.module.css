@@ -338,3 +338,155 @@
   margin: 0;
   white-space: pre-wrap;
 }
+
+/* ── Attachments ──────────────────────────────── */
+.attachmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.attachmentItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-primary, #0d0f1a);
+  border: 1px solid var(--border-color, #1e2235);
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.attachmentItem:hover {
+  border-color: rgba(108, 99, 255, 0.4);
+  transform: translateX(4px);
+}
+
+.fileIcon {
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(108, 99, 255, 0.1);
+  border-radius: 0.4rem;
+  color: var(--primary-color, #6c63ff);
+}
+
+.fileInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.fileNameLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #e2e8f0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fileMeta {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-secondary, #64748b);
+  margin-top: 0.15rem;
+}
+
+.fileActions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.downloadBtn, .removeAttachmentBtn {
+  background: transparent;
+  border: 1px solid var(--border-color, #2a2d3e);
+  color: var(--text-secondary, #94a3b8);
+  width: 28px;
+  height: 28px;
+  border-radius: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.downloadBtn:hover {
+  background: var(--primary-color, #6c63ff);
+  color: #fff;
+  border-color: var(--primary-color, #6c63ff);
+}
+
+.removeAttachmentBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.uploadZone {
+  position: relative;
+  border: 2px dashed var(--border-color, #2a2d3e);
+  border-radius: 0.8rem;
+  padding: 1.25rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.uploadZone:hover {
+  border-color: var(--primary-color, #6c63ff);
+  background: rgba(108, 99, 255, 0.05);
+}
+
+.uploadZoneInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.uploadIcon {
+  font-size: 1.6rem;
+  color: var(--primary-color, #6c63ff);
+}
+
+.uploadText {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.uploadSubtext {
+  font-size: 0.7rem;
+  color: var(--text-secondary, #64748b);
+}
+
+.uploadingOverlay {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--primary-color, #6c63ff);
+}
+
+.noAttachments {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #64748b);
+  font-style: italic;
+  text-align: center;
+  padding: 0.5rem;
+}

@@ -4,6 +4,8 @@ import com.trackify.project.enums.IssuePriority;
 import com.trackify.project.enums.IssueStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,4 +55,8 @@ public class Issue {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<IssueAttachment> attachments = new ArrayList<>();
 }
