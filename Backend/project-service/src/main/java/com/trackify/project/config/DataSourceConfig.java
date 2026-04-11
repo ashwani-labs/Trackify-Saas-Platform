@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -71,7 +72,7 @@ public class DataSourceConfig implements WebMvcConfigurer {
     @Bean
     @Primary
     public DataSource dataSource(
-            @Qualifier("masterJdbcTemplate") JdbcTemplate masterJdbcTemplate,
+            @Lazy @Qualifier("masterJdbcTemplate") JdbcTemplate masterJdbcTemplate,
             @Qualifier("masterDataSource") DataSource masterDataSource) {
         TenantRoutingDataSource routingDataSource = new TenantRoutingDataSource() {
             @Override

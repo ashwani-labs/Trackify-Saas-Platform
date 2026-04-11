@@ -14,8 +14,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 public class LocalStorageService implements StorageService {
 
@@ -30,7 +32,7 @@ public class LocalStorageService implements StorageService {
     try {
       Files.createDirectories(rootLocation);
     } catch (IOException e) {
-      throw AppException.error("Could not initialize storage: " + e.getMessage());
+      throw AppException.internalError("Could not initialize storage: " + e.getMessage());
     }
   }
 
@@ -59,7 +61,7 @@ public class LocalStorageService implements StorageService {
             StandardCopyOption.REPLACE_EXISTING);
       }
     } catch (IOException e) {
-      throw AppException.error("Failed to store file: " + e.getMessage());
+      throw AppException.internalError("Failed to store file: " + e.getMessage());
     }
 
     return fileKey;

@@ -1,5 +1,6 @@
 package com.trackify.project.service;
 
+import com.trackify.common.exception.AppException;
 import com.trackify.project.dto.CommentRequest;
 import com.trackify.project.dto.CommentResponse;
 import com.trackify.project.dto.IssueAttachmentResponse;
@@ -9,6 +10,7 @@ import com.trackify.project.entity.Issue;
 import com.trackify.project.entity.IssueAttachment;
 import com.trackify.project.entity.IssueComment;
 import com.trackify.project.entity.Project;
+import com.trackify.project.enums.IssuePriority;
 import com.trackify.project.enums.IssueStatus;
 import com.trackify.project.repository.IssueAttachmentRepository;
 import com.trackify.project.repository.IssueCommentRepository;
@@ -20,13 +22,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 public class IssueService {
 
@@ -36,6 +41,9 @@ public class IssueService {
     private final IssueAttachmentRepository attachmentRepository;
     private final StorageService storageService;
     private final JdbcTemplate jdbcTemplate;
+
+    @Value("${services.notification-url}")
+    private String notificationUrl;
 
     public IssueService(IssueRepository issueRepository, 
                         ProjectRepository projectRepository, 
@@ -60,7 +68,7 @@ public class IssueService {
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .status(request.getStatus() != null ? request.getStatus() : IssueStatus.TODO)
-                .priority(request.getPriority() != null ? request.getPriority() : com.trackify.project.enums.IssuePriority.MEDIUM)
+                .priority(request.getPriority() != null ? request.getPriority() : IssuePriority.MEDIUM)
                 .project(project)
                 .reporterId(reporterId)
                 .assigneeId(request.getAssigneeId())
@@ -189,10 +197,10 @@ public class IssueService {
                 request.put("subject", "Task Assigned: " + issueTitle);
                 request.put("body", "You have been assigned to: " + issueTitle + "\n\nLog in to your dashboard to view details.");
                 
-                restTemplate.postForEntity("http://localhost:8084/api/notifications/email", request, String.class);
+                restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
             }
         } catch (Exception e) {
-            LoggerFactory.getLogger(IssueService.class).error("Failed to send assignment email: {}", e.getMessage());
+            log.error("Failed to send assignment email: {}", e.getMessage());
         }
     }
 
