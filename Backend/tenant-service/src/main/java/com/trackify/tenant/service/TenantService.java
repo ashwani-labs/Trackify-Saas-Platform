@@ -14,6 +14,7 @@ import com.trackify.tenant.entity.UserLookup;
 import com.trackify.tenant.repository.TenantRepository;
 import com.trackify.tenant.repository.UserLookupRepository;
 import java.sql.Timestamp;
+import java.util.UUID;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +52,7 @@ public class TenantService {
     String dbUsername = request.getCode() + "_admin";
 
     String dbPassword = "pw_" + System.currentTimeMillis();
+    String adminPassword = UUID.randomUUID().toString().substring(0, 10);
 
     Tenant tenant =
         Tenant.builder()
@@ -68,11 +70,13 @@ public class TenantService {
 
     tenant = tenantRepository.save(tenant);
 
-    provisionTenantDatabase(dbName, dbUsername, dbPassword, request.getAdminEmail());
+    provisionTenantDatabase(dbName, dbUsername, dbPassword, request.getAdminEmail(), adminPassword);
 
     UserLookup userLookup =
         UserLookup.builder().email(request.getAdminEmail()).tenantId(tenant.getId()).build();
     userLookupRepository.save(userLookup);
+
+    sendWelcomeEmail(request.getAdminEmail(), request.getName(), adminPassword, request.getCode());
 
     return mapToResponse(tenant);
   }
@@ -200,6 +204,36 @@ public class TenantService {
     }
   }
 
+  private void sendWelcomeEmail(String email, String tenantName, String password, String domain) {
+    try {
+      org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+      java.util.Map<String, String> request = new java.util.HashMap<>();
+      request.put("to", email);
+      request.put("subject", "Welcome to Trackify - Your Cloud Instance is Ready!");
+      
+      String body = String.format(
+          "Hello,\n\n" +
+          "Your Trackify instance for '%s' has been successfully provisioned.\n\n" +
+          "Login Details:\n" +
+          "Domain: %s\n" +
+          "Email: %s\n" +
+          "Password: %s\n\n" +
+          "You can access your instance at: http://%s.trackify.com\n\n" +
+          "Please change your password after your first login.\n\n" +
+          "Best Regards,\n" +
+          "The Trackify Team",
+          tenantName, domain, email, password, domain
+      );
+      
+      request.put("body", body);
+      
+      restTemplate.postForEntity("http://localhost:8084/api/notifications/email", request, String.class);
+      log.info("Welcome email sent to: {}", email);
+    } catch (Exception e) {
+      log.error("Failed to send welcome email to notification service: {}", e.getMessage());
+    }
+  }
+
   private JdbcTemplate getTenantJdbcTemplate(Tenant tenant) {
     String dbUrl =
         String.format(
@@ -228,7 +262,7 @@ public class TenantService {
   }
 
   private void provisionTenantDatabase(
-      String dbName, String dbUsername, String dbPassword, String adminEmail) {
+      String dbName, String dbUsername, String dbPassword, String adminEmail, String adminPassword) {
     try {
       log.info("Provisioning database: {}", dbName);
       jdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
@@ -308,8 +342,7 @@ public class TenantService {
           }
       }
 
-      String defaultPassword = "admin123";
-      String hashedPassword = passwordEncoder.encode(defaultPassword);
+      String hashedPassword = passwordEncoder.encode(adminPassword);
       String insertAdminUser =
           "INSERT INTO users (email, password, full_name, role, status) VALUES (?, ?, ?, 'ADMIN', 'ACTIVE')";
       

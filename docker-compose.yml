@@ -88,6 +88,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
       - JWT_SECRET=8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=ashwanitechnohunk@gmail.com
+      - MAIL_PASSWORD=sbbt wmzi gwaj eibr
     depends_on:
       db:
         condition: service_healthy
