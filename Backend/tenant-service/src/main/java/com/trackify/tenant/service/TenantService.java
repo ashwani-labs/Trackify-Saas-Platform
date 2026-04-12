@@ -42,6 +42,9 @@ public class TenantService {
   @Value("${tenant.datasource.default-host:localhost}")
   private String defaultDbHost;
 
+  @Value("${services.notification-url:http://localhost:8084}")
+  private String notificationUrl;
+
   @Transactional
   public TenantResponse createTenant(CreateTenantRequest request) {
     if (tenantRepository.existsByDomain(request.getCode())) {
@@ -226,9 +229,10 @@ public class TenantService {
       request.put("subject", "Account Approved");
       request.put("body", "Hello " + fullName + ",\n\nYour account has been approved. You can now log in.\n\nBest,\nTrackify Team");
       
-      restTemplate.postForEntity("http://localhost:8084/api/notifications/email", request, String.class);
+      org.springframework.http.ResponseEntity<String> response = restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
+      log.info("Approval email response status: {}", response.getStatusCode());
     } catch (Exception e) {
-      log.error("Failed to send approval email to notification service: {}", e.getMessage());
+      log.error("Failed to send approval email to notification service: {} (URL: {})", e.getMessage(), notificationUrl);
     }
   }
 
@@ -255,10 +259,11 @@ public class TenantService {
       
       request.put("body", body);
       
-      restTemplate.postForEntity("http://localhost:8084/api/notifications/email", request, String.class);
+      org.springframework.http.ResponseEntity<String> response = restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
+      log.info("Welcome email response status: {}", response.getStatusCode());
       log.info("Welcome email sent to: {}", email);
     } catch (Exception e) {
-      log.error("Failed to send welcome email to notification service: {}", e.getMessage());
+      log.error("Failed to send welcome email to notification service: {} (URL: {})", e.getMessage(), notificationUrl);
     }
   }
 
@@ -293,33 +298,19 @@ public class TenantService {
       String dbName, String dbUsername, String dbPassword, String adminEmail, String adminPassword) {
     try {
       log.info("Provisioning database: {}", dbName);
-      jdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
       
-      // We use 'localhost' for the user creation because the MySQL server itself 
-      // is usually configured to allow root/admin connections from localhost 
-      // and we are creating a user that the app (running elsewhere) will use.
-      // However, if the MySQL server is in a container, '%' or specific IPs are better.
-      // For now, let's allow from any host '%' to be safe in Docker.
+      // 1. Create Database and User with root privileges
+      jdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
       jdbcTemplate.execute(
           String.format("CREATE USER IF NOT EXISTS '%s'@'%%' IDENTIFIED BY '%s'", dbUsername, dbPassword));
       jdbcTemplate.execute(
           String.format("GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%'", dbName, dbUsername));
       jdbcTemplate.execute("FLUSH PRIVILEGES");
 
-      // Use a dedicated JdbcTemplate for the new database to avoid polluting the master connection pool
-      Tenant tempTenant = Tenant.builder()
-          .dbHost(defaultDbHost)
-          .dbPort(3306)
-          .dbName(dbName)
-          .dbUsername(dbUsername)
-          .dbPassword(dbPassword)
-          .build();
-      
-      JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tempTenant);
-      
-      String schemaSql =
+      // 2. Create Schema using the same root connection (prefixed with dbName)
+      String schemaSql = String.format(
           """
-                CREATE TABLE IF NOT EXISTS users (
+                CREATE TABLE IF NOT EXISTS %s.users (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   email        VARCHAR(255) NOT NULL UNIQUE,
                   password     VARCHAR(255) NOT NULL,
@@ -330,7 +321,7 @@ public class TenantService {
                   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 );
 
-                CREATE TABLE IF NOT EXISTS projects (
+                CREATE TABLE IF NOT EXISTS %s.projects (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   name         VARCHAR(255) NOT NULL,
                   description  TEXT,
@@ -339,7 +330,7 @@ public class TenantService {
                   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 );
 
-                CREATE TABLE IF NOT EXISTS issues (
+                CREATE TABLE IF NOT EXISTS %s.issues (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   title        VARCHAR(255) NOT NULL,
                   description  TEXT,
@@ -350,36 +341,41 @@ public class TenantService {
                   assignee_id  BIGINT,
                   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
                   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                  FOREIGN KEY (project_id) REFERENCES projects(id)
+                  FOREIGN KEY (project_id) REFERENCES %s.projects(id)
                 );
 
-                CREATE TABLE IF NOT EXISTS issue_comments (
+                CREATE TABLE IF NOT EXISTS %s.issue_comments (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   issue_id     BIGINT NOT NULL,
                   user_id      BIGINT,
                   content      TEXT NOT NULL,
                   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  FOREIGN KEY (issue_id) REFERENCES issues(id)
+                  FOREIGN KEY (issue_id) REFERENCES %s.issues(id)
                 );
-            """;
+            """,
+          dbName, dbName, dbName, dbName, dbName, dbName
+      );
       
-      // Split and execute individual statements
+      // Split and execute individual statements using the ROOT jdbcTemplate
       for (String sql : schemaSql.split(";")) {
           if (!sql.trim().isEmpty()) {
-              tenantJdbc.execute(sql.trim());
+              jdbcTemplate.execute(sql.trim());
           }
       }
 
+      // 3. Create Admin User
       String hashedPassword = passwordEncoder.encode(adminPassword);
-      String insertAdminUser =
-          "INSERT INTO users (email, password, full_name, role, status) VALUES (?, ?, ?, 'ADMIN', 'ACTIVE')";
+      String insertAdminUser = String.format(
+          "INSERT INTO %s.users (email, password, full_name, role, status) VALUES (?, ?, ?, 'ADMIN', 'ACTIVE')", 
+          dbName
+      );
       
-      tenantJdbc.update(insertAdminUser, adminEmail, hashedPassword, "Admin User");
+      jdbcTemplate.update(insertAdminUser, adminEmail, hashedPassword, "Admin User");
 
       log.info("Provisioned database successfully: {}", dbName);
     } catch (Exception e) {
       log.error("Failed to provision database {}: {}", dbName, e.getMessage());
-      throw AppException.internalError("Failed to provision tenant database");
+      throw AppException.internalError("Failed to provision tenant database: " + e.getMessage());
     }
   }
 

@@ -14,6 +14,9 @@ spring:
       ddl-auto: update
     show-sql: true
 
+services:
+  notification-url: http://localhost:8084
+
 tenant:
   datasource:
     default-host: localhost

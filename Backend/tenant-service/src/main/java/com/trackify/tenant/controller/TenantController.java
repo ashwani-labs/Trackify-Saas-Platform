@@ -38,20 +38,20 @@ public class TenantController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<TenantResponse>> getTenant(@PathVariable Long id) {
+  public ResponseEntity<ApiResponse<TenantResponse>> getTenant(@PathVariable("id") Long id) {
     return ResponseEntity.ok(ApiResponse.ok(tenantService.getTenantById(id)));
   }
 
   @PatchMapping("/{id}/status")
   public ResponseEntity<ApiResponse<TenantResponse>> updateTenantStatus(
-      @PathVariable Long id, @Valid @RequestBody UpdateTenantStatusRequest request) {
+      @PathVariable("id") Long id, @Valid @RequestBody UpdateTenantStatusRequest request) {
     return ResponseEntity.ok(
         ApiResponse.ok(
             "Tenant status updated successfully", tenantService.updateTenantStatus(id, request)));
   }
   
   @DeleteMapping("/{id}")
-  public ResponseEntity<ApiResponse<Void>> deleteTenant(@PathVariable Long id) {
+  public ResponseEntity<ApiResponse<Void>> deleteTenant(@PathVariable("id") Long id) {
     tenantService.deleteTenant(id);
     return ResponseEntity.ok(ApiResponse.ok("Organization deleted permanently", null));
   }
@@ -64,15 +64,15 @@ public class TenantController {
   }
 
   @GetMapping("/{id}/users/pending")
-  public ResponseEntity<ApiResponse<Page<UserResponse>>> getPendingUsers(@PathVariable Long id, Pageable pageable) {
+  public ResponseEntity<ApiResponse<Page<UserResponse>>> getPendingUsers(@PathVariable("id") Long id, Pageable pageable) {
     return ResponseEntity.ok(ApiResponse.ok(tenantService.getPendingUsers(id, pageable)));
   }
 
   @PatchMapping("/{id}/users/{userId}/status")
   public ResponseEntity<ApiResponse<UserResponse>> updateUserStatus(
-      @PathVariable Long id,
-      @PathVariable Long userId,
-      @RequestParam UserStatus status) {
+      @PathVariable("id") Long id,
+      @PathVariable("userId") Long userId,
+      @RequestParam("status") UserStatus status) {
     return ResponseEntity.ok(
         ApiResponse.ok("User status updated successfully", tenantService.updateUserStatus(id, userId, status)));
   }

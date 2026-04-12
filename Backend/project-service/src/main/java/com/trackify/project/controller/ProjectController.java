@@ -39,21 +39,21 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProjectResponse>> getProjectById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ProjectResponse>> getProjectById(@PathVariable("id") Long id) {
         ProjectResponse response = projectService.getProjectById(id);
         return ResponseEntity.ok(ApiResponse.ok("Project fetched successfully", response));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ProjectResponse>> updateProject(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody ProjectRequest request) {
         ProjectResponse response = projectService.updateProject(id, request);
         return ResponseEntity.ok(ApiResponse.ok("Project updated successfully", response));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteProject(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteProject(@PathVariable("id") Long id) {
         projectService.deleteProject(id);
         return ResponseEntity.ok(ApiResponse.ok("Project deleted successfully", null));
     }

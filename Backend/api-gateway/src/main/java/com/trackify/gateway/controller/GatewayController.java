@@ -69,9 +69,9 @@ public class GatewayController {
           .headers(e.getResponseHeaders())
           .body(e.getResponseBodyAsString());
     } catch (Exception e) {
-      log.error("Proxy error", e);
+      log.error("Proxy error: {}", e.getMessage(), e);
       return ResponseEntity.internalServerError()
-          .body("{\"success\":false,\"message\":\"Internal Gateway Error\"}");
+          .body(String.format("{\"success\":false,\"message\":\"Internal Gateway Error: %s\"}", e.getMessage()));
     }
   }
 }
