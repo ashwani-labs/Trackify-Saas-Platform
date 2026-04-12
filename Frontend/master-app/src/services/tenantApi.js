@@ -4,7 +4,7 @@ const API_BASE_URL = 'http://localhost:8080'; // API Gateway
 
 const getAuthHeaders = () => ({
   headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
+    Authorization: `Bearer ${localStorage.getItem('trackify_master_token')}`,
   },
 });
 

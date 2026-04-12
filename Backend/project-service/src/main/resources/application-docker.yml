@@ -1,2 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:mysql://db:3306/trackify_master?useSSL=false&allowPublicKeyRetrieval=true
+  sql:
+    init:
+      mode: never
+
 services:
   notification-url: http://notification-service:8084

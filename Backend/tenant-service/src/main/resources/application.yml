@@ -14,6 +14,10 @@ spring:
       ddl-auto: update
     show-sql: true
 
+tenant:
+  datasource:
+    default-host: localhost
+
 jwt:
   secret: ${JWT_SECRET:8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=}
   expiration: 86400000

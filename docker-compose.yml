@@ -55,6 +55,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
       - JWT_SECRET=8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=
+      - TENANT_DATASOURCE_DEFAULT_HOST=db
     depends_on:
       db:
         condition: service_healthy

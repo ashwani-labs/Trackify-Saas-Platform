@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,9 @@ public class TenantService {
   private final UserLookupRepository userLookupRepository;
   private final JdbcTemplate jdbcTemplate;
   private final PasswordEncoder passwordEncoder;
+
+  @Value("${tenant.datasource.default-host:localhost}")
+  private String defaultDbHost;
 
   @Transactional
   public TenantResponse createTenant(CreateTenantRequest request) {
@@ -56,7 +60,7 @@ public class TenantService {
                 request.getPlan() != null ? request.getPlan() : com.trackify.common.enums.Plan.FREE)
             .status(TenantStatus.ACTIVE)
             .dbName(dbName)
-            .dbHost("localhost")
+            .dbHost(defaultDbHost)
             .dbPort(3306)
             .dbUsername(dbUsername)
             .dbPassword(dbPassword)
@@ -228,18 +232,30 @@ public class TenantService {
     try {
       log.info("Provisioning database: {}", dbName);
       jdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
+      
+      // We use 'localhost' for the user creation because the MySQL server itself 
+      // is usually configured to allow root/admin connections from localhost 
+      // and we are creating a user that the app (running elsewhere) will use.
+      // However, if the MySQL server is in a container, '%' or specific IPs are better.
+      // For now, let's allow from any host '%' to be safe in Docker.
       jdbcTemplate.execute(
-          "CREATE USER IF NOT EXISTS '"
-              + dbUsername
-              + "'@'localhost' IDENTIFIED BY '"
-              + dbPassword
-              + "'");
+          String.format("CREATE USER IF NOT EXISTS '%s'@'%%' IDENTIFIED BY '%s'", dbUsername, dbPassword));
       jdbcTemplate.execute(
-          "GRANT ALL PRIVILEGES ON " + dbName + ".* TO '" + dbUsername + "'@'localhost'");
+          String.format("GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%'", dbName, dbUsername));
       jdbcTemplate.execute("FLUSH PRIVILEGES");
 
-      jdbcTemplate.execute("USE " + dbName);
-      String createUserTable =
+      // Use a dedicated JdbcTemplate for the new database to avoid polluting the master connection pool
+      Tenant tempTenant = Tenant.builder()
+          .dbHost(defaultDbHost)
+          .dbPort(3306)
+          .dbName(dbName)
+          .dbUsername(dbUsername)
+          .dbPassword(dbPassword)
+          .build();
+      
+      JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tempTenant);
+      
+      String schemaSql =
           """
                 CREATE TABLE IF NOT EXISTS users (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -284,15 +300,20 @@ public class TenantService {
                   FOREIGN KEY (issue_id) REFERENCES issues(id)
                 );
             """;
-      jdbcTemplate.execute(createUserTable);
+      
+      // Split and execute individual statements
+      for (String sql : schemaSql.split(";")) {
+          if (!sql.trim().isEmpty()) {
+              tenantJdbc.execute(sql.trim());
+          }
+      }
 
       String defaultPassword = "admin123";
       String hashedPassword = passwordEncoder.encode(defaultPassword);
       String insertAdminUser =
-          String.format(
-              "INSERT INTO users (email, password, full_name, role, status) VALUES ('%s', '%s', '%s', 'ADMIN', 'ACTIVE')",
-              adminEmail, hashedPassword, "Admin User");
-      jdbcTemplate.execute(insertAdminUser);
+          "INSERT INTO users (email, password, full_name, role, status) VALUES (?, ?, ?, 'ADMIN', 'ACTIVE')";
+      
+      tenantJdbc.update(insertAdminUser, adminEmail, hashedPassword, "Admin User");
 
       log.info("Provisioned database successfully: {}", dbName);
     } catch (Exception e) {
