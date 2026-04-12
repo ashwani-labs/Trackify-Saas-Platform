@@ -26,3 +26,8 @@ export const updateTenantStatus = async (tenantId, status) => {
   );
   return response.data;
 };
+
+export const deleteTenant = async (tenantId) => {
+  const response = await axios.delete(`${API_BASE_URL}/tenants/${tenantId}`, getAuthHeaders());
+  return response.data;
+};

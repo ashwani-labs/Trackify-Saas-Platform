@@ -49,6 +49,12 @@ public class TenantController {
         ApiResponse.ok(
             "Tenant status updated successfully", tenantService.updateTenantStatus(id, request)));
   }
+  
+  @DeleteMapping("/{id}")
+  public ResponseEntity<ApiResponse<Void>> deleteTenant(@PathVariable Long id) {
+    tenantService.deleteTenant(id);
+    return ResponseEntity.ok(ApiResponse.ok("Organization deleted permanently", null));
+  }
 
   @PostMapping("/users/register")
   public ResponseEntity<ApiResponse<UserResponse>> registerUser(

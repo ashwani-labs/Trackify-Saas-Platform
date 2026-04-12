@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadTenants, toggleTenantStatus, selectAllTenants, selectTenantLoading, selectTenantCurrentPage, selectTenantTotalPages } from '../features/tenants/tenantSlice';
+import { loadTenants, toggleTenantStatus, deleteTenantAsync, selectAllTenants, selectTenantLoading, selectTenantCurrentPage, selectTenantTotalPages } from '../features/tenants/tenantSlice';
 import CreateTenantModal from '../components/tenants/CreateTenantModal';
 import styles from './TenantManagementPage.module.css';
 import Pagination from '../components/common/Pagination';
-import { Users, Globe, Activity, ShieldCheck, ShieldAlert, RefreshCw, Plus } from 'lucide-react';
+import { Users, Globe, Activity, ShieldCheck, ShieldAlert, RefreshCw, Plus, Trash2 } from 'lucide-react';
 
 const TenantManagementPage = () => {
   const dispatch = useDispatch();
@@ -19,8 +19,19 @@ const TenantManagementPage = () => {
   }, [dispatch]);
 
   const handleToggleStatus = (id, currentStatus) => {
-    if (window.confirm(`Are you sure you want to ${currentStatus === 'ACTIVE' ? 'deactivate' : 'activate'} this tenant?`)) {
+    const action = currentStatus === 'ACTIVE' ? 'mark as INACTIVE' : 'mark as ACTIVE';
+    const warning = currentStatus === 'ACTIVE' 
+      ? "\nNote: This will prevent users from logging in to this organization."
+      : "";
+
+    if (window.confirm(`Are you sure you want to ${action} this organization?${warning}`)) {
       dispatch(toggleTenantStatus({ id, currentStatus }));
+    }
+  };
+
+  const handleDeleteTenant = (id, name) => {
+    if (window.confirm(`⚠️ PERMANENT DELETION WARNING ⚠️\n\nAre you sure you want to PERMANENTLY delete "${name}"?\n\nThis will drop the organization's database and remove ALL data. This action CANNOT be undone.`)) {
+      dispatch(deleteTenantAsync(id));
     }
   };
 
@@ -101,12 +112,25 @@ const TenantManagementPage = () => {
                   </td>
                   <td>{new Date(tenant.createdAt).toLocaleDateString()}</td>
                   <td style={{ textAlign: 'right' }}>
-                    <button 
-                      onClick={() => handleToggleStatus(tenant.id, tenant.status)}
-                      className={`${styles.actionBtn} ${tenant.status === 'ACTIVE' ? styles.deactivateBtn : styles.activateBtn}`}
-                    >
-                      {tenant.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
-                    </button>
+                    <div className={styles.actions}>
+                      <button 
+                        onClick={() => handleToggleStatus(tenant.id, tenant.status)}
+                        className={`${styles.actionBtn} ${tenant.status === 'ACTIVE' ? styles.deactivateBtn : styles.activateBtn}`}
+                        title={tenant.status === 'ACTIVE' ? 'Mark as Inactive' : 'Mark as Active'}
+                      >
+                        {tenant.status === 'ACTIVE' ? 'Mark Inactive' : 'Mark Active'}
+                      </button>
+                      
+                      {tenant.status === 'INACTIVE' && (
+                        <button 
+                          onClick={() => handleDeleteTenant(tenant.id, tenant.name)}
+                          className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                          title="Permanently Delete Organization"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

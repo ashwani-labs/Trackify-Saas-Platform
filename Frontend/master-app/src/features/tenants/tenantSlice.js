@@ -39,6 +39,18 @@ export const toggleTenantStatus = createAsyncThunk(
   }
 );
 
+export const deleteTenantAsync = createAsyncThunk(
+  'tenants/delete',
+  async (id, { rejectWithValue }) => {
+    try {
+      await tenantApi.deleteTenant(id);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete tenant');
+    }
+  }
+);
+
 const initialState = {
   list: [],
   currentPage: 0,
@@ -92,6 +104,18 @@ const tenantSlice = createSlice({
         state.list.push(action.payload);
       })
       .addCase(createTenantAsync.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(deleteTenantAsync.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteTenantAsync.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.list = state.list.filter((t) => t.id !== action.payload);
+      })
+      .addCase(deleteTenantAsync.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });

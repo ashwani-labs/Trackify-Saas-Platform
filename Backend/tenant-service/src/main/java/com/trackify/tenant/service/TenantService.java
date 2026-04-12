@@ -81,6 +81,34 @@ public class TenantService {
     return mapToResponse(tenant);
   }
 
+  @Transactional
+  public void deleteTenant(Long id) {
+    Tenant tenant =
+        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
+
+    if (tenant.getStatus() != TenantStatus.INACTIVE) {
+      throw AppException.badRequest("Only INACTIVE organizations can be deleted permanently");
+    }
+
+    log.info("Deleting tenant {} (Domain: {}) permanently", tenant.getName(), tenant.getDomain());
+
+    // 1. Drop the tenant database
+    try {
+      jdbcTemplate.execute("DROP DATABASE IF EXISTS " + tenant.getDbName());
+    } catch (Exception e) {
+      log.error("Failed to drop database {}: {}", tenant.getDbName(), e.getMessage());
+      // Proceeding with metadata deletion even if DB drop fails (it might not have been created)
+    }
+
+    // 2. Delete user lookups
+    userLookupRepository.deleteByTenantId(id);
+
+    // 3. Delete tenant record
+    tenantRepository.delete(tenant);
+    
+    log.info("Tenant {} deleted successfully", tenant.getName());
+  }
+
   public Page<TenantResponse> getAllTenants(Pageable pageable) {
     return tenantRepository.findAll(pageable).map(this::mapToResponse);
   }

@@ -213,6 +213,28 @@
   font-weight: 600;
   transition: all 0.2s;
   border: 1px solid transparent;
+  min-width: 120px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.deleteBtn {
+  color: #8b949e;
+  padding: 0.5rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteBtn:hover {
+  background: rgba(248, 81, 73, 0.1);
+  color: #f85149;
+  border-color: rgba(248, 81, 73, 0.2);
 }
 
 .deactivateBtn {
