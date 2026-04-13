@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +30,10 @@ public class AuthService {
   private final TenantRepository tenantRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
+  private final JdbcTemplate jdbcTemplate;
+
+  @Value("${tenant.datasource.host-override:}")
+  private String dbHostOverride;
 
   public LoginResponse login(LoginRequest request) {
     // 1. Try Platform Master User
@@ -70,22 +75,16 @@ public class AuthService {
 
   private Map<String, Object> checkTenantUserCredentials(
       Tenant tenant, String email, String password) {
-    String dbUrl =
-        String.format(
-            "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true",
-            tenant.getDbHost(), tenant.getDbPort(), tenant.getDbName());
-
-    DriverManagerDataSource dataSource = new DriverManagerDataSource();
-    dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-    dataSource.setUrl(dbUrl);
-    dataSource.setUsername(tenant.getDbUsername());
-    dataSource.setPassword(tenant.getDbPassword());
-
-    JdbcTemplate tenantJdbc = new JdbcTemplate(dataSource);
+    
+    log.info("Authenticating user {} for tenant {} using master connection", email, tenant.getDbName());
 
     try {
-      Map<String, Object> user =
-          tenantJdbc.queryForMap("SELECT id, password, role, status FROM users WHERE email = ?", email);
+      String sql = String.format(
+          "SELECT id, password, role, status FROM %s.users WHERE email = ?", 
+          tenant.getDbName()
+      );
+      
+      Map<String, Object> user = jdbcTemplate.queryForMap(sql, email);
 
       String status = (String) user.get("status");
       if ("INACTIVE".equals(status)) {
@@ -100,7 +99,8 @@ public class AuthService {
       return user;
     } catch (Exception e) {
       log.error(
-          "Error authenticating against tenant DB {}: {}", tenant.getDbName(), e.getMessage());
+          "Error authenticating against tenant DB {}: {}. Root cause: {}", 
+          tenant.getDbName(), e.getMessage(), e.getCause() != null ? e.getCause().getMessage() : "N/A");
       throw AppException.unauthorized("Invalid email or password");
     }
   }

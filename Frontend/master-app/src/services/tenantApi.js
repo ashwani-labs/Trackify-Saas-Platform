@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080'; // API Gateway
+const API_BASE_URL = 'http://api.trackify.com'; // API Gateway
 
 const getAuthHeaders = () => ({
   headers: {

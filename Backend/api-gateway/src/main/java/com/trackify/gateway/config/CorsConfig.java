@@ -15,7 +15,12 @@ public class CorsConfig {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     CorsConfiguration config = new CorsConfiguration();
     config.setAllowCredentials(true);
-    config.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://localhost:5174"));
+    config.setAllowedOriginPatterns(List.of(
+        "http://localhost:5173", 
+        "http://localhost:5174",
+        "http://trackify.com",
+        "http://*.trackify.com"
+    ));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     source.registerCorsConfiguration("/**", config);
