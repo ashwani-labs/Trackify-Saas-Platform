@@ -17,9 +17,9 @@ spring:
 services:
   notification-url: http://localhost:8084
 
-tenant:
   datasource:
     default-host: localhost
+  app-url-pattern: http://%s.lvh.me:5174
 
 jwt:
   secret: ${JWT_SECRET:8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=}

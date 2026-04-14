@@ -16,10 +16,12 @@ public class CorsConfig {
     CorsConfiguration config = new CorsConfiguration();
     config.setAllowCredentials(true);
     config.setAllowedOriginPatterns(List.of(
-        "http://localhost:5173", 
-        "http://localhost:5174",
         "http://trackify.com",
-        "http://*.trackify.com"
+        "http://*.trackify.com",
+        "http://lvh.me",
+        "http://*.lvh.me",
+        "http://localhost:5173",
+        "http://localhost:5174"
     ));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

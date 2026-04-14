@@ -45,6 +45,9 @@ public class TenantService {
   @Value("${services.notification-url:http://localhost:8084}")
   private String notificationUrl;
 
+  @Value("${tenant.app-url-pattern:http://%s.trackify.com:5174}")
+  private String appUrlPattern;
+
   @Transactional
   public TenantResponse createTenant(CreateTenantRequest request) {
     if (tenantRepository.existsByDomain(request.getCode())) {
@@ -243,6 +246,8 @@ public class TenantService {
       request.put("to", email);
       request.put("subject", "Welcome to Trackify - Your Cloud Instance is Ready!");
       
+      String tenantUrl = String.format(appUrlPattern, domain);
+      
       String body = String.format(
           "Hello,\n\n" +
           "Your Trackify instance for '%s' has been successfully provisioned.\n\n" +
@@ -250,11 +255,11 @@ public class TenantService {
           "Domain: %s\n" +
           "Email: %s\n" +
           "Password: %s\n\n" +
-          "You can access your instance at: http://%s.trackify.com\n\n" +
+          "You can access your instance at: %s\n\n" +
           "Please change your password after your first login.\n\n" +
           "Best Regards,\n" +
           "The Trackify Team",
-          tenantName, domain, email, password, domain
+          tenantName, domain, email, password, tenantUrl
       );
       
       request.put("body", body);

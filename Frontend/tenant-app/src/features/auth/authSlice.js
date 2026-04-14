@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/axios';
 
-const API_BASE_URL = 'http://api.trackify.com'; // API Gateway
+const API_BASE_URL = 'http://localhost:8080'; // API Gateway
 
 export const loginUser = createAsyncThunk(
   'auth/login',

@@ -8,4 +8,9 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  server: {
+    port: 5174,
+    host: true, // Listen on all network interfaces
+    allowedHosts: true // Allow any hostname (e.g., techno.trackify.com)
+  }
 })
