@@ -7,85 +7,59 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
 import UserApprovalPage from './pages/UserApprovalPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
+import TeamPage from './pages/TeamPage';
 import './styles/variables.css';
-
-const MainDashboard = () => (
-  <div style={{ padding: '1rem' }}>
-    <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Workspace Overview</h1>
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-      gap: '1.5rem'
-    }}>
-      <div style={{ background: 'var(--bg-secondary)', padding: '2rem', borderRadius: '1rem', border: '1px solid var(--border-color)' }}>
-        <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Active Projects</h3>
-        <span style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>0</span>
-      </div>
-      <div style={{ background: 'var(--bg-secondary)', padding: '2rem', borderRadius: '1rem', border: '1px solid var(--border-color)' }}>
-        <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Pending Tasks</h3>
-        <span style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>0</span>
-      </div>
-    </div>
-  </div>
-);
 
 function App() {
   return (
     <Provider store={store}>
-      <Toaster position="top-right" />
+      <Toaster position="top-right" toastOptions={{ style: { background: '#161b22', color: '#f0f6fc', border: '1px solid #30363d' } }} />
       <Router>
         <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<LoginPage />} />
+          {/* Public */}
+          <Route path="/login"    element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Protected Dashboard Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <MainDashboard />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
+          {/* Dashboard */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <DashboardLayout><DashboardPage /></DashboardLayout>
+            </ProtectedRoute>
+          } />
 
-          <Route
-            path="/pending-users"
-            element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <UserApprovalPage />
-              </ProtectedRoute>
-            }
-          />
+          {/* Team — Admin only */}
+          <Route path="/team" element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <DashboardLayout><TeamPage /></DashboardLayout>
+            </ProtectedRoute>
+          } />
 
-          <Route
-            path="/projects"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <ProjectsPage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
+          {/* Pending Users — Admin only */}
+          <Route path="/pending-users" element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <DashboardLayout><UserApprovalPage /></DashboardLayout>
+            </ProtectedRoute>
+          } />
 
-          <Route
-            path="/projects/:id"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <ProjectDetailPage />
-                </DashboardLayout>
-              </ProtectedRoute>
-            }
-          />
+          {/* Projects */}
+          <Route path="/projects" element={
+            <ProtectedRoute>
+              <DashboardLayout><ProjectsPage /></DashboardLayout>
+            </ProtectedRoute>
+          } />
 
-          {/* Catch-all Redirect */}
+          {/* Project Detail / Kanban */}
+          <Route path="/projects/:id" element={
+            <ProtectedRoute>
+              <DashboardLayout><ProjectDetailPage /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

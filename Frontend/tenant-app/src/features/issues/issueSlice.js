@@ -160,6 +160,10 @@ const initialState = {
   issues: [],           // all issues for current project
   comments: {},         // { [issueId]: [comments] }
   selectedIssue: null,  // issue open in detail panel
+  filters: {
+    status: 'ALL',
+    priority: 'ALL',
+  },
   isLoading: false,
   isCommentLoading: false,
   isAttachmentLoading: false,
@@ -184,6 +188,12 @@ const issueSlice = createSlice({
     },
     clearIssueError: (state) => {
       state.error = null;
+    },
+    setFilters: (state, action) => {
+      state.filters = { ...state.filters, ...action.payload };
+    },
+    clearFilters: (state) => {
+      state.filters = { status: 'ALL', priority: 'ALL' };
     },
     // Optimistic status update for drag-and-drop feel
     optimisticStatusUpdate: (state, action) => {
@@ -293,6 +303,8 @@ export const {
   clearSelectedIssue,
   clearIssues,
   clearIssueError,
+  setFilters,
+  clearFilters,
   optimisticStatusUpdate,
 } = issueSlice.actions;
 

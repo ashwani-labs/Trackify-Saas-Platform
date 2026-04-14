@@ -68,6 +68,11 @@ public class TenantController {
     return ResponseEntity.ok(ApiResponse.ok(tenantService.getPendingUsers(id, pageable)));
   }
 
+  @GetMapping("/{id}/users")
+  public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(@PathVariable("id") Long id, Pageable pageable) {
+    return ResponseEntity.ok(ApiResponse.ok(tenantService.getAllUsers(id, pageable)));
+  }
+
   @PatchMapping("/{id}/users/{userId}/status")
   public ResponseEntity<ApiResponse<UserResponse>> updateUserStatus(
       @PathVariable("id") Long id,

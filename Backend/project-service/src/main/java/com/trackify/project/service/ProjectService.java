@@ -3,7 +3,10 @@ package com.trackify.project.service;
 import com.trackify.common.exception.AppException;
 import com.trackify.project.dto.ProjectRequest;
 import com.trackify.project.dto.ProjectResponse;
+import com.trackify.project.dto.ProjectStatsResponse;
 import com.trackify.project.entity.Project;
+import com.trackify.project.enums.IssueStatus;
+import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -18,9 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final IssueRepository issueRepository;
 
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(ProjectRepository projectRepository, IssueRepository issueRepository) {
         this.projectRepository = projectRepository;
+        this.issueRepository = issueRepository;
     }
 
     @Transactional
@@ -35,6 +40,22 @@ public class ProjectService {
 
         project = projectRepository.save(project);
         return mapToResponse(project);
+    }
+
+    public ProjectStatsResponse getProjectStats() {
+        long totalProjects = projectRepository.count();
+        long todoCount = issueRepository.countByStatus(IssueStatus.TODO);
+        long inProgressCount = issueRepository.countByStatus(IssueStatus.IN_PROGRESS);
+        long doneCount = issueRepository.countByStatus(IssueStatus.DONE);
+        long totalIssues = todoCount + inProgressCount + doneCount;
+
+        return ProjectStatsResponse.builder()
+                .totalProjects(totalProjects)
+                .todoCount(todoCount)
+                .inProgressCount(inProgressCount)
+                .doneCount(doneCount)
+                .totalIssues(totalIssues)
+                .build();
     }
 
     public Page<ProjectResponse> getAllProjects(Pageable pageable) {

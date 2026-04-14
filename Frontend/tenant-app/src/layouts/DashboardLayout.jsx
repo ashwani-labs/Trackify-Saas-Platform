@@ -5,13 +5,13 @@ import { logout } from '../features/auth/authSlice';
 import styles from './DashboardLayout.module.css';
 import { 
   LayoutDashboard, 
-  Users, 
   Settings, 
   LogOut, 
   ChevronLeft, 
   ChevronRight,
   ClipboardList,
-  UserCheck
+  UserCheck,
+  Users2,
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
@@ -26,10 +26,10 @@ const DashboardLayout = ({ children }) => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
-    { name: 'Pending Users', path: '/pending-users', icon: <UserCheck size={20} />, adminOnly: true },
-    { name: 'Projects', path: '/projects', icon: <ClipboardList size={20} /> },
-    { name: 'Settings', path: '/settings', icon: <Settings size={20} /> },
+    { name: 'Dashboard',     path: '/',              icon: <LayoutDashboard size={20} /> },
+    { name: 'Projects',      path: '/projects',      icon: <ClipboardList size={20} /> },
+    { name: 'Team',          path: '/team',           icon: <Users2 size={20} />,    adminOnly: true },
+    { name: 'Pending Users', path: '/pending-users',  icon: <UserCheck size={20} />, adminOnly: true },
   ];
 
   const filteredMenu = menuItems.filter(item => !item.adminOnly || user?.role === 'ADMIN');

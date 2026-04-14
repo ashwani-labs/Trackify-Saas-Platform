@@ -3,13 +3,17 @@ import axios from '../../utils/axios';
 
 const API_BASE_URL = 'http://localhost:8080'; // API Gateway
 
+const getAuthHeader = () => {
+  const token = localStorage.getItem('tenantToken');
+  return { Authorization: `Bearer ${token}` };
+};
+
 export const fetchProjects = createAsyncThunk(
   'projects/fetchAll',
   async ({ page = 0, size = 10, ...rest } = {}, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('tenantToken');
       const response = await axios.get(`${API_BASE_URL}/projects?page=${page}&size=${size}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeader(),
       });
       return response.data.data;
     } catch (error) {
@@ -37,13 +41,26 @@ export const fetchProjectById = createAsyncThunk(
   'projects/fetchById',
   async (id, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('tenantToken');
       const response = await axios.get(`${API_BASE_URL}/projects/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeader(),
       });
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch project details');
+    }
+  }
+);
+
+export const fetchProjectStats = createAsyncThunk(
+  'projects/fetchStats',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/projects/stats`, {
+        headers: getAuthHeader(),
+      });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch stats');
     }
   }
 );
@@ -54,6 +71,8 @@ const initialState = {
   totalPages: 0,
   totalElements: 0,
   currentProject: null,
+  stats: null,
+  statsLoading: false,
   isLoading: false,
   error: null,
 };
@@ -104,6 +123,16 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProjectById.fulfilled, (state, action) => {
         state.currentProject = action.payload;
+      })
+      .addCase(fetchProjectStats.pending, (state) => {
+        state.statsLoading = true;
+      })
+      .addCase(fetchProjectStats.fulfilled, (state, action) => {
+        state.statsLoading = false;
+        state.stats = action.payload;
+      })
+      .addCase(fetchProjectStats.rejected, (state) => {
+        state.statsLoading = false;
       });
   },
 });

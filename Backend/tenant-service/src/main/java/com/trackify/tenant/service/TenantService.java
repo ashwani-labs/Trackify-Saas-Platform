@@ -199,6 +199,24 @@ public class TenantService {
     return new org.springframework.data.domain.PageImpl<>(userResponses, pageable, total != null ? total : 0);
   }
 
+  public Page<UserResponse> getAllUsers(Long tenantId, Pageable pageable) {
+    Tenant tenant =
+        tenantRepository.findById(tenantId).orElseThrow(() -> AppException.notFound("Tenant not found"));
+
+    JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
+    Long total = tenantJdbc.queryForObject("SELECT COUNT(*) FROM users", Long.class);
+
+    String sql = "SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    List<Map<String, Object>> users =
+        tenantJdbc.queryForList(sql, pageable.getPageSize(), pageable.getOffset());
+
+    List<UserResponse> userResponses = users.stream()
+        .map(map -> mapToUserResponse(map, tenantId))
+        .collect(Collectors.toList());
+
+    return new org.springframework.data.domain.PageImpl<>(userResponses, pageable, total != null ? total : 0);
+  }
+
   @Transactional
   public UserResponse updateUserStatus(Long tenantId, Long userId, UserStatus status) {
     Tenant tenant =

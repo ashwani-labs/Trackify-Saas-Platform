@@ -4,6 +4,7 @@ import com.trackify.common.dto.ApiResponse;
 import com.trackify.common.security.JwtUtil;
 import com.trackify.project.dto.ProjectRequest;
 import com.trackify.project.dto.ProjectResponse;
+import com.trackify.project.dto.ProjectStatsResponse;
 import com.trackify.project.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,11 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final JwtUtil jwtUtil;
+
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<ProjectStatsResponse>> getProjectStats() {
+        return ResponseEntity.ok(ApiResponse.ok("Stats fetched successfully", projectService.getProjectStats()));
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<ProjectResponse>> createProject(

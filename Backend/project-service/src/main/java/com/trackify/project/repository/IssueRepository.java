@@ -12,4 +12,5 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findAllByProjectId(Long projectId);
     List<Issue> findAllByAssigneeId(Long assigneeId);
     List<Issue> findAllByProjectIdAndStatus(Long projectId, IssueStatus status);
+    long countByStatus(IssueStatus status);
 }

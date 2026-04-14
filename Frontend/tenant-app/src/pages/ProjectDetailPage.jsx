@@ -9,6 +9,7 @@ import {
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import CreateIssueModal from '../components/issues/CreateIssueModal';
 import IssueDetailPanel from '../components/issues/IssueDetailPanel';
+import IssueFilterBar from '../components/issues/IssueFilterBar';
 import styles from './ProjectDetailPage.module.css';
 
 const ProjectDetailPage = () => {
@@ -17,8 +18,15 @@ const ProjectDetailPage = () => {
   const dispatch = useDispatch();
 
   const { currentProject, isLoading: projectLoading } = useSelector((s) => s.projects);
-  const { selectedIssue, issues } = useSelector((s) => s.issues);
+  const { selectedIssue, issues, filters } = useSelector((s) => s.issues);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Apply client-side filters
+  const filteredIssues = issues.filter((issue) => {
+    const statusMatch   = !filters.status   || filters.status   === 'ALL' || issue.status   === filters.status;
+    const priorityMatch = !filters.priority || filters.priority === 'ALL' || issue.priority === filters.priority;
+    return statusMatch && priorityMatch;
+  });
 
   useEffect(() => {
     dispatch(fetchProjectById(id));
@@ -29,9 +37,9 @@ const ProjectDetailPage = () => {
     };
   }, [id, dispatch]);
 
-  const todoCount      = issues.filter((i) => i.status === 'TODO').length;
-  const inProgressCount = issues.filter((i) => i.status === 'IN_PROGRESS').length;
-  const doneCount      = issues.filter((i) => i.status === 'DONE').length;
+  const todoCount       = filteredIssues.filter((i) => i.status === 'TODO').length;
+  const inProgressCount = filteredIssues.filter((i) => i.status === 'IN_PROGRESS').length;
+  const doneCount       = filteredIssues.filter((i) => i.status === 'DONE').length;
 
   if (projectLoading && !currentProject) {
     return (
@@ -94,9 +102,13 @@ const ProjectDetailPage = () => {
         </div>
       )}
 
+      {/* ── Filter Bar ── */}
+      <IssueFilterBar />
+
       {/* ── Kanban Board ── */}
       <KanbanBoard
         projectId={Number(id)}
+        filteredIssues={filteredIssues}
         onCreateIssue={() => setIsCreateModalOpen(true)}
       />
 

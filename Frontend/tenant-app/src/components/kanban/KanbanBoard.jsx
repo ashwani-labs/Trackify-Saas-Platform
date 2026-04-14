@@ -14,9 +14,10 @@ const COLUMNS = [
   { status: 'DONE',        label: 'Done',        colorClass: 'colDone' },
 ];
 
-const KanbanBoard = ({ projectId, onCreateIssue }) => {
+const KanbanBoard = ({ projectId, filteredIssues, onCreateIssue }) => {
   const dispatch = useDispatch();
-  const { issues, isLoading } = useSelector((state) => state.issues);
+  const { issues: allIssues, isLoading } = useSelector((state) => state.issues);
+  const issues = filteredIssues ?? allIssues;
   const dragOverColumn = useRef(null);
 
   const issuesByStatus = (status) => issues.filter((i) => i.status === status);
