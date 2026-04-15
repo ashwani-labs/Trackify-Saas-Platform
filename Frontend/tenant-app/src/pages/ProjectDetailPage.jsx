@@ -10,6 +10,8 @@ import KanbanBoard from '../components/kanban/KanbanBoard';
 import CreateIssueModal from '../components/issues/CreateIssueModal';
 import IssueDetailPanel from '../components/issues/IssueDetailPanel';
 import IssueFilterBar from '../components/issues/IssueFilterBar';
+import ProjectMembersModal from '../components/projects/ProjectMembersModal';
+import { Users } from 'lucide-react';
 import styles from './ProjectDetailPage.module.css';
 
 const ProjectDetailPage = () => {
@@ -20,6 +22,7 @@ const ProjectDetailPage = () => {
   const { currentProject, isLoading: projectLoading } = useSelector((s) => s.projects);
   const { selectedIssue, issues, filters } = useSelector((s) => s.issues);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
 
   // Apply client-side filters
   const filteredIssues = issues.filter((issue) => {
@@ -80,12 +83,27 @@ const ProjectDetailPage = () => {
             </div>
           </div>
 
-          <button
-            className={styles.createIssueBtn}
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <span>+</span> Create Issue
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              onClick={() => setIsMembersModalOpen(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                background: 'var(--bg-item, #181825)', color: 'var(--text-primary, #cdd6f4)',
+                border: '1px solid var(--border-color, #313244)', padding: '0 1rem',
+                borderRadius: '8px', fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.background = 'var(--bg-hover, #313244)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-item, #181825)'; }}
+            >
+              <Users size={16} /> Members
+            </button>
+            <button
+              className={styles.createIssueBtn}
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <span>+</span> Create Issue
+            </button>
+          </div>
         </div>
       </div>
 
@@ -120,6 +138,12 @@ const ProjectDetailPage = () => {
           projectId={Number(id)}
         />
       )}
+
+      <ProjectMembersModal
+        isOpen={isMembersModalOpen}
+        onClose={() => setIsMembersModalOpen(false)}
+        projectId={Number(id)}
+      />
 
       {selectedIssue && <IssueDetailPanel />}
     </div>
