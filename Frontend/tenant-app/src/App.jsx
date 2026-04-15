@@ -12,6 +12,8 @@ import UserApprovalPage from './pages/UserApprovalPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import TeamPage from './pages/TeamPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import './styles/variables.css';
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
           {/* Public */}
           <Route path="/login"    element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Dashboard */}
           <Route path="/" element={

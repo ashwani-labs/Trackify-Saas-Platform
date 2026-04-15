@@ -1,7 +1,9 @@
 package com.trackify.auth.service;
 
+import com.trackify.auth.dto.ForgotPasswordRequest;
 import com.trackify.auth.dto.LoginRequest;
 import com.trackify.auth.dto.LoginResponse;
+import com.trackify.auth.dto.ResetPasswordRequest;
 import com.trackify.auth.entity.MasterUser;
 import com.trackify.auth.entity.Tenant;
 import com.trackify.auth.entity.UserLookup;
@@ -34,6 +36,12 @@ public class AuthService {
 
   @Value("${tenant.datasource.host-override:}")
   private String dbHostOverride;
+
+  @Value("${services.notification-url:http://localhost:8084}")
+  private String notificationUrl;
+
+  @Value("${tenant.app-url-pattern:http://%s.trackify.com:5174}")
+  private String appUrlPattern;
 
   public LoginResponse login(LoginRequest request) {
     // 1. Try Platform Master User
@@ -102,6 +110,100 @@ public class AuthService {
           "Error authenticating against tenant DB {}: {}. Root cause: {}", 
           tenant.getDbName(), e.getMessage(), e.getCause() != null ? e.getCause().getMessage() : "N/A");
       throw AppException.unauthorized("Invalid email or password");
+    }
+  }
+
+  public void forgotPassword(ForgotPasswordRequest request) {
+    String email = request.getEmail();
+    
+    UserLookup lookup = userLookupRepository.findByEmail(email)
+        .orElseThrow(() -> AppException.notFound("No account found with that email address"));
+
+    Tenant tenant = tenantRepository.findById(lookup.getTenantId())
+        .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
+
+    String token = java.util.UUID.randomUUID().toString();
+    java.time.LocalDateTime expiresAt = java.time.LocalDateTime.now().plusHours(1);
+
+    try {
+        String sql = String.format(
+            "INSERT INTO %s.password_reset_tokens (email, token, expires_at) VALUES (?, ?, ?)",
+            tenant.getDbName()
+        );
+        jdbcTemplate.update(sql, email, token, expiresAt);
+    } catch (Exception e) {
+        log.error("Failed to insert reset token in tenant DB: {}", e.getMessage());
+        throw AppException.internalError("Failed to generate password reset request");
+    }
+
+    sendPasswordResetEmail(email, token, tenant.getDomain());
+  }
+
+  private void sendPasswordResetEmail(String email, String token, String domain) {
+    try {
+      org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+      java.util.Map<String, String> request = new java.util.HashMap<>();
+      request.put("to", email);
+      request.put("subject", "Trackify - Password Reset Request");
+      
+      String resetUrl = String.format(appUrlPattern, domain) + "/reset-password?token=" + token + "&email=" + email;
+      
+      String body = "Hello,\n\nWe received a request to reset your password for your Trackify account.\n\n"
+          + "Click the link below to set a new password:\n"
+          + resetUrl + "\n\n"
+          + "If you did not request this, please ignore this email.\n\nBest,\nTrackify Team";
+          
+      request.put("body", body);
+      
+      org.springframework.http.ResponseEntity<String> response = restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
+      log.info("Password reset email sent to {}", email);
+    } catch (Exception e) {
+      log.error("Failed to send password reset email: {}", e.getMessage());
+    }
+  }
+
+  public void resetPassword(ResetPasswordRequest request) {
+    UserLookup lookup = userLookupRepository.findByEmail(request.getEmail())
+        .orElseThrow(() -> AppException.notFound("Invalid reset request"));
+
+    Tenant tenant = tenantRepository.findById(lookup.getTenantId())
+        .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
+
+    try {
+        // Find token
+        String sqlFind = String.format(
+            "SELECT id FROM %s.password_reset_tokens WHERE email = ? AND token = ? AND used = FALSE AND expires_at > NOW()",
+            tenant.getDbName()
+        );
+        java.util.List<Long> tokens = jdbcTemplate.query(sqlFind, 
+            (rs, rowNum) -> rs.getLong("id"), 
+            request.getEmail(), request.getToken());
+            
+        if (tokens.isEmpty()) {
+            throw AppException.badRequest("Invalid or expired password reset token");
+        }
+
+        // Update password in users table
+        String newHashedPassword = passwordEncoder.encode(request.getNewPassword());
+        String sqlUpdatePass = String.format(
+            "UPDATE %s.users SET password = ? WHERE email = ?",
+            tenant.getDbName()
+        );
+        jdbcTemplate.update(sqlUpdatePass, newHashedPassword, request.getEmail());
+
+        // Mark token as used
+        String sqlUpdateToken = String.format(
+            "UPDATE %s.password_reset_tokens SET used = TRUE WHERE id = ?",
+            tenant.getDbName()
+        );
+        jdbcTemplate.update(sqlUpdateToken, tokens.get(0));
+
+        log.info("Password successfully reset for {}", request.getEmail());
+    } catch (AppException e) {
+        throw e;
+    } catch (Exception e) {
+        log.error("Failed to process password reset: {}", e.getMessage());
+        throw AppException.internalError("Failed to reset password: " + e.getMessage());
     }
   }
 }
