@@ -65,15 +65,59 @@ export const fetchProjectStats = createAsyncThunk(
   }
 );
 
+export const fetchProjectMembers = createAsyncThunk(
+  'projects/fetchMembers',
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/projects/${projectId}/members`, {
+        headers: getAuthHeader(),
+      });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch members');
+    }
+  }
+);
+
+export const addProjectMember = createAsyncThunk(
+  'projects/addMember',
+  async ({ projectId, memberData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/projects/${projectId}/members`, memberData, {
+        headers: getAuthHeader(),
+      });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to add member');
+    }
+  }
+);
+
+export const removeProjectMember = createAsyncThunk(
+  'projects/removeMember',
+  async ({ projectId, userId }, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/projects/${projectId}/members/${userId}`, {
+        headers: getAuthHeader(),
+      });
+      return userId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to remove member');
+    }
+  }
+);
+
 const initialState = {
   projects: [],
   currentPage: 0,
   totalPages: 0,
   totalElements: 0,
   currentProject: null,
+  members: [],
   stats: null,
   statsLoading: false,
   isLoading: false,
+  memberLoading: false,
   error: null,
 };
 
@@ -133,6 +177,22 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProjectStats.rejected, (state) => {
         state.statsLoading = false;
+      })
+      .addCase(fetchProjectMembers.pending, (state) => {
+        state.memberLoading = true;
+      })
+      .addCase(fetchProjectMembers.fulfilled, (state, action) => {
+        state.memberLoading = false;
+        state.members = action.payload;
+      })
+      .addCase(fetchProjectMembers.rejected, (state) => {
+        state.memberLoading = false;
+      })
+      .addCase(addProjectMember.fulfilled, (state, action) => {
+        state.members.push(action.payload);
+      })
+      .addCase(removeProjectMember.fulfilled, (state, action) => {
+        state.members = state.members.filter(m => m.userId !== action.payload);
       });
   },
 });

@@ -375,6 +375,27 @@ public class TenantService {
                   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
                   FOREIGN KEY (issue_id) REFERENCES %s.issues(id)
                 );
+
+                CREATE TABLE IF NOT EXISTS %s.project_members (
+                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+                  project_id   BIGINT NOT NULL,
+                  user_id      BIGINT NOT NULL,
+                  user_email   VARCHAR(255),
+                  user_name    VARCHAR(255),
+                  user_role    VARCHAR(50) DEFAULT 'USER',
+                  added_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  UNIQUE KEY uq_project_user (project_id, user_id),
+                  FOREIGN KEY (project_id) REFERENCES %s.projects(id)
+                );
+
+                CREATE TABLE IF NOT EXISTS %s.password_reset_tokens (
+                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+                  email        VARCHAR(255) NOT NULL,
+                  token        VARCHAR(255) NOT NULL UNIQUE,
+                  expires_at   DATETIME NOT NULL,
+                  used         BOOLEAN DEFAULT FALSE,
+                  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
             """,
           dbName, dbName, dbName, dbName, dbName, dbName
       );
