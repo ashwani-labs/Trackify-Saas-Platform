@@ -39,14 +39,14 @@ public class TenantService {
   private final JdbcTemplate jdbcTemplate;
   private final PasswordEncoder passwordEncoder;
 
-  @Value("${tenant.datasource.default-host:localhost}")
-  private String defaultDbHost;
+    @Value("${tenant.app-url-pattern:http://%s.trackify.com:5174}")
+    private String appUrlPattern;
 
-  @Value("${services.notification-url:http://localhost:8084}")
-  private String notificationUrl;
+    @Value("${tenant.datasource.default-host:localhost}")
+    private String defaultDbHost;
 
-  @Value("${tenant.app-url-pattern:http://%s.trackify.com:5174}")
-  private String appUrlPattern;
+    @Value("${services.notification-url:http://localhost:8084}")
+    private String notificationUrl;
 
   @Transactional
   public TenantResponse createTenant(CreateTenantRequest request) {
@@ -78,18 +78,36 @@ public class TenantService {
             .dbPassword(dbPassword)
             .build();
 
-    tenant = tenantRepository.save(tenant);
+        tenant = tenantRepository.save(tenant);
+        
+        // Ensure metadata is committed before long-running provisioning
+        // This avoids holding locks and handles the implicit commit of DDL better
+        log.info("Tenant metadata saved for {}. Starting background provisioning...", request.getCode());
+        
+        try {
+            provisionTenantDatabase(dbName, dbUsername, dbPassword, request.getAdminEmail(), adminPassword);
+            
+            UserLookup userLookup =
+                UserLookup.builder().email(request.getAdminEmail()).tenantId(tenant.getId()).build();
+            userLookupRepository.save(userLookup);
+    
+            sendWelcomeEmail(request.getAdminEmail(), request.getName(), adminPassword, request.getCode());
+        } catch (Exception e) {
+            log.error("Failed to fully provision tenant {}: {}", request.getCode(), e.getMessage());
+            // Cleanup: Since DDL in provisionTenantDatabase triggered an implicit commit, 
+            // the Tenant record is now permanently in the DB. We must delete it manually
+            // if we want to allow retries with the same organization code.
+            try {
+                tenantRepository.delete(tenant);
+                log.info("Successfully cleaned up orphan tenant record for {}", request.getCode());
+            } catch (Exception cleanupEx) {
+                log.error("Critical: Failed to cleanup orphan tenant record for {}: {}", request.getCode(), cleanupEx.getMessage());
+            }
+            throw e;
+        }
 
-    provisionTenantDatabase(dbName, dbUsername, dbPassword, request.getAdminEmail(), adminPassword);
-
-    UserLookup userLookup =
-        UserLookup.builder().email(request.getAdminEmail()).tenantId(tenant.getId()).build();
-    userLookupRepository.save(userLookup);
-
-    sendWelcomeEmail(request.getAdminEmail(), request.getName(), adminPassword, request.getCode());
-
-    return mapToResponse(tenant);
-  }
+        return mapToResponse(tenant);
+    }
 
   @Transactional
   public void deleteTenant(Long id) {
@@ -337,7 +355,7 @@ public class TenantService {
       // 2. Create Schema using the same root connection (prefixed with dbName)
       String schemaSql = String.format(
           """
-                CREATE TABLE IF NOT EXISTS %s.users (
+                CREATE TABLE IF NOT EXISTS %1$s.users (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   email        VARCHAR(255) NOT NULL UNIQUE,
                   password     VARCHAR(255) NOT NULL,
@@ -348,7 +366,7 @@ public class TenantService {
                   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 );
 
-                CREATE TABLE IF NOT EXISTS %s.projects (
+                CREATE TABLE IF NOT EXISTS %1$s.projects (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   name         VARCHAR(255) NOT NULL,
                   description  TEXT,
@@ -357,7 +375,7 @@ public class TenantService {
                   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 );
 
-                CREATE TABLE IF NOT EXISTS %s.issues (
+                CREATE TABLE IF NOT EXISTS %1$s.issues (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   title        VARCHAR(255) NOT NULL,
                   description  TEXT,
@@ -368,19 +386,19 @@ public class TenantService {
                   assignee_id  BIGINT,
                   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
                   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                  FOREIGN KEY (project_id) REFERENCES %s.projects(id)
+                  FOREIGN KEY (project_id) REFERENCES %1$s.projects(id)
                 );
 
-                CREATE TABLE IF NOT EXISTS %s.issue_comments (
+                CREATE TABLE IF NOT EXISTS %1$s.issue_comments (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   issue_id     BIGINT NOT NULL,
                   user_id      BIGINT,
                   content      TEXT NOT NULL,
                   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  FOREIGN KEY (issue_id) REFERENCES %s.issues(id)
+                  FOREIGN KEY (issue_id) REFERENCES %1$s.issues(id)
                 );
 
-                CREATE TABLE IF NOT EXISTS %s.project_members (
+                CREATE TABLE IF NOT EXISTS %1$s.project_members (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   project_id   BIGINT NOT NULL,
                   user_id      BIGINT NOT NULL,
@@ -389,10 +407,10 @@ public class TenantService {
                   user_role    VARCHAR(50) DEFAULT 'USER',
                   added_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
                   UNIQUE KEY uq_project_user (project_id, user_id),
-                  FOREIGN KEY (project_id) REFERENCES %s.projects(id)
+                  FOREIGN KEY (project_id) REFERENCES %1$s.projects(id)
                 );
 
-                CREATE TABLE IF NOT EXISTS %s.password_reset_tokens (
+                CREATE TABLE IF NOT EXISTS %1$s.password_reset_tokens (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   email        VARCHAR(255) NOT NULL,
                   token        VARCHAR(255) NOT NULL UNIQUE,
@@ -401,7 +419,7 @@ public class TenantService {
                   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
                 );
             """,
-          dbName, dbName, dbName, dbName, dbName, dbName
+          dbName
       );
       
       // Split and execute individual statements using the ROOT jdbcTemplate
