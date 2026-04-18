@@ -1,11 +1,9 @@
 package com.trackify.project.entity;
 
-import com.trackify.project.enums.IssuePriority;
-import com.trackify.project.enums.IssueStatus;
+import com.trackify.project.enums.SprintStatus;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,38 +17,31 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "issues")
-public class Issue {
+@Table(name = "sprints")
+public class Sprint {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String title;
+    private String name;
 
     @Column(columnDefinition = "TEXT")
-    private String description;
+    private String goal;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
-    private IssueStatus status = IssueStatus.TODO;
-
-    @Enumerated(EnumType.STRING)
-    private IssuePriority priority = IssuePriority.MEDIUM;
+    private SprintStatus status = SprintStatus.PLANNED;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
-
-    @Column(name = "reporter_id")
-    private Long reporterId;
-
-    @Column(name = "assignee_id")
-    private Long assigneeId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sprint_id")
-    private Sprint sprint;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -59,8 +50,4 @@ public class Issue {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<IssueAttachment> attachments = new ArrayList<>();
 }

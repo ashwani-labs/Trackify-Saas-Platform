@@ -24,6 +24,7 @@ public class IssueResponse {
     private String projectHeaderName;
     private Long reporterId;
     private Long assigneeId;
+    private Long sprintId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<IssueAttachmentResponse> attachments;

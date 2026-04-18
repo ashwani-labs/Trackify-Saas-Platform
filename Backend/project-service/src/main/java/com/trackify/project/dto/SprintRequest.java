@@ -1,7 +1,5 @@
 package com.trackify.project.dto;
 
-import com.trackify.project.enums.IssuePriority;
-import com.trackify.project.enums.IssueStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -9,22 +7,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class IssueRequest {
-    @NotBlank(message = "Issue title is required")
-    private String title;
-    private String description;
+public class SprintRequest {
+    @NotBlank(message = "Sprint name is required")
+    private String name;
     
-    private IssueStatus status;
-    private IssuePriority priority;
+    private String goal;
+    private LocalDate startDate;
+    private LocalDate endDate;
     
     @NotNull(message = "Project ID is required")
     private Long projectId;
-    
-    private Long assigneeId;
-    
-    private Long sprintId;
 }

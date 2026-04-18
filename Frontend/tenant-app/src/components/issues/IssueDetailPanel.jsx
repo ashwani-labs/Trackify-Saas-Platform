@@ -48,6 +48,7 @@ const IssueDetailPanel = () => {
         description: selectedIssue.description || '',
         status: selectedIssue.status,
         priority: selectedIssue.priority,
+        sprintId: selectedIssue.sprintId || '',
       });
     }
   }, [selectedIssue?.id]);
@@ -70,6 +71,7 @@ const IssueDetailPanel = () => {
       id: selectedIssue.id,
       data: {
         ...editData,
+        sprintId: editData.sprintId ? Number(editData.sprintId) : null,
         projectId: selectedIssue.projectId,
         assigneeId: selectedIssue.assigneeId,
       },
@@ -198,6 +200,26 @@ const IssueDetailPanel = () => {
             <div className={styles.metaItem}>
               <span className={styles.metaLabel}>Reporter</span>
               <span className={styles.metaValue}>#{selectedIssue.reporterId}</span>
+            </div>
+
+            {/* Sprint */}
+            <div className={styles.metaItem}>
+              <span className={styles.metaLabel}>Sprint</span>
+              {isEditing ? (
+                <input
+                  type="number"
+                  name="sprintId"
+                  value={editData.sprintId}
+                  onChange={handleEditChange}
+                  placeholder="ID or empty"
+                  className={styles.metaSelect}
+                  style={{ width: '80px' }}
+                />
+              ) : (
+                <span className={styles.metaValue}>
+                  {selectedIssue.sprintId ? `Sprint ID: ${selectedIssue.sprintId}` : 'Backlog'}
+                </span>
+              )}
             </div>
           </div>
 

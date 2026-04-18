@@ -16,6 +16,8 @@ import com.trackify.project.repository.IssueAttachmentRepository;
 import com.trackify.project.repository.IssueCommentRepository;
 import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
+import com.trackify.project.repository.SprintRepository;
+import com.trackify.project.entity.Sprint;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +43,7 @@ public class IssueService {
     private final IssueAttachmentRepository attachmentRepository;
     private final StorageService storageService;
     private final JdbcTemplate jdbcTemplate;
+    private final SprintRepository sprintRepository;
 
     @Value("${services.notification-url}")
     private String notificationUrl;
@@ -50,19 +53,27 @@ public class IssueService {
                         IssueCommentRepository commentRepository,
                         IssueAttachmentRepository attachmentRepository,
                         StorageService storageService,
-                        DataSource dataSource) {
+                        DataSource dataSource,
+                        SprintRepository sprintRepository) {
         this.issueRepository = issueRepository;
         this.projectRepository = projectRepository;
         this.commentRepository = commentRepository;
         this.attachmentRepository = attachmentRepository;
         this.storageService = storageService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.sprintRepository = sprintRepository;
     }
 
     @Transactional
     public IssueResponse createIssue(IssueRequest request, Long reporterId) {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> AppException.notFound("Project not found"));
+                
+        Sprint sprint = null;
+        if (request.getSprintId() != null) {
+            sprint = sprintRepository.findById(request.getSprintId())
+                    .orElseThrow(() -> AppException.notFound("Sprint not found"));
+        }
 
         Issue issue = Issue.builder()
                 .title(request.getTitle())
@@ -70,6 +81,7 @@ public class IssueService {
                 .status(request.getStatus() != null ? request.getStatus() : IssueStatus.TODO)
                 .priority(request.getPriority() != null ? request.getPriority() : IssuePriority.MEDIUM)
                 .project(project)
+                .sprint(sprint)
                 .reporterId(reporterId)
                 .assigneeId(request.getAssigneeId())
                 .build();
@@ -105,6 +117,14 @@ public class IssueService {
         if (request.getStatus() != null) issue.setStatus(request.getStatus());
         if (request.getPriority() != null) issue.setPriority(request.getPriority());
         issue.setAssigneeId(request.getAssigneeId());
+        
+        if (request.getSprintId() != null) {
+            Sprint sprint = sprintRepository.findById(request.getSprintId())
+                    .orElseThrow(() -> AppException.notFound("Sprint not found"));
+            issue.setSprint(sprint);
+        } else {
+            issue.setSprint(null);
+        }
 
         issue = issueRepository.save(issue);
         
@@ -213,6 +233,7 @@ public class IssueService {
                 .priority(issue.getPriority())
                 .projectId(issue.getProject().getId())
                 .projectHeaderName(issue.getProject().getName())
+                .sprintId(issue.getSprint() != null ? issue.getSprint().getId() : null)
                 .reporterId(issue.getReporterId())
                 .assigneeId(issue.getAssigneeId())
                 .createdAt(issue.getCreatedAt())
