@@ -51,7 +51,11 @@ public class TenantService {
   @Transactional
   public TenantResponse createTenant(CreateTenantRequest request) {
     if (tenantRepository.existsByDomain(request.getCode())) {
-      throw AppException.conflict("Code already exists");
+      throw AppException.conflict("Organization code '" + request.getCode() + "' is already taken");
+    }
+
+    if (userLookupRepository.findByEmail(request.getAdminEmail()).isPresent()) {
+      throw AppException.conflict("Admin email '" + request.getAdminEmail() + "' is already registered with another organization");
     }
 
     String dbName = "trackify_tenant_" + request.getCode();
