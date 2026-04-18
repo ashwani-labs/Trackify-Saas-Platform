@@ -14,17 +14,17 @@ public class CorsConfig {
   public CorsFilter corsFilter() {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowCredentials(true);
     config.setAllowedOriginPatterns(List.of(
         "http://trackify.com",
         "http://*.trackify.com",
-        "http://lvh.me",
-        "http://*.lvh.me",
-        "http://localhost:5173",
-        "http://localhost:5174"
+        "http://lvh.me:*",
+        "http://*.lvh.me:*",
+        "http://localhost:*",
+        "http://127.0.0.1:*"
     ));
-    config.setAllowedHeaders(List.of("*"));
+    config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    config.setMaxAge(3600L);
     source.registerCorsConfiguration("/**", config);
     return new CorsFilter(source);
   }
