@@ -120,11 +120,14 @@ public class TenantService {
 
     log.info("Deleting tenant {} (Domain: {}) permanently", tenant.getName(), tenant.getDomain());
 
-    // 1. Drop the tenant database
+    // 1. Drop the tenant database and user
     try {
       jdbcTemplate.execute("DROP DATABASE IF EXISTS " + tenant.getDbName());
+      jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'%%'", tenant.getDbUsername()));
+      jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'localhost'", tenant.getDbUsername()));
+      jdbcTemplate.execute("FLUSH PRIVILEGES");
     } catch (Exception e) {
-      log.error("Failed to drop database {}: {}", tenant.getDbName(), e.getMessage());
+      log.error("Failed to drop database or user for {}: {}", tenant.getDbName(), e.getMessage());
       // Proceeding with metadata deletion even if DB drop fails (it might not have been created)
     }
 
@@ -346,10 +349,26 @@ public class TenantService {
       
       // 1. Create Database and User with root privileges
       jdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
+      
+      // Drop and Recreate user to ensure fresh credentials and permissions for both % and localhost
+      // This solves the 'stale password' issue when re-provisioning tenants
+      try {
+          jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'%%'", dbUsername));
+          jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'localhost'", dbUsername));
+      } catch (Exception e) {
+          log.warn("Non-critical error dropping user during provisioning: {}", e.getMessage());
+      }
+
       jdbcTemplate.execute(
-          String.format("CREATE USER IF NOT EXISTS '%s'@'%%' IDENTIFIED BY '%s'", dbUsername, dbPassword));
+          String.format("CREATE USER '%s'@'%%' IDENTIFIED BY '%s'", dbUsername, dbPassword));
+      jdbcTemplate.execute(
+          String.format("CREATE USER '%s'@'localhost' IDENTIFIED BY '%s'", dbUsername, dbPassword));
+          
       jdbcTemplate.execute(
           String.format("GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%'", dbName, dbUsername));
+      jdbcTemplate.execute(
+          String.format("GRANT ALL PRIVILEGES ON %s.* TO '%s'@'localhost'", dbName, dbUsername));
+          
       jdbcTemplate.execute("FLUSH PRIVILEGES");
 
       // 2. Create Schema using the same root connection (prefixed with dbName)
