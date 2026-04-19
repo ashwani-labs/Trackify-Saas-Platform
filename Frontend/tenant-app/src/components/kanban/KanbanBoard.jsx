@@ -5,13 +5,12 @@ import {
   optimisticStatusUpdate,
 } from '../../features/issues/issueSlice';
 import IssueCard from './IssueCard';
-import Skeleton from '../common/Skeleton';
-import styles from './KanbanBoard.module.css';
+import { Plus } from 'lucide-react';
 
 const COLUMNS = [
-  { status: 'TODO',        label: 'To Do',      colorClass: 'colTodo' },
-  { status: 'IN_PROGRESS', label: 'In Progress', colorClass: 'colInProgress' },
-  { status: 'DONE',        label: 'Done',        colorClass: 'colDone' },
+  { status: 'TODO',        label: 'To Do' },
+  { status: 'IN_PROGRESS', label: 'In Progress' },
+  { status: 'DONE',        label: 'Done' },
 ];
 
 const KanbanBoard = ({ projectId, filteredIssues, onCreateIssue }) => {
@@ -37,10 +36,8 @@ const KanbanBoard = ({ projectId, filteredIssues, onCreateIssue }) => {
     const issue = issues.find((i) => i.id === issueId);
     if (!issue) return;
 
-    // Optimistic update for instant feel
     dispatch(optimisticStatusUpdate({ id: issueId, status: newStatus }));
 
-    // Persist to backend
     dispatch(updateIssue({
       id: issueId,
       data: {
@@ -56,17 +53,10 @@ const KanbanBoard = ({ projectId, filteredIssues, onCreateIssue }) => {
 
   if (isLoading && issues.length === 0) {
     return (
-      <div className={styles.board}>
-        {COLUMNS.map(({ status, label, colorClass }) => (
-          <div key={status} className={styles.column}>
-            <div className={`${styles.columnHeader} ${styles[colorClass]}`}>
-              <Skeleton type="text" className={styles.columnLabel} />
-            </div>
-            <div className={styles.cardList}>
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} type="card" style={{ marginBottom: '1rem' }} />
-              ))}
-            </div>
+      <div className="kanban-board">
+        {COLUMNS.map(({ status, label }) => (
+          <div key={status} className="kanban-column">
+             <div className="skeleton" style={{ height: '300px', width: '100%' }}></div>
           </div>
         ))}
       </div>
@@ -74,44 +64,43 @@ const KanbanBoard = ({ projectId, filteredIssues, onCreateIssue }) => {
   }
 
   return (
-    <div className={styles.board}>
-      {COLUMNS.map(({ status, label, colorClass }) => {
+    <div className="kanban-board">
+      {COLUMNS.map(({ status, label }) => {
         const columnIssues = issuesByStatus(status);
         return (
           <div
             key={status}
-            className={styles.column}
+            className="kanban-column"
+            data-status={status}
             onDragOver={(e) => handleDragOver(e, status)}
             onDrop={(e) => handleDrop(e, status)}
           >
-            {/* Column Header */}
-            <div className={`${styles.columnHeader} ${styles[colorClass]}`}>
-              <span className={styles.columnLabel}>{label}</span>
-              <span className={styles.columnCount}>{columnIssues.length}</span>
+            <div className="kanban-header">
+              <span className="column-title">{label}</span>
+              <span className="column-count">{columnIssues.length}</span>
             </div>
 
-            {/* Issue Cards */}
-            <div className={styles.cardList}>
+            <div className="kanban-list">
               {columnIssues.length === 0 ? (
-                <div className={styles.emptyColumn}>
-                  <p>Drop issues here</p>
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', fontSize: '0.8rem', border: '1px dashed var(--border-main)', borderRadius: 'var(--radius-md)' }}>
+                  Empty
                 </div>
               ) : (
                 columnIssues.map((issue) => (
                   <IssueCard key={issue.id} issue={issue} />
                 ))
               )}
+              
+              {status === 'TODO' && (
+                <button
+                  className="btn btn-secondary"
+                  style={{ width: '100%', marginTop: 'auto', borderStyle: 'dashed' }}
+                  onClick={() => onCreateIssue()}
+                >
+                  <Plus size={16} /> Add Issue
+                </button>
+              )}
             </div>
-
-            {/* Add Issue Button at bottom of TODO column only */}
-            {status === 'TODO' && (
-              <button
-                className={styles.addIssueBtn}
-                onClick={() => onCreateIssue()}
-              >
-                + Add Issue
-              </button>
-            )}
           </div>
         );
       })}

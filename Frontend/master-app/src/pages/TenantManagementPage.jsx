@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadTenants, toggleTenantStatus, deleteTenantAsync, selectAllTenants, selectTenantLoading, selectTenantCurrentPage, selectTenantTotalPages } from '../features/tenants/tenantSlice';
 import CreateTenantModal from '../components/tenants/CreateTenantModal';
-import styles from './TenantManagementPage.module.css';
 import Pagination from '../components/common/Pagination';
-import { Users, Globe, Activity, ShieldCheck, ShieldAlert, RefreshCw, Plus, Trash2 } from 'lucide-react';
+import { Globe, Activity, RefreshCw, Plus, Trash2, Mail, ShieldCheck, ShieldAlert } from 'lucide-react';
 
 const TenantManagementPage = () => {
   const dispatch = useDispatch();
@@ -36,56 +35,51 @@ const TenantManagementPage = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <header className="hero-section">
         <div>
-          <h1 className={styles.title}>Tenant Management</h1>
-          <p className={styles.subtitle}>View and manage all active organizations on the platform.</p>
+          <h1 className="hero-title">Tenant Management</h1>
+          <p style={{ color: 'var(--text-muted)' }}>View and manage all active organizations on the platform.</p>
         </div>
-        <button className={styles.addBtn} onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} />
-          Create Tenant
+        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+          <Plus size={18} /> Create Tenant
         </button>
       </header>
 
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}>
-            <Globe size={24} />
+      <div className="stats-grid">
+        <div className="stat-card" style={{ borderLeft: '4px solid var(--primary)' }}>
+          <div className="stat-header">
+            <Globe size={20} color="var(--primary)" />
+            <span style={{ fontWeight: '500' }}>Total Tenants</span>
           </div>
-          <div className={styles.statInfo}>
-            <span className={styles.statLabel}>Total Tenants</span>
-            <span className={styles.statValue}>{tenants.length}</span>
-          </div>
+          <div className="stat-value">{tenants.length}</div>
         </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e' }}>
-            <Activity size={24} />
+        <div className="stat-card" style={{ borderLeft: '4px solid var(--success)' }}>
+          <div className="stat-header">
+            <Activity size={20} color="var(--success)" />
+            <span style={{ fontWeight: '500' }}>Active Now</span>
           </div>
-          <div className={styles.statInfo}>
-            <span className={styles.statLabel}>Active Now</span>
-            <span className={styles.statValue}>{tenants.filter(t => t.status === 'ACTIVE').length}</span>
-          </div>
+          <div className="stat-value">{tenants.filter(t => t.status === 'ACTIVE').length}</div>
         </div>
       </div>
 
-      <div className={styles.tableCard}>
-        <div className={styles.tableHeader}>
-          <h2 className={styles.tableTitle}>Organization List</h2>
-          <button className={styles.refreshBtn} onClick={() => dispatch(loadTenants({ page: currentPage, size: 10 }))} disabled={isLoading}>
-            <RefreshCw size={16} className={isLoading ? styles.spinning : ''} />
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-main)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{ fontSize: '1.1rem' }}>Organization List</h2>
+          <button className="theme-toggle" onClick={() => dispatch(loadTenants({ page: currentPage, size: 10 }))} disabled={isLoading}>
+            <RefreshCw size={18} style={{ animation: isLoading ? 'loading 2s linear infinite' : 'none' }} />
           </button>
         </div>
 
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+        <div className="table-wrapper" style={{ border: 'none', marginTop: 0, borderRadius: 0 }}>
+          <table>
             <thead>
               <tr>
                 <th>Organization</th>
                 <th>Domain</th>
                 <th>Plan</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th>Joined</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
@@ -93,41 +87,47 @@ const TenantManagementPage = () => {
               {tenants.map((tenant) => (
                 <tr key={tenant.id}>
                   <td>
-                    <div className={styles.tenantInfo}>
-                      <div className={styles.tenantAvatar}>{tenant.name.charAt(0)}</div>
-                      <span className={styles.tenantName}>{tenant.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ 
+                        width: '36px', height: '36px', borderRadius: '8px', 
+                        background: 'var(--bg-input)', display: 'flex', alignItems: 'center', 
+                        justifyContent: 'center', fontWeight: 'bold', color: 'var(--primary)'
+                      }}>
+                        {tenant.name.charAt(0)}
+                      </div>
+                      <span style={{ fontWeight: '600' }}>{tenant.name}</span>
                     </div>
                   </td>
-                  <td><code className={styles.code}>{tenant.domain}.trackify.io</code></td>
+                  <td><code style={{ fontSize: '0.85rem' }}>{tenant.domain}.trackify.io</code></td>
                   <td>
-                    <span className={`${styles.planBadge} ${styles[`plan-${tenant.plan.toLowerCase()}`]}`}>
+                    <span className="badge badge-primary" style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)' }}>
                       {tenant.plan}
                     </span>
                   </td>
                   <td>
-                    <span className={`${styles.statusBadge} ${tenant.status === 'ACTIVE' ? styles.statusActive : styles.statusInactive}`}>
-                      {tenant.status === 'ACTIVE' ? <ShieldCheck size={14} /> : <ShieldAlert size={14} />}
+                    <span className={`badge badge-${tenant.status === 'ACTIVE' ? 'success' : 'danger'}`}>
+                      {tenant.status === 'ACTIVE' ? <ShieldCheck size={14} style={{ marginRight: '4px' }} /> : <ShieldAlert size={14} style={{ marginRight: '4px' }} />}
                       {tenant.status}
                     </span>
                   </td>
                   <td>{new Date(tenant.createdAt).toLocaleDateString()}</td>
                   <td style={{ textAlign: 'right' }}>
-                    <div className={styles.actions}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                       <button 
                         onClick={() => handleToggleStatus(tenant.id, tenant.status)}
-                        className={`${styles.actionBtn} ${tenant.status === 'ACTIVE' ? styles.deactivateBtn : styles.activateBtn}`}
-                        title={tenant.status === 'ACTIVE' ? 'Mark as Inactive' : 'Mark as Active'}
+                        className="btn btn-secondary"
+                        style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem' }}
                       >
-                        {tenant.status === 'ACTIVE' ? 'Mark Inactive' : 'Mark Active'}
+                        {tenant.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
                       </button>
                       
                       {tenant.status === 'INACTIVE' && (
                         <button 
                           onClick={() => handleDeleteTenant(tenant.id, tenant.name)}
-                          className={`${styles.actionBtn} ${styles.deleteBtn}`}
-                          title="Permanently Delete Organization"
+                          className="theme-toggle"
+                          style={{ color: 'var(--danger)' }}
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={18} />
                         </button>
                       )}
                     </div>
@@ -136,7 +136,7 @@ const TenantManagementPage = () => {
               ))}
               {tenants.length === 0 && !isLoading && (
                 <tr>
-                  <td colSpan="6" className={styles.emptyState}>No tenants found.</td>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>No tenants found.</td>
                 </tr>
               )}
             </tbody>
@@ -144,11 +144,13 @@ const TenantManagementPage = () => {
         </div>
         
         {tenants.length > 0 && totalPages > 1 && (
-          <Pagination 
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => dispatch(loadTenants({ page, size: 10 }))}
-          />
+          <div style={{ padding: '1rem' }}>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => dispatch(loadTenants({ page, size: 10 }))}
+            />
+          </div>
         )}
       </div>
 

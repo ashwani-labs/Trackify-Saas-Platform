@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadTenants, selectAllTenants, selectTenantLoading } from '../features/tenants/tenantSlice';
 import { useAuth } from '../hooks/useAuth';
-import { Users, Globe, Activity, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { Users, Globe, CheckCircle2, ShieldAlert, TrendingUp } from 'lucide-react';
 import {
   PieChart,
   Pie,
@@ -11,11 +11,9 @@ import {
   BarChart,
   Bar,
   XAxis,
-  YAxis,
   Tooltip,
   Legend,
 } from 'recharts';
-import styles from './DashboardPage.module.css';
 
 const DashboardPage = () => {
   const dispatch = useDispatch();
@@ -32,63 +30,52 @@ const DashboardPage = () => {
   const inactiveTenants = tenants.filter(t => t.status === 'INACTIVE').length;
 
   const statusData = [
-    { name: 'Active', value: activeTenants, color: '#34d399' },
-    { name: 'Inactive', value: inactiveTenants, color: '#fb7185' },
+    { name: 'Active', value: activeTenants, color: 'var(--success)' },
+    { name: 'Inactive', value: inactiveTenants, color: 'var(--danger)' },
   ];
 
-  // Mock distribution by month for visualization
   const distributionData = [
     { month: 'Jan', count: Math.max(0, totalTenants - 4) },
     { month: 'Feb', count: Math.max(0, totalTenants - 2) },
     { month: 'Mar', count: totalTenants },
   ];
 
+  const statCards = [
+    { label: 'Total Organizations', value: totalTenants, icon: <Globe size={24} />, color: 'primary' },
+    { label: 'Active Workspaces', value: activeTenants, icon: <CheckCircle2 size={24} />, color: 'success' },
+    { label: 'Inactive / Suspended', value: inactiveTenants, icon: <ShieldAlert size={24} />, color: 'danger' },
+  ];
+
   return (
-    <div className={styles.dashboardWrapper}>
-      <section className={styles.welcomeSection}>
-        <h1 className={styles.title}>Platform Overview</h1>
-        <p className={styles.subtitle}>
-          Welcome back. You are authenticated as {role || 'MASTER'}. Monitor global platform metrics here.
-        </p>
-      </section>
-
-      <section className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: 'rgba(124, 111, 255, 0.1)', color: '#a78bfa' }}>
-            <Globe size={26} />
-          </div>
-          <div className={styles.statInfo}>
-            <span className={styles.statValue}>{isLoading ? '-' : totalTenants}</span>
-            <span className={styles.statLabel}>Total Organizations</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#34d399' }}>
-            <CheckCircle2 size={26} />
-          </div>
-          <div className={styles.statInfo}>
-            <span className={styles.statValue}>{isLoading ? '-' : activeTenants}</span>
-            <span className={styles.statLabel}>Active Workspaces</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#fb7185' }}>
-            <ShieldAlert size={26} />
-          </div>
-          <div className={styles.statInfo}>
-            <span className={styles.statValue}>{isLoading ? '-' : inactiveTenants}</span>
-            <span className={styles.statLabel}>Inactive / Suspended</span>
-          </div>
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <section className="hero-section">
+        <div>
+          <h1 className="hero-title">Platform Overview</h1>
+          <p style={{ color: 'var(--text-muted)' }}>
+            Monitor global platform metrics and organizational health. Authenticated as <strong>{role || 'MASTER'}</strong>.
+          </p>
         </div>
       </section>
 
-      <section className={styles.chartsGrid}>
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Workspace Status Distribution</h3>
-          <div className={styles.chartContainer}>
-            <ResponsiveContainer width="100%" height={240}>
+      <section className="stats-grid">
+        {statCards.map((card) => (
+          <div key={card.label} className="stat-card" style={{ borderLeft: `4px solid var(--${card.color})` }}>
+            <div className="stat-header">
+              <span style={{ color: `var(--${card.color})` }}>{card.icon}</span>
+              <span style={{ fontWeight: '500' }}>{card.label}</span>
+            </div>
+            <div className="stat-value">
+              {isLoading ? <div className="skeleton" style={{ height: '2.5rem', width: '50%' }} /> : card.value}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+        <div className="card">
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Workspace Status Distribution</h3>
+          <div style={{ height: '240px' }}>
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={statusData}
@@ -102,67 +89,79 @@ const DashboardPage = () => {
                   ))}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{ background: '#1e293b', border: 'none', borderRadius: '8px' }}
-                  itemStyle={{ color: '#f8fafc' }}
+                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-main)', borderRadius: '8px' }}
+                  itemStyle={{ color: 'var(--text-main)' }}
                 />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '10px' }} />
+                <Legend iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Provisioning Trend</h3>
-          <div className={styles.chartContainer}>
-            <ResponsiveContainer width="100%" height={240}>
+        <div className="card">
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Provisioning Trend</h3>
+          <div style={{ height: '240px' }}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={distributionData}>
-                <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip 
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                  contentStyle={{ background: '#1e293b', border: 'none', borderRadius: '8px' }}
+                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-main)', borderRadius: '8px' }}
                 />
-                <Bar dataKey="count" fill="#7c3aed" radius={[4, 4, 0, 0]} barSize={40} />
+                <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       </section>
 
-      <section className={styles.recentSection}>
-        <h2 className={styles.sectionTitle}>Recent Organizations</h2>
+      <section>
+        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <TrendingUp size={24} color="var(--primary)" /> Recent Organizations
+        </h2>
         {tenants.length === 0 ? (
-          <div className={styles.emptyState}>
-            No tenants provisioned yet. Switch to the Tenants tab to create one.
+          <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+            No tenants provisioned yet.
           </div>
         ) : (
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            {tenants.slice(0, 3).map(tenant => (
-              <div key={tenant.id} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-                padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ 
-                    width: '40px', height: '40px', borderRadius: '8px', 
-                    background: '#1e293b', display: 'flex', alignItems: 'center', 
-                    justifyContent: 'center', fontWeight: 'bold' 
-                  }}>
-                    {tenant.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h4 style={{ margin: 0, color: '#f8fafc' }}>{tenant.name}</h4>
-                    <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{tenant.domain}.trackify.io</span>
-                  </div>
-                </div>
-                <span style={{
-                  padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '600',
-                  background: tenant.status === 'ACTIVE' ? 'rgba(52, 211, 153, 0.1)' : 'rgba(244, 63, 94, 0.1)',
-                  color: tenant.status === 'ACTIVE' ? '#34d399' : '#fb7185'
-                }}>
-                  {tenant.status}
-                </span>
-              </div>
-            ))}
+          <div className="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Organization</th>
+                  <th>Domain</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tenants.slice(0, 5).map(tenant => (
+                  <tr key={tenant.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ 
+                          width: '32px', height: '32px', borderRadius: '6px', 
+                          background: 'var(--bg-input)', display: 'flex', alignItems: 'center', 
+                          justifyContent: 'center', fontWeight: 'bold', color: 'var(--primary)'
+                        }}>
+                          {tenant.name.charAt(0)}
+                        </div>
+                        <span style={{ fontWeight: '600' }}>{tenant.name}</span>
+                      </div>
+                    </td>
+                    <td><code style={{ fontSize: '0.85rem' }}>{tenant.domain}.trackify.io</code></td>
+                    <td>
+                      <span className={`badge badge-${tenant.status === 'ACTIVE' ? 'success' : 'danger'}`}>
+                        {tenant.status}
+                      </span>
+                    </td>
+                    <td>
+                        <button className="theme-toggle" style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>Manage</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { X, UserPlus, UserMinus } from 'lucide-react';
+import { X, UserPlus, UserMinus, User, Mail, Shield, Loader2 } from 'lucide-react';
 import { fetchProjectMembers, addProjectMember, removeProjectMember } from '../../features/projects/projectSlice';
 import { fetchAllUsers } from '../../features/users/userSlice';
-import styles from './ProjectMembersModal.module.css';
 
 const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
   const dispatch = useDispatch();
@@ -24,7 +23,6 @@ const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
 
   if (!isOpen) return null;
 
-  // Filter out users who are already members
   const availableUsers = allUsers.filter(
     (u) => !members.some((m) => m.userId === u.id)
   );
@@ -43,7 +41,7 @@ const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
     };
 
     await dispatch(addProjectMember({ projectId, memberData: requestData }));
-    setSelectedUserId(''); // reset
+    setSelectedUserId('');
   };
 
   const handleRemoveMember = async (userId) => {
@@ -53,65 +51,93 @@ const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Manage Project Members</h2>
-          <button className={styles.closeBtn} onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 style={{ fontSize: '1.25rem' }}>Project Access</h2>
+          <button className="theme-toggle" onClick={onClose} style={{ width: '32px', height: '32px' }}>
             <X size={20} />
           </button>
         </div>
 
-        <div className={styles.content}>
-          <div className={styles.addSection}>
-            <select
-              className={styles.select}
-              value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
-              disabled={usersLoading}
-            >
-              <option value="">Select a user...</option>
-              {availableUsers.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.fullName || user.email} ({user.email})
-                </option>
-              ))}
-            </select>
-            <button
-              className={styles.addBtn}
-              onClick={handleAddMember}
-              disabled={!selectedUserId || memberLoading}
-            >
-              <UserPlus size={18} />
-              Add
-            </button>
+        <div className="modal-body">
+          <div style={{ marginBottom: '2rem' }}>
+            <label className="form-label">Add Member</label>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <User style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                <select
+                  className="input-field"
+                  style={{ paddingLeft: '2.5rem', appearance: 'none' }}
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  disabled={usersLoading}
+                >
+                  <option value="">Select a user...</option>
+                  {availableUsers.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.fullName || user.email} ({user.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                className="btn btn-primary"
+                onClick={handleAddMember}
+                disabled={!selectedUserId || memberLoading}
+                style={{ width: '100px' }}
+              >
+                {memberLoading ? <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} /> : <><UserPlus size={18} /> Add</>}
+              </button>
+            </div>
           </div>
 
-          <div className={styles.memberList}>
-            {memberLoading ? (
-              <div className={styles.loading}>Loading members...</div>
+          <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'grid', gap: '0.75rem' }}>
+            <h4 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Current Members</h4>
+            
+            {memberLoading && members.length === 0 ? (
+              <div className="skeleton" style={{ height: '60px', width: '100%' }}></div>
             ) : members.length === 0 ? (
-              <div className={styles.empty}>No members in this project yet.</div>
+              <div style={{ textAlign: 'center', padding: '2rem', border: '1px dashed var(--border-main)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)' }}>
+                No members found.
+              </div>
             ) : (
               members.map((member) => (
-                <div key={member.id} className={styles.memberItem}>
-                  <div className={styles.memberInfo}>
-                    <div className={styles.avatar}>
+                <div key={member.id} className="card" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '50%', 
+                      backgroundColor: 'var(--primary)', 
+                      color: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: '700',
+                      fontSize: '1rem'
+                    }}>
                       {(member.userName || member.userEmail || '?').charAt(0).toUpperCase()}
                     </div>
-                    <div className={styles.details}>
-                      <span className={styles.name}>{member.userName || 'Unknown'}</span>
-                      <span className={styles.email}>{member.userEmail}</span>
-                      <span className={styles.roleBadge}>{member.userRole || 'USER'}</span>
+                    <div>
+                      <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{member.userName || 'Unknown'}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Mail size={12} /> {member.userEmail}
+                      </div>
                     </div>
                   </div>
-                  <button
-                    className={styles.removeBtn}
-                    onClick={() => handleRemoveMember(member.userId)}
-                    title="Remove Member"
-                  >
-                    <UserMinus size={18} />
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <span className="badge" style={{ backgroundColor: 'var(--bg-input)', fontSize: '0.7rem' }}>
+                      <Shield size={10} style={{ marginRight: '0.25rem' }} /> {member.userRole || 'USER'}
+                    </span>
+                    <button
+                      className="theme-toggle"
+                      style={{ color: 'var(--danger)', width: '32px', height: '32px' }}
+                      onClick={() => handleRemoveMember(member.userId)}
+                    >
+                      <UserMinus size={18} />
+                    </button>
+                  </div>
                 </div>
               ))
             )}

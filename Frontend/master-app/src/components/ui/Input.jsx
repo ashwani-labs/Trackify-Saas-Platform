@@ -1,10 +1,5 @@
 import { forwardRef, useState, useId } from 'react';
-import styles from './Input.module.css';
 
-/**
- * Input — controlled input field with label, icon, and error support.
- * Props: label, error, hint, leftIcon, rightIcon, type, ...native input props
- */
 const Input = forwardRef(({
   label,
   error,
@@ -23,24 +18,28 @@ const Input = forwardRef(({
   const inputId = externalId || generatedId;
 
   return (
-    <div className={[styles.field, className].filter(Boolean).join(' ')}>
+    <div className={`form-group ${className}`}>
       {label && (
-        <label htmlFor={inputId} className={styles.label}>
+        <label htmlFor={inputId} className="form-label">
           {label}
-          {required && <span className={styles.required} aria-hidden="true"> *</span>}
+          {required && <span style={{ color: 'var(--danger)' }} aria-hidden="true"> *</span>}
         </label>
       )}
 
-      <div
-        className={[
-          styles.wrapper,
-          focused    ? styles['wrapper--focused']  : '',
-          error      ? styles['wrapper--error']    : '',
-          disabled   ? styles['wrapper--disabled'] : '',
-        ].filter(Boolean).join(' ')}
-      >
+      <div style={{ position: 'relative' }}>
         {leftIcon && (
-          <span className={styles.icon} aria-hidden="true">{leftIcon}</span>
+          <span style={{ 
+            position: 'absolute', 
+            left: '1rem', 
+            top: '50%', 
+            transform: 'translateY(-50%)', 
+            color: focused ? 'var(--primary)' : 'var(--text-muted)',
+            display: 'flex',
+            alignItems: 'center',
+            transition: 'var(--transition)'
+          }}>
+            {leftIcon}
+          </span>
         )}
 
         <input
@@ -49,29 +48,40 @@ const Input = forwardRef(({
           type={type}
           disabled={disabled}
           required={required}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
-          className={styles.input}
+          className="input-field"
+          style={{ 
+            paddingLeft: leftIcon ? '2.75rem' : '1rem',
+            paddingRight: rightIcon ? '2.75rem' : '1rem',
+            borderColor: error ? 'var(--danger)' : focused ? 'var(--primary)' : 'var(--border-main)'
+          }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           {...rest}
         />
 
         {rightIcon && (
-          <span className={styles.iconRight} aria-hidden="true">{rightIcon}</span>
+          <span style={{ 
+            position: 'absolute', 
+            right: '1rem', 
+            top: '50%', 
+            transform: 'translateY(-50%)', 
+            color: 'var(--text-muted)',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            {rightIcon}
+          </span>
         )}
       </div>
 
       {error && (
-        <p id={`${inputId}-error`} className={styles.error} role="alert">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-            <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 3.5a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4.5Zm0 6.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
-          </svg>
+        <p style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <span aria-hidden="true">⚠️</span>
           {error}
         </p>
       )}
       {!error && hint && (
-        <p id={`${inputId}-hint`} className={styles.hint}>{hint}</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.4rem' }}>{hint}</p>
       )}
     </div>
   );

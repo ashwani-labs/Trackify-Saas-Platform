@@ -2,14 +2,11 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchProjectStats } from '../features/projects/projectSlice';
-import { fetchIssuesByProject } from '../features/issues/issueSlice';
-import styles from './DashboardPage.module.css';
 import {
   FolderKanban,
   CheckCircle2,
   Clock,
   CircleDot,
-  TrendingUp,
   AlertCircle,
   ArrowRight,
   Users,
@@ -23,7 +20,7 @@ const DashboardPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, tenantId, tenantDomain } = useSelector((s) => s.auth);
-  const { projects, stats, statsLoading } = useSelector((s) => s.projects);
+  const { stats, statsLoading } = useSelector((s) => s.projects);
   
   const tenantUrl = `http://${tenantDomain}.trackify.com:5174`;
 
@@ -45,133 +42,139 @@ const DashboardPage = () => {
 
   const statCards = [
     {
-      label: 'Total Projects',
-      value: stats?.totalProjects ?? '—',
-      icon: <FolderKanban size={22} />,
-      color: 'blue',
+      label: 'Projects',
+      value: stats?.totalProjects ?? '0',
+      icon: <FolderKanban size={24} />,
       sub: 'Active workspaces',
     },
     {
       label: 'Total Issues',
-      value: stats?.totalIssues ?? '—',
-      icon: <CircleDot size={22} />,
-      color: 'purple',
+      value: stats?.totalIssues ?? '0',
+      icon: <CircleDot size={24} />,
       sub: 'Across all projects',
     },
     {
       label: 'To Do',
-      value: stats?.todoCount ?? '—',
-      icon: <AlertCircle size={22} />,
-      color: 'orange',
+      value: stats?.todoCount ?? '0',
+      icon: <AlertCircle size={24} />,
       sub: 'Awaiting start',
     },
     {
       label: 'In Progress',
-      value: stats?.inProgressCount ?? '—',
-      icon: <Clock size={22} />,
-      color: 'yellow',
-      sub: 'Being worked on',
+      value: stats?.inProgressCount ?? '0',
+      icon: <Clock size={24} />,
+      sub: 'Active tasks',
     },
     {
       label: 'Done',
-      value: stats?.doneCount ?? '—',
-      icon: <CheckCircle2 size={22} />,
-      color: 'green',
-      sub: 'Completed issues',
+      value: stats?.doneCount ?? '0',
+      icon: <CheckCircle2 size={24} />,
+      sub: 'Completed',
     },
   ];
 
   return (
-    <div className={styles.page}>
-      {/* ── Hero greeting ── */}
-      <div className={styles.hero}>
-        <div className={styles.heroLeft}>
-          <p className={styles.greeting}>{greeting()},</p>
-          <h1 className={styles.userName}>{user?.email?.split('@')[0]} 👋</h1>
-          <p className={styles.subtitle}>Here's what's happening in your workspace today.</p>
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      {/* Hero Header */}
+      <div className="hero-section">
+        <div>
+          <p style={{ color: 'var(--text-muted)', fontWeight: '500' }}>{greeting()},</p>
+          <h1 className="hero-title">{user?.email?.split('@')[0]} 👋</h1>
+          <p style={{ color: 'var(--text-muted)' }}>Here's what's happening in your workspace today.</p>
         </div>
-        <div className={styles.heroRight}>
-          <button className={styles.ctaBtn} onClick={() => navigate('/projects')}>
-            View Projects <ArrowRight size={16} />
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button className="btn btn-primary" onClick={() => navigate('/projects')}>
+            View Projects <ArrowRight size={18} />
           </button>
           {user?.role === 'ADMIN' && (
-            <button className={styles.secondaryBtn} onClick={() => navigate('/team')}>
-              <Users size={16} /> Manage Team
+            <button className="btn btn-secondary" onClick={() => navigate('/team')}>
+              <Users size={18} /> Manage Team
             </button>
           )}
         </div>
       </div>
       
-      {/* ── Workspace Info (Admin Only) ── */}
+      {/* Workspace Info Banner (Admin Only) */}
       {user?.role === 'ADMIN' && (
-        <div className={styles.workspaceInfo}>
-          <div className={styles.infoContent}>
-            <div className={styles.infoTitleBox}>
-              <Globe className={styles.infoIcon} size={20} />
-              <h3>Your Workspace</h3>
+        <div className="info-banner">
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+              <Globe style={{ color: 'var(--primary)' }} size={24} />
+              <h3 style={{ fontSize: '1.25rem' }}>Your Workspace</h3>
             </div>
-            <div className={styles.idGrid}>
-              <div className={styles.idBox}>
-                <span className={styles.idLabel}>Workspace ID</span>
-                <div className={styles.idValueWrapper}>
-                  <code>{tenantId}</code>
-                  <button onClick={() => copyToClipboard(tenantId, 'ID')} className={styles.copyTiny}>
-                    <Copy size={12} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Workspace ID</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                  <code style={{ background: 'var(--bg-input)', padding: '0.25rem 0.5rem', borderRadius: '4px' }}>{tenantId}</code>
+                  <button onClick={() => copyToClipboard(tenantId, 'ID')} className="theme-toggle" style={{ width: '28px', height: '28px' }}>
+                    <Copy size={14} />
                   </button>
                 </div>
               </div>
-              <div className={styles.idBox}>
-                <span className={styles.idLabel}>Login URL for Employees</span>
-                <div className={styles.idValueWrapper}>
-                  <code>{tenantUrl}</code>
-                  <button onClick={() => copyToClipboard(tenantUrl, 'URL')} className={styles.copyTiny}>
-                    <Copy size={12} />
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Login URL for Employees</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                  <code style={{ background: 'var(--bg-input)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>{tenantUrl}</code>
+                  <button onClick={() => copyToClipboard(tenantUrl, 'URL')} className="theme-toggle" style={{ width: '28px', height: '28px' }}>
+                    <Copy size={14} />
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <a href={tenantUrl} target="_blank" rel="noopener noreferrer" className={styles.visitBtn}>
-            Visit App <ExternalLink size={14} />
+          <a href={tenantUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ height: 'fit-content' }}>
+            Visit App <ExternalLink size={16} />
           </a>
         </div>
       )}
 
-      {/* ── Stat Cards ── */}
-      <div className={styles.statsGrid}>
+      {/* Stats Grid */}
+      <div className="stats-grid">
         {statCards.map((card) => (
-          <div key={card.label} className={`${styles.statCard} ${styles[card.color]}`}>
-            <div className={styles.cardTop}>
-              <div className={styles.cardIcon}>{card.icon}</div>
-              <span className={styles.cardLabel}>{card.label}</span>
+          <div key={card.label} className="stat-card">
+            <div className="stat-header">
+              {card.icon}
+              <span style={{ fontWeight: '500' }}>{card.label}</span>
             </div>
-            <div className={styles.cardValue}>
-              {statsLoading ? <div className={styles.skeleton} /> : card.value}
+            <div className="stat-value">
+              {statsLoading ? <div className="skeleton" style={{ height: '2.5rem', width: '50%' }} /> : card.value}
             </div>
-            <p className={styles.cardSub}>{card.sub}</p>
+            <div className="stat-footer">{card.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* ── Quick Actions ── */}
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Quick Actions</h2>
-        <div className={styles.quickActions}>
-          <button className={styles.actionCard} onClick={() => navigate('/projects')}>
-            <FolderKanban size={28} />
-            <span>Browse Projects</span>
-          </button>
+      {/* Quick Actions */}
+      <div style={{ marginTop: '4rem' }}>
+        <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Quick Actions</h2>
+        <div className="quick-actions-grid">
+          <div className="action-card" onClick={() => navigate('/projects')}>
+            <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '1rem', borderRadius: 'var(--radius-lg)' }}>
+              <FolderKanban size={32} />
+            </div>
+            <span style={{ fontWeight: '600' }}>Browse Projects</span>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Manage and track project progress</p>
+          </div>
+          
           {user?.role === 'ADMIN' && (
-            <button className={styles.actionCard} onClick={() => navigate('/pending-users')}>
-              <Users size={28} />
-              <span>User Approvals</span>
-            </button>
+            <div className="action-card" onClick={() => navigate('/pending-users')}>
+              <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: '1rem', borderRadius: 'var(--radius-lg)' }}>
+                <Users size={32} />
+              </div>
+              <span style={{ fontWeight: '600' }}>User Approvals</span>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Approve new employee requests</p>
+            </div>
           )}
+          
           {user?.role === 'ADMIN' && (
-            <button className={styles.actionCard} onClick={() => navigate('/team')}>
-              <Users size={28} />
-              <span>Team Members</span>
-            </button>
+            <div className="action-card" onClick={() => navigate('/team')}>
+              <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '1rem', borderRadius: 'var(--radius-lg)' }}>
+                <Users size={32} />
+              </div>
+              <span style={{ fontWeight: '600' }}>Team Members</span>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Manage existing team members</p>
+            </div>
           )}
         </div>
       </div>

@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPendingUsers, updateUserStatus } from '../features/users/userSlice';
-import styles from './UserApprovalPage.module.css';
 import Pagination from '../components/common/Pagination';
-import { UserCheck, UserX, Clock, User, Mail, RefreshCw } from 'lucide-react';
+import { UserCheck, UserX, Clock, User, Mail, RefreshCw, ShieldAlert } from 'lucide-react';
 
 const UserApprovalPage = () => {
   const dispatch = useDispatch();
@@ -24,43 +23,57 @@ const UserApprovalPage = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <header className="hero-section">
         <div>
-          <h1 className={styles.title}>User Approvals</h1>
-          <p className={styles.subtitle}>Manage pending access requests for your workspace.</p>
+          <h1 className="hero-title">User Approvals</h1>
+          <p style={{ color: 'var(--text-muted)' }}>Manage pending access requests for your workspace.</p>
         </div>
         <button
-          className={styles.refreshBtn}
+          className="theme-toggle"
           onClick={() => dispatch(fetchPendingUsers({ tenantId, page: currentPage, size: 10 }))}
           disabled={isLoading}
         >
-          <RefreshCw size={18} className={isLoading ? styles.spinning : ''} />
+          <RefreshCw size={20} style={{ animation: isLoading ? 'loading 2s linear infinite' : 'none' }} />
         </button>
       </header>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && <div className="badge badge-danger" style={{ width: '100%', padding: '1rem', marginBottom: '2rem' }}>{error}</div>}
 
-      <div className={styles.list}>
+      <div style={{ display: 'grid', gap: '1.5rem' }}>
         {pendingUsers.map((user) => (
-          <div key={user.id} className={styles.userCard}>
-            <div className={styles.userMain}>
-              <div className={styles.avatar}>
-                <User size={24} />
+          <div key={user.id} className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <div style={{ 
+                width: '56px', 
+                height: '56px', 
+                borderRadius: '50%', 
+                background: 'var(--bg-input)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                color: 'var(--primary)'
+              }}>
+                <User size={28} />
               </div>
-              <div className={styles.info}>
-                <h3 className={styles.userName}>{user.fullName}</h3>
-                <div className={styles.userMeta}>
-                  <span className={styles.metaItem}><Mail size={14} />{user.email}</span>
-                  <span className={styles.metaItem}><Clock size={14} />{new Date(user.createdAt).toLocaleDateString()}</span>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{user.fullName}</h3>
+                <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Mail size={14} /> {user.email}
+                  </span>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Clock size={14} /> Requested {new Date(user.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className={styles.actions}>
-              <button className={styles.rejectBtn} onClick={() => handleAction(user.id, 'INACTIVE')} title="Reject">
+            
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button className="btn btn-secondary" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleAction(user.id, 'INACTIVE')}>
                 <UserX size={18} /> Reject
               </button>
-              <button className={styles.approveBtn} onClick={() => handleAction(user.id, 'ACTIVE')} title="Approve">
+              <button className="btn btn-primary" onClick={() => handleAction(user.id, 'ACTIVE')}>
                 <UserCheck size={18} /> Approve
               </button>
             </div>
@@ -68,19 +81,25 @@ const UserApprovalPage = () => {
         ))}
 
         {pendingUsers.length === 0 && !isLoading && (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}><UserCheck size={48} /></div>
-            <h3 className={styles.emptyTitle}>All caught up!</h3>
-            <p className={styles.emptySubtitle}>There are no pending user requests at the moment.</p>
+          <div className="card" style={{ textAlign: 'center', padding: '5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ background: 'var(--bg-input)', padding: '2rem', borderRadius: '50%', color: 'var(--success)' }}>
+              <ShieldCheck size={48} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>All caught up!</h2>
+              <p style={{ color: 'var(--text-muted)' }}>There are no pending user requests at the moment.</p>
+            </div>
           </div>
         )}
 
         {pendingUsers.length > 0 && totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => dispatch(fetchPendingUsers({ tenantId, page, size: 10 }))}
-          />
+          <div style={{ marginTop: '2rem' }}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => dispatch(fetchPendingUsers({ tenantId, page, size: 10 }))}
+            />
+          </div>
         )}
       </div>
     </div>

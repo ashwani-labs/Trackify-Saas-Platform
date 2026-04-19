@@ -14,11 +14,12 @@ import ProjectDetailPage from './pages/ProjectDetailPage';
 import TeamPage from './pages/TeamPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-import './styles/variables.css';
+import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
     <Provider store={store}>
+      <ThemeProvider>
       <Toaster position="top-right" toastOptions={{ style: { background: '#161b22', color: '#f0f6fc', border: '1px solid #30363d' } }} />
       <Router>
         <Routes>
@@ -67,6 +68,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+      </ThemeProvider>
     </Provider>
   );
 }

@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjects, clearProjectError } from '../features/projects/projectSlice';
 import CreateProjectModal from '../components/projects/CreateProjectModal';
-import styles from './ProjectsPage.module.css';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../components/common/Pagination';
-import Skeleton from '../components/common/Skeleton';
+import { Plus, FolderKanban, ArrowRight, Layers, Clock } from 'lucide-react';
 
 const ProjectsPage = () => {
   const dispatch = useDispatch();
@@ -21,79 +20,80 @@ const ProjectsPage = () => {
     return () => dispatch(clearProjectError());
   }, [dispatch]);
 
-  const handleProjectClick = (projectId) => {
-    navigate(`/projects/${projectId}`);
-  };
-
-  if (isLoading && projects.length === 0) {
-    return (
-      <div className={styles.container}>
-        <header className={styles.header}>
-          <Skeleton type="title" />
-        </header>
-        <div className={styles.grid}>
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} type="card" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <header className="hero-section">
         <div>
-          <h1>Projects</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Manage and track your organization's work</p>
+          <h1 className="hero-title">Projects</h1>
+          <p style={{ color: 'var(--text-muted)' }}>Manage and track your organization's work and development cycles.</p>
         </div>
         {isAdmin && (
-          <button 
-            className={styles.createButton}
-            onClick={() => setIsModalOpen(true)}
-          >
-            <span>+</span> Create Project
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} /> Create Project
           </button>
         )}
       </header>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && <div className="badge badge-danger" style={{ width: '100%', padding: '1rem', marginBottom: '2rem' }}>{error}</div>}
 
-      {projects.length === 0 ? (
-        <div className={styles.empty}>
-          <h2>No projects found</h2>
-          <p>Get started by creating your first project.</p>
+      {isLoading && projects.length === 0 ? (
+        <div className="stats-grid">
+          {[...Array(6)].map((_, i) => (
+             <div key={i} className="card skeleton" style={{ height: '200px' }}></div>
+          ))}
+        </div>
+      ) : projects.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: '5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ background: 'var(--bg-input)', padding: '2rem', borderRadius: '50%' }}>
+            <FolderKanban size={48} color="var(--text-muted)" />
+          </div>
+          <div>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>No projects found</h2>
+            <p style={{ color: 'var(--text-muted)' }}>Get started by creating your first project workspace.</p>
+          </div>
           {isAdmin && (
-            <button 
-              className={styles.createButton} 
-              style={{ marginTop: '1.5rem', alignSelf: 'center' }}
-              onClick={() => setIsModalOpen(true)}
-            >
+            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
               Create Your First Project
             </button>
           )}
         </div>
       ) : (
-        <div className={styles.grid}>
+        <div className="stats-grid">
           {projects.map((project) => (
             <div 
               key={project.id} 
-              className={styles.card}
-              onClick={() => handleProjectClick(project.id)}
+              className="card"
+              onClick={() => navigate(`/projects/${project.id}`)}
+              style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '1rem' }}
             >
-              <div className={styles.cardHeader}>
-                <span className={styles.projectKey}>{project.key}</span>
-                <span className={styles.category}>{project.category || 'Software'}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <span className="badge badge-primary">{project.key}</span>
+                <div style={{ color: 'var(--text-muted)' }}>
+                  <Layers size={18} />
+                </div>
               </div>
-              <h3 className={styles.projectName}>{project.name}</h3>
-              <p className={styles.projectDescription}>
-                {project.description || 'No description provided.'}
-              </p>
-              <div className={styles.cardFooter}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                  Created: {new Date(project.createdAt).toLocaleDateString()}
-                </span>
-                <span style={{ color: 'var(--primary-color)', fontWeight: '600' }}>→</span>
+              
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{project.name}</h3>
+                <p style={{ 
+                  color: 'var(--text-muted)', 
+                  fontSize: '0.9rem', 
+                  display: '-webkit-box', 
+                  WebkitLineClamp: '2', 
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  lineHeight: '1.5'
+                }}>
+                  {project.description || 'No description provided.'}
+                </p>
+              </div>
+
+              <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  <Clock size={14} />
+                  {new Date(project.createdAt).toLocaleDateString()}
+                </div>
+                <ArrowRight size={18} color="var(--primary)" />
               </div>
             </div>
           ))}
@@ -101,19 +101,19 @@ const ProjectsPage = () => {
       )}
 
       {projects.length > 0 && totalPages > 1 && (
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={totalPages} 
-          onPageChange={(page) => dispatch(fetchProjects({ page, size: 10 }))} 
-        />
+        <div style={{ marginTop: '2rem' }}>
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={(page) => dispatch(fetchProjects({ page, size: 10 }))} 
+          />
+        </div>
       )}
 
-      {isModalOpen && (
-        <CreateProjectModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
-        />
-      )}
+      <CreateProjectModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 };

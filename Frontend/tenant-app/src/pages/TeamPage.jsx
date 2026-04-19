@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllUsers, updateUserStatus } from '../features/users/userSlice';
 import Pagination from '../components/common/Pagination';
-import styles from './TeamPage.module.css';
 import {
   Users,
   UserCheck,
@@ -18,28 +17,22 @@ import {
   Lock,
   Globe,
   Copy,
-  ExternalLink,
+  Loader2
 } from 'lucide-react';
 import { registerUser } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
 
-const STATUS_COLORS = {
-  ACTIVE: { label: 'Active', cls: 'active' },
-  PENDING: { label: 'Pending', cls: 'pending' },
-  INACTIVE: { label: 'Inactive', cls: 'inactive' },
-};
-
-const ROLE_COLORS = {
-  ADMIN: { label: 'Admin', cls: 'roleAdmin' },
-  USER: { label: 'User', cls: 'roleUser' },
+const STATUS_VARIANTS = {
+  ACTIVE: 'success',
+  PENDING: 'warning',
+  INACTIVE: 'danger',
 };
 
 const TeamPage = () => {
   const dispatch = useDispatch();
-  const { tenantId } = useSelector((s) => s.auth);
+  const { tenantId, tenantDomain } = useSelector((s) => s.auth);
   const { allUsers, allUsersPage, allUsersTotalPages, allUsersTotalElements, isLoading, error } =
     useSelector((s) => s.users);
-  const { tenantDomain } = useSelector((s) => s.auth);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ fullName: '', email: '', password: '' });
@@ -92,131 +85,115 @@ const TeamPage = () => {
     : allUsers;
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <header className={styles.header}>
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <header className="hero-section">
         <div>
-          <h1 className={styles.title}>Team Members</h1>
-          <p className={styles.subtitle}>
-            {allUsersTotalElements ?? 0} member{allUsersTotalElements !== 1 ? 's' : ''} in your workspace
+          <h1 className="hero-title">Team Members</h1>
+          <p style={{ color: 'var(--text-muted)' }}>
+            {allUsersTotalElements ?? 0} members active in this workspace
           </p>
         </div>
-        <div className={styles.headerActions}>
-          <button
-            className={styles.addBtn}
-            onClick={() => setIsModalOpen(true)}
-          >
-            <UserPlus size={18} /> Add Member
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button className="btn btn-secondary" onClick={() => dispatch(fetchAllUsers({ tenantId, page: allUsersPage, size: 10 }))} disabled={isLoading}>
+            {isLoading ? <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} /> : <RefreshCw size={18} />}
           </button>
-          <button
-            className={styles.refreshBtn}
-            onClick={() => dispatch(fetchAllUsers({ tenantId, page: allUsersPage, size: 10 }))}
-            disabled={isLoading}
-          >
-            <RefreshCw size={18} className={isLoading ? styles.spinning : ''} />
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            <UserPlus size={18} /> Add Member
           </button>
         </div>
       </header>
 
-      {/* Workspace Link Banner */}
-      <div className={styles.workspaceBanner}>
-        <div className={styles.bannerInfo}>
-          <Globe size={16} />
-          <span>Employees can also register themselves at: <code>{tenantUrl}/register</code></span>
-          <span className={styles.bannerId}>Workspace ID: <strong>{tenantId}</strong></span>
+      <div className="card" style={{ padding: '1rem 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', borderStyle: 'dashed' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className="avatar-circle" style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)' }}>
+            <Globe size={18} />
+          </div>
+          <div style={{ fontSize: '0.9rem' }}>
+            <span style={{ color: 'var(--text-muted)' }}>Employee Join Link:</span>
+            <code style={{ marginLeft: '0.5rem', color: 'var(--primary)', fontWeight: '600' }}>{tenantUrl}/register</code>
+          </div>
         </div>
-        <button className={styles.copyBtn} onClick={() => copyToClipboard(`${tenantUrl}/register`, 'Link')}>
-          <Copy size={14} /> Copy Link
+        <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => copyToClipboard(`${tenantUrl}/register`, 'Link')}>
+          <Copy size={14} /> Copy
         </button>
       </div>
 
-      {/* Search bar */}
-      <div className={styles.searchBar}>
-        <Search size={18} className={styles.searchIcon} />
+      <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+        <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
         <input
-          className={styles.searchInput}
-          placeholder="Search by name or email…"
+          className="input-field"
+          style={{ paddingLeft: '3rem' }}
+          placeholder="Search by name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && <div className="badge badge-danger" style={{ width: '100%', padding: '1rem', marginBottom: '1rem' }}>{error}</div>}
 
-      {/* Table */}
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
+      <div className="table-wrapper">
+        <table>
           <thead>
             <tr>
               <th>Member</th>
               <th>Role</th>
               <th>Status</th>
               <th>Joined</th>
-              <th>Actions</th>
+              <th style={{ textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((user) => {
-              const statusMeta = STATUS_COLORS[user.status] || STATUS_COLORS.INACTIVE;
-              const roleMeta = ROLE_COLORS[user.role] || ROLE_COLORS.USER;
-              return (
-                <tr key={user.id} className={styles.row}>
-                  <td>
-                    <div className={styles.memberCell}>
-                      <div className={styles.avatar}>
-                        {(user.fullName || user.email).charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className={styles.memberName}>{user.fullName || '—'}</div>
-                        <div className={styles.memberEmail}>
-                          <Mail size={12} /> {user.email}
-                        </div>
+            {filtered.map((u) => (
+              <tr key={u.id}>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div className="avatar-circle">
+                      {(u.fullName || u.email).charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '600' }}>{u.fullName || '—'}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Mail size={12} /> {u.email}
                       </div>
                     </div>
-                  </td>
-                  <td>
-                    <span className={`${styles.badge} ${styles[roleMeta.cls]}`}>
-                      <ShieldCheck size={12} /> {roleMeta.label}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`${styles.badge} ${styles[statusMeta.cls]}`}>
-                      {statusMeta.label}
-                    </span>
-                  </td>
-                  <td className={styles.joinedCell}>
-                    <Clock size={13} />
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </td>
-                  <td>
-                    <div className={styles.actions}>
-                      {user.status !== 'ACTIVE' && user.role !== 'ADMIN' && (
-                        <button
-                          className={styles.approveBtn}
-                          onClick={() => handleStatusChange(user.id, 'ACTIVE')}
-                          title="Activate"
-                        >
-                          <UserCheck size={15} /> Activate
-                        </button>
-                      )}
-                      {user.status === 'ACTIVE' && user.role !== 'ADMIN' && (
-                        <button
-                          className={styles.revokeBtn}
-                          onClick={() => handleStatusChange(user.id, 'INACTIVE')}
-                          title="Deactivate"
-                        >
-                          <UserX size={15} /> Revoke
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                  </div>
+                </td>
+                <td>
+                  <span className="badge badge-primary">
+                    <ShieldCheck size={12} style={{ marginRight: '0.4rem' }} /> {u.role}
+                  </span>
+                </td>
+                <td>
+                  <span className={`badge badge-${STATUS_VARIANTS[u.status] || 'primary'}`}>
+                    {u.status}
+                  </span>
+                </td>
+                <td style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Clock size={14} />
+                    {new Date(u.createdAt).toLocaleDateString()}
+                  </div>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                    {u.status !== 'ACTIVE' && u.role !== 'ADMIN' && (
+                      <button className="theme-toggle" onClick={() => handleStatusChange(u.id, 'ACTIVE')} title="Activate">
+                        <UserCheck size={18} />
+                      </button>
+                    )}
+                    {u.status === 'ACTIVE' && u.role !== 'ADMIN' && (
+                      <button className="theme-toggle" onClick={() => handleStatusChange(u.id, 'INACTIVE')} title="Deactivate" style={{ color: 'var(--danger)' }}>
+                        <UserX size={18} />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
             {filtered.length === 0 && !isLoading && (
               <tr>
-                <td colSpan={5} className={styles.emptyRow}>
-                  <Users size={32} />
+                <td colSpan={5} style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                  <Users size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
                   <p>No team members found.</p>
                 </td>
               </tr>
@@ -226,83 +203,91 @@ const TeamPage = () => {
       </div>
 
       {allUsersTotalPages > 1 && (
-        <Pagination
-          currentPage={allUsersPage}
-          totalPages={allUsersTotalPages}
-          onPageChange={(page) => dispatch(fetchAllUsers({ tenantId, page, size: 10 }))}
-        />
+        <div style={{ marginTop: '2rem' }}>
+          <Pagination
+            currentPage={allUsersPage}
+            totalPages={allUsersTotalPages}
+            onPageChange={(page) => dispatch(fetchAllUsers({ tenantId, page, size: 10 }))}
+          />
+        </div>
       )}
 
-      {/* Add Member Modal */}
       {isModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h3>Add New Member</h3>
-              <button onClick={() => setIsModalOpen(false)} className={styles.closeBtn}>
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 style={{ fontSize: '1.25rem' }}>Add Team Member</h2>
+              <button className="theme-toggle" onClick={() => setIsModalOpen(false)}>
                 <X size={20} />
               </button>
             </div>
-            <p className={styles.modalSub}>
-              An invitation email with these credentials will be sent automatically.
-            </p>
-            
-            <form onSubmit={handleAddMember} className={styles.form}>
-              <div className={styles.inputGroup}>
-                <label>Full Name</label>
-                <div className={styles.inputWrapper}>
-                  <User size={16} />
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. John Doe"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  />
-                </div>
-              </div>
-              
-              <div className={styles.inputGroup}>
-                <label>Email Address</label>
-                <div className={styles.inputWrapper}>
-                  <Mail size={16} />
-                  <input
-                    type="email"
-                    required
-                    placeholder="john@company.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-              </div>
-              
-              <div className={styles.inputGroup}>
-                <label>Temporary Password</label>
-                <div className={styles.inputWrapper}>
-                  <Lock size={16} />
-                  <input
-                    type="text"
-                    required
-                    placeholder="Min 6 characters"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
-                  <button 
-                    type="button" 
-                    className={styles.genBtn}
-                    onClick={() => setFormData({ ...formData, password: Math.random().toString(36).slice(-8) })}
-                  >
-                    Auto
-                  </button>
+            <form onSubmit={handleAddMember}>
+              <div className="modal-body">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Full Name</label>
+                    <div style={{ position: 'relative' }}>
+                      <User style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                      <input
+                        className="input-field"
+                        style={{ paddingLeft: '2.5rem' }}
+                        required
+                        placeholder="e.g. John Doe"
+                        value={formData.fullName}
+                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Email Address</label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                      <input
+                        className="input-field"
+                        style={{ paddingLeft: '2.5rem' }}
+                        type="email"
+                        required
+                        placeholder="john@company.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Temporary Password</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <div style={{ position: 'relative', flex: 1 }}>
+                        <Lock style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                        <input
+                          className="input-field"
+                          style={{ paddingLeft: '2.5rem' }}
+                          type="text"
+                          required
+                          placeholder="Min 6 characters"
+                          value={formData.password}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        />
+                      </div>
+                      <button 
+                        type="button" 
+                        className="btn btn-secondary"
+                        onClick={() => setFormData({ ...formData, password: Math.random().toString(36).slice(-8) })}
+                      >
+                        Auto
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className={styles.modalFooter}>
-                <button type="button" onClick={() => setIsModalOpen(false)} className={styles.cancelBtn}>
+              <div className="modal-footer">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-secondary">
                   Cancel
                 </button>
-                <button type="submit" disabled={isAdding} className={styles.submitBtn}>
-                  {isAdding ? 'Adding...' : 'Send Invitation'}
+                <button type="submit" disabled={isAdding} className="btn btn-primary" style={{ minWidth: '150px' }}>
+                  {isAdding ? <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} /> : 'Send Invitation'}
                 </button>
               </div>
             </form>

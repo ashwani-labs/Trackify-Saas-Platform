@@ -1,98 +1,117 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
-import { LayoutDashboard, Users, LogOut, Bell, Search, Settings } from 'lucide-react';
-import styles from './DashboardLayout.module.css';
+import { useTheme } from '../context/ThemeContext';
+import { 
+  LayoutDashboard, 
+  Users, 
+  LogOut, 
+  Sun, 
+  Moon, 
+  Menu, 
+  X,
+  Search,
+  Layout
+} from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { theme, toggleTheme } = useTheme();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
     navigate(ROUTES.LOGIN, { replace: true });
   };
 
+  const navItems = [
+    { name: 'Dashboard', path: ROUTES.DASHBOARD, icon: <LayoutDashboard size={20} /> },
+    { name: 'Tenants',   path: ROUTES.TENANTS,   icon: <Users size={20} /> },
+  ];
+
   return (
-    <div className={styles.layout}>
+    <div className="layout-container">
       {/* Sidebar */}
-      <aside className={styles.sidebar}>
-        <div className={styles.logoContainer}>
-          <div className={styles.logo}>
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-              <path d="M16 3L29 9.5V22.5L16 29L3 22.5V9.5L16 3Z" fill="url(#layoutG)" />
-              <path d="M11 16l3.5 3.5L21 12" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              <defs>
-                <linearGradient id="layoutG" x1="3" y1="3" x2="29" y2="29" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#7c6fff" />
-                  <stop offset="1" stopColor="#a78bfa" />
-                </linearGradient>
-              </defs>
-            </svg>
+      <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ padding: '0.5rem', background: 'var(--primary)', borderRadius: 'var(--radius-md)' }}>
+              <Layout size={20} color="white" />
+            </div>
+            <span className="logo-text">Master.App</span>
           </div>
-          <span className={styles.brandName}>Master<span style={{ color: '#a78bfa' }}>.App</span></span>
+          <button className="theme-toggle show-mobile" onClick={() => setMobileOpen(false)}>
+            <X size={20} />
+          </button>
         </div>
 
-        <nav className={styles.nav}>
-          <NavLink
-            to={ROUTES.DASHBOARD}
-            className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
-          >
-            <LayoutDashboard size={20} />
-            <span>Dashboard</span>
-          </NavLink>
-
-          <NavLink
-            to={ROUTES.TENANTS}
-            className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
-          >
-            <Users size={20} />
-            <span>Tenants</span>
-          </NavLink>
-
-          {/* Placeholder for future features */}
-          <div className={styles.navItemDisabled} title="Coming Soon">
-            <Settings size={20} />
-            <span>Settings</span>
-          </div>
+        <nav className="nav-menu">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <span>{item.icon}</span>
+              <span>{item.name}</span>
+            </NavLink>
+          ))}
         </nav>
 
-        <div className={styles.sidebarFooter}>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
+        <div className="sidebar-footer">
+          <button className="nav-item" onClick={handleLogout} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}>
             <LogOut size={20} />
             <span>Sign out</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className={styles.mainContent}>
-        {/* Top Navbar */}
-        <header className={styles.topNav}>
-          <div className={styles.searchBar}>
-            <Search size={18} className={styles.searchIcon} />
-            <input type="text" placeholder="Search across all tenants..." className={styles.searchInput} />
+      {/* Main Content */}
+      <main className="main-content">
+        <header className="top-bar">
+          <button className="theme-toggle show-mobile" onClick={() => setMobileOpen(true)}>
+            <Menu size={24} />
+          </button>
+
+          <div className="hide-mobile" style={{ alignItems: 'center', gap: '1rem', flex: 1, maxWidth: '400px', margin: '0 2rem' }}>
+            <div style={{ position: 'relative', width: '100%' }}>
+              <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Search tenants..." 
+                style={{ paddingLeft: '2.5rem', height: '40px' }}
+              />
+            </div>
           </div>
 
-          <div className={styles.navActions}>
-            <button className={styles.iconBtn}>
-              <Bell size={20} />
-              <span className={styles.badge}></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
+            <button className="theme-toggle" onClick={toggleTheme}>
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
-            <div className={styles.userProfile}>
-              <div className={styles.avatar}>M</div>
-              <span className={styles.userName}>Master Admin</span>
+            <div className="avatar-circle">
+              M
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <div className={styles.pageWrapper}>
+        <div className="page-body">
           {children}
         </div>
       </main>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div 
+          className="modal-overlay"
+          style={{ zIndex: 45 }}
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
     </div>
   );
 };

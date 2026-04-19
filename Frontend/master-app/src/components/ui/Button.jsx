@@ -1,13 +1,6 @@
 import { forwardRef } from 'react';
-import Spinner from './Spinner';
-import '../../styles/variables.css';
-import styles from './Button.module.css';
+import { Loader2 } from 'lucide-react';
 
-/**
- * Button — reusable button with variant system.
- * Variants: 'primary' | 'ghost' | 'danger' | 'outline'
- * Props: variant, size ('sm'|'md'|'lg'), isLoading, leftIcon, rightIcon, fullWidth
- */
 const Button = forwardRef(({
   children,
   variant    = 'primary',
@@ -18,10 +11,20 @@ const Button = forwardRef(({
   leftIcon   = null,
   rightIcon  = null,
   type       = 'button',
+  className  = '',
   onClick,
   ...rest
 }, ref) => {
   const isDisabled = disabled || isLoading;
+
+  const getVariantClass = () => {
+    switch (variant) {
+      case 'primary': return 'btn-primary';
+      case 'secondary': return 'btn-secondary';
+      case 'danger': return 'btn btn-danger'; // Assuming there's a btn-danger global class or just styling here
+      default: return 'btn-secondary';
+    }
+  };
 
   return (
     <button
@@ -29,26 +32,26 @@ const Button = forwardRef(({
       type={type}
       disabled={isDisabled}
       onClick={onClick}
-      className={[
-        styles.btn,
-        styles[`btn--${variant}`],
-        styles[`btn--${size}`],
-        fullWidth ? styles['btn--full'] : '',
-        isLoading ? styles['btn--loading'] : '',
-      ].filter(Boolean).join(' ')}
-      aria-busy={isLoading}
+      className={`btn ${getVariantClass()} ${className}`}
+      style={{ 
+        width: fullWidth ? '100%' : 'auto',
+        opacity: isDisabled ? 0.6 : 1,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        padding: size === 'sm' ? '0.4rem 0.8rem' : size === 'lg' ? '0.8rem 1.6rem' : '0.6rem 1.2rem',
+        fontSize: size === 'sm' ? '0.8rem' : size === 'lg' ? '1rem' : '0.9rem',
+      }}
       {...rest}
     >
       {isLoading ? (
-        <Spinner size={size === 'sm' ? 14 : 18} color="currentColor" />
+        <Loader2 size={size === 'sm' ? 14 : 18} style={{ animation: 'loading 2s linear infinite' }} />
       ) : leftIcon ? (
-        <span className={styles.btn__icon} aria-hidden="true">{leftIcon}</span>
+        <span style={{ display: 'inline-flex', marginRight: '0.5rem' }}>{leftIcon}</span>
       ) : null}
 
-      <span className={styles.btn__label}>{children}</span>
+      <span>{children}</span>
 
       {!isLoading && rightIcon && (
-        <span className={styles.btn__icon} aria-hidden="true">{rightIcon}</span>
+        <span style={{ display: 'inline-flex', marginLeft: '0.5rem' }}>{rightIcon}</span>
       )}
     </button>
   );

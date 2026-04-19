@@ -1,17 +1,16 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { setSelectedIssue } from '../../features/issues/issueSlice';
-import styles from './IssueCard.module.css';
+import { MoreHorizontal, MessageSquare, Paperclip } from 'lucide-react';
 
-const PRIORITY_CONFIG = {
-  HIGH:   { label: 'High',   className: styles.priorityHigh },
-  MEDIUM: { label: 'Med',    className: styles.priorityMedium },
-  LOW:    { label: 'Low',    className: styles.priorityLow },
+const PRIORITY_COLORS = {
+  HIGH:   'var(--danger)',
+  MEDIUM: 'var(--warning)',
+  LOW:    'var(--success)',
 };
 
 const IssueCard = ({ issue, onDragStart }) => {
   const dispatch = useDispatch();
-  const priority = PRIORITY_CONFIG[issue.priority] || PRIORITY_CONFIG.MEDIUM;
 
   const handleClick = () => {
     dispatch(setSelectedIssue(issue));
@@ -19,7 +18,7 @@ const IssueCard = ({ issue, onDragStart }) => {
 
   return (
     <div
-      className={styles.card}
+      className="issue-card"
       draggable
       onDragStart={(e) => {
         e.dataTransfer.setData('issueId', String(issue.id));
@@ -28,22 +27,38 @@ const IssueCard = ({ issue, onDragStart }) => {
       }}
       onClick={handleClick}
     >
-      <p className={styles.title}>{issue.title}</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+        <span style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>
+          {issue.projectHeaderName ? `${issue.projectHeaderName}-${issue.id}` : `ISSUE-${issue.id}`}
+        </span>
+        <button className="theme-toggle" style={{ width: '20px', height: '20px' }}>
+          <MoreHorizontal size={14} />
+        </button>
+      </div>
+
+      <h4 className="issue-title">{issue.title}</h4>
 
       {issue.description && (
-        <p className={styles.description}>
-          {issue.description.length > 80
-            ? issue.description.slice(0, 80) + '…'
-            : issue.description}
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {issue.description}
         </p>
       )}
 
-      <div className={styles.footer}>
-        <span className={styles.issueKey}>
-          {issue.projectHeaderName}-{issue.id}
-        </span>
-        <span className={`${styles.priority} ${priority.className}`}>
-          {priority.label}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', color: 'var(--text-muted)' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.7rem' }}>
+             <MessageSquare size={12} /> 2
+           </div>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.7rem' }}>
+             <Paperclip size={12} /> 1
+           </div>
+        </div>
+        
+        <span className="issue-badge" style={{ 
+          color: PRIORITY_COLORS[issue.priority] || 'var(--text-muted)',
+          backgroundColor: `${PRIORITY_COLORS[issue.priority] || 'var(--text-muted)'}15`
+        }}>
+          {issue.priority}
         </span>
       </div>
     </div>
