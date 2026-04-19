@@ -14,6 +14,7 @@ import com.trackify.tenant.entity.UserLookup;
 import com.trackify.tenant.repository.TenantRepository;
 import com.trackify.tenant.repository.UserLookupRepository;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -382,7 +383,9 @@ public class TenantService {
         .fullName((String) map.get("full_name"))
         .role(Role.valueOf((String) map.get("role")))
         .status(UserStatus.valueOf((String) map.get("status")))
-        .createdAt(((Timestamp) map.get("created_at")).toLocalDateTime())
+        .createdAt(map.get("created_at") instanceof Timestamp ? 
+            ((Timestamp) map.get("created_at")).toLocalDateTime() : 
+            (LocalDateTime) map.get("created_at"))
         .tenantId(tenantId)
         .build();
   }
