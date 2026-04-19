@@ -78,7 +78,12 @@ public class AuthService {
     
     String token = jwtUtil.generateToken(request.getEmail(), role, tenant.getId(), userId);
 
-    return LoginResponse.builder().token(token).role(role).tenantId(tenant.getId()).build();
+    return LoginResponse.builder()
+        .token(token)
+        .role(role)
+        .tenantId(tenant.getId())
+        .domain(tenant.getDomain())
+        .build();
   }
 
   private Map<String, Object> checkTenantUserCredentials(

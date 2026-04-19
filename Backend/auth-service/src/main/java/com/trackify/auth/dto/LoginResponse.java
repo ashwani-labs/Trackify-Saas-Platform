@@ -17,4 +17,6 @@ public class LoginResponse {
 
   @JsonProperty("tenant_id")
   private Long tenantId;
+
+  private String domain;
 }

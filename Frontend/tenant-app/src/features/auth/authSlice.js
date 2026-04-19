@@ -8,13 +8,14 @@ export const loginUser = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
-      const { token, role, tenantId } = response.data;
+      const { token, role, tenantId, domain } = response.data;
       
-      // Store token in localStorage
+      // Store token and tenant info in localStorage
       localStorage.setItem('tenantToken', token);
       localStorage.setItem('tenantId', tenantId);
+      localStorage.setItem('tenantDomain', domain);
       
-      return { token, role, tenantId, email };
+      return { token, role, tenantId, domain, email };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
@@ -23,13 +24,14 @@ export const loginUser = createAsyncThunk(
 
 export const registerUser = createAsyncThunk(
   'auth/register',
-  async ({ email, password, fullName, tenantId }, { rejectWithValue }) => {
+  async ({ email, password, fullName, tenantId, status }, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/tenants/users/register`, {
         email,
         password,
         fullName,
         tenantId,
+        status,
       });
       return response.data;
     } catch (error) {
@@ -42,6 +44,7 @@ const initialState = {
   user: null,
   token: localStorage.getItem('tenantToken'),
   tenantId: localStorage.getItem('tenantId'),
+  tenantDomain: localStorage.getItem('tenantDomain'),
   isAuthenticated: !!localStorage.getItem('tenantToken'),
   loading: false,
   error: null,
@@ -73,6 +76,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.token = action.payload.token;
         state.tenantId = action.payload.tenantId;
+        state.tenantDomain = action.payload.domain;
         state.user = { email: action.payload.email, role: action.payload.role };
       })
       .addCase(loginUser.rejected, (state, action) => {

@@ -25,4 +25,6 @@ public class UserRegistrationRequest {
 
   @NotNull(message = "Tenant ID is required")
   private Long tenantId;
+
+  private String status; // Optional: can be ACTIVE or PENDING
 }

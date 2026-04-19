@@ -13,13 +13,24 @@ import {
   AlertCircle,
   ArrowRight,
   Users,
+  Copy,
+  ExternalLink,
+  Globe,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const DashboardPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, tenantId } = useSelector((s) => s.auth);
+  const { user, tenantId, tenantDomain } = useSelector((s) => s.auth);
   const { projects, stats, statsLoading } = useSelector((s) => s.projects);
+  
+  const tenantUrl = `http://${tenantDomain}.trackify.com:5174`;
+
+  const copyToClipboard = (text, label) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied!`);
+  };
 
   useEffect(() => {
     dispatch(fetchProjectStats());
@@ -90,6 +101,41 @@ const DashboardPage = () => {
           )}
         </div>
       </div>
+      
+      {/* ── Workspace Info (Admin Only) ── */}
+      {user?.role === 'ADMIN' && (
+        <div className={styles.workspaceInfo}>
+          <div className={styles.infoContent}>
+            <div className={styles.infoTitleBox}>
+              <Globe className={styles.infoIcon} size={20} />
+              <h3>Your Workspace</h3>
+            </div>
+            <div className={styles.idGrid}>
+              <div className={styles.idBox}>
+                <span className={styles.idLabel}>Workspace ID</span>
+                <div className={styles.idValueWrapper}>
+                  <code>{tenantId}</code>
+                  <button onClick={() => copyToClipboard(tenantId, 'ID')} className={styles.copyTiny}>
+                    <Copy size={12} />
+                  </button>
+                </div>
+              </div>
+              <div className={styles.idBox}>
+                <span className={styles.idLabel}>Login URL for Employees</span>
+                <div className={styles.idValueWrapper}>
+                  <code>{tenantUrl}</code>
+                  <button onClick={() => copyToClipboard(tenantUrl, 'URL')} className={styles.copyTiny}>
+                    <Copy size={12} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <a href={tenantUrl} target="_blank" rel="noopener noreferrer" className={styles.visitBtn}>
+            Visit App <ExternalLink size={14} />
+          </a>
+        </div>
+      )}
 
       {/* ── Stat Cards ── */}
       <div className={styles.statsGrid}>

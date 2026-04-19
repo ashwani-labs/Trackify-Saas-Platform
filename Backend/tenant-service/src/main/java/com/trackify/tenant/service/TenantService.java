@@ -182,9 +182,18 @@ public class TenantService {
         UserLookup.builder().email(request.getEmail()).tenantId(tenant.getId()).build();
     userLookupRepository.save(lookup);
 
-    // 4. Insert into Tenant Database (Status: PENDING)
+    // 4. Insert into Tenant Database
     String hashedPassword = passwordEncoder.encode(request.getPassword());
     JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
+
+    UserStatus initialStatus = UserStatus.PENDING;
+    if (request.getStatus() != null) {
+        try {
+            initialStatus = UserStatus.valueOf(request.getStatus().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid status provided in registration: {}, defaulting to PENDING", request.getStatus());
+        }
+    }
 
     try {
       String sql =
@@ -195,10 +204,16 @@ public class TenantService {
           hashedPassword,
           request.getFullName(),
           Role.USER.name(),
-          UserStatus.PENDING.name());
+          initialStatus.name());
 
       Map<String, Object> userMap =
           tenantJdbc.queryForMap("SELECT * FROM users WHERE email = ?", request.getEmail());
+          
+      // Trigger invitation email if ACTIVE (direct add by admin)
+      if (initialStatus == UserStatus.ACTIVE) {
+          sendInviteEmail(request.getEmail(), tenant.getName(), request.getPassword(), tenant.getDomain());
+      }
+      
       return mapToUserResponse(userMap, tenant.getId());
     } catch (Exception e) {
       log.error("Failed to register user in tenant DB: {}", e.getMessage());
@@ -279,6 +294,36 @@ public class TenantService {
       log.info("Approval email response status: {}", response.getStatusCode());
     } catch (Exception e) {
       log.error("Failed to send approval email to notification service: {} (URL: {})", e.getMessage(), notificationUrl);
+    }
+  }
+
+  private void sendInviteEmail(String email, String tenantName, String password, String domain) {
+    try {
+      org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+      java.util.Map<String, String> request = new java.util.HashMap<>();
+      request.put("to", email);
+      request.put("subject", "You've been invited to join " + tenantName + " on Trackify");
+      
+      String tenantUrl = String.format(appUrlPattern, domain);
+      
+      String body = String.format(
+          "Hello,\n\n" +
+          "You have been added as a team member to '%s' on Trackify.\n\n" +
+          "Login Details:\n" +
+          "App URL: %s\n" +
+          "Email: %s\n" +
+          "Temporary Password: %s\n\n" +
+          "Please log in and change your password after your first login.\n\n" +
+          "Best,\n" +
+          "The Trackify Team",
+          tenantName, tenantUrl, email, password
+      );
+      request.put("body", body);
+      
+      restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
+      log.info("Invitation email sent successfully to {}", email);
+    } catch (Exception e) {
+      log.error("Failed to send invitation email: {}", e.getMessage());
     }
   }
 

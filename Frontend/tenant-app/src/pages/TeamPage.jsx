@@ -12,7 +12,16 @@ import {
   Mail,
   Search,
   RefreshCw,
+  UserPlus,
+  X,
+  User,
+  Lock,
+  Globe,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
+import { registerUser } from '../features/auth/authSlice';
+import toast from 'react-hot-toast';
 
 const STATUS_COLORS = {
   ACTIVE: { label: 'Active', cls: 'active' },
@@ -30,11 +39,40 @@ const TeamPage = () => {
   const { tenantId } = useSelector((s) => s.auth);
   const { allUsers, allUsersPage, allUsersTotalPages, allUsersTotalElements, isLoading, error } =
     useSelector((s) => s.users);
+  const { tenantDomain } = useSelector((s) => s.auth);
   const [search, setSearch] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ fullName: '', email: '', password: '' });
+  const [isAdding, setIsAdding] = useState(false);
+  
+  const tenantUrl = `http://${tenantDomain}.trackify.com:5174`;
 
   useEffect(() => {
     if (tenantId) dispatch(fetchAllUsers({ tenantId, page: 0, size: 10 }));
   }, [dispatch, tenantId]);
+
+  const handleAddMember = async (e) => {
+    e.preventDefault();
+    setIsAdding(true);
+    try {
+      const result = await dispatch(registerUser({ ...formData, tenantId, status: 'ACTIVE' }));
+      if (registerUser.fulfilled.match(result)) {
+        toast.success(`Invitation sent to ${formData.email}`);
+        setIsModalOpen(false);
+        setFormData({ fullName: '', email: '', password: '' });
+        dispatch(fetchAllUsers({ tenantId, page: 0, size: 10 }));
+      } else {
+        toast.error(result.payload || 'Failed to add member');
+      }
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const copyToClipboard = (text, label) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied!`);
+  };
 
   const handleStatusChange = (userId, status) => {
     const label = status === 'ACTIVE' ? 'activate' : 'deactivate';
@@ -63,14 +101,34 @@ const TeamPage = () => {
             {allUsersTotalElements ?? 0} member{allUsersTotalElements !== 1 ? 's' : ''} in your workspace
           </p>
         </div>
-        <button
-          className={styles.refreshBtn}
-          onClick={() => dispatch(fetchAllUsers({ tenantId, page: allUsersPage, size: 10 }))}
-          disabled={isLoading}
-        >
-          <RefreshCw size={18} className={isLoading ? styles.spinning : ''} />
-        </button>
+        <div className={styles.headerActions}>
+          <button
+            className={styles.addBtn}
+            onClick={() => setIsModalOpen(true)}
+          >
+            <UserPlus size={18} /> Add Member
+          </button>
+          <button
+            className={styles.refreshBtn}
+            onClick={() => dispatch(fetchAllUsers({ tenantId, page: allUsersPage, size: 10 }))}
+            disabled={isLoading}
+          >
+            <RefreshCw size={18} className={isLoading ? styles.spinning : ''} />
+          </button>
+        </div>
       </header>
+
+      {/* Workspace Link Banner */}
+      <div className={styles.workspaceBanner}>
+        <div className={styles.bannerInfo}>
+          <Globe size={16} />
+          <span>Employees can also register themselves at: <code>{tenantUrl}/register</code></span>
+          <span className={styles.bannerId}>Workspace ID: <strong>{tenantId}</strong></span>
+        </div>
+        <button className={styles.copyBtn} onClick={() => copyToClipboard(`${tenantUrl}/register`, 'Link')}>
+          <Copy size={14} /> Copy Link
+        </button>
+      </div>
 
       {/* Search bar */}
       <div className={styles.searchBar}>
@@ -173,6 +231,83 @@ const TeamPage = () => {
           totalPages={allUsersTotalPages}
           onPageChange={(page) => dispatch(fetchAllUsers({ tenantId, page, size: 10 }))}
         />
+      )}
+
+      {/* Add Member Modal */}
+      {isModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3>Add New Member</h3>
+              <button onClick={() => setIsModalOpen(false)} className={styles.closeBtn}>
+                <X size={20} />
+              </button>
+            </div>
+            <p className={styles.modalSub}>
+              An invitation email with these credentials will be sent automatically.
+            </p>
+            
+            <form onSubmit={handleAddMember} className={styles.form}>
+              <div className={styles.inputGroup}>
+                <label>Full Name</label>
+                <div className={styles.inputWrapper}>
+                  <User size={16} />
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. John Doe"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div className={styles.inputGroup}>
+                <label>Email Address</label>
+                <div className={styles.inputWrapper}>
+                  <Mail size={16} />
+                  <input
+                    type="email"
+                    required
+                    placeholder="john@company.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div className={styles.inputGroup}>
+                <label>Temporary Password</label>
+                <div className={styles.inputWrapper}>
+                  <Lock size={16} />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Min 6 characters"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  />
+                  <button 
+                    type="button" 
+                    className={styles.genBtn}
+                    onClick={() => setFormData({ ...formData, password: Math.random().toString(36).slice(-8) })}
+                  >
+                    Auto
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.modalFooter}>
+                <button type="button" onClick={() => setIsModalOpen(false)} className={styles.cancelBtn}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={isAdding} className={styles.submitBtn}>
+                  {isAdding ? 'Adding...' : 'Send Invitation'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
