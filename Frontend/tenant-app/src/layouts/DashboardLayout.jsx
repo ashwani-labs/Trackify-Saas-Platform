@@ -14,7 +14,8 @@ import {
   Sun,
   Moon,
   Menu,
-  X
+  X,
+  User
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
@@ -35,6 +36,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Projects',      path: '/projects',      icon: <ClipboardList size={20} /> },
     { name: 'Team',          path: '/team',           icon: <Users2 size={20} />,    adminOnly: true },
     { name: 'Pending Users', path: '/pending-users',  icon: <UserCheck size={20} />, adminOnly: true },
+    { name: 'Profile',       path: '/profile',        icon: <User size={20} /> },
   ];
 
   const filteredMenu = menuItems.filter(item => !item.adminOnly || user?.role === 'ADMIN');

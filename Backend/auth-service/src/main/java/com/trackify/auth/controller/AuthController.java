@@ -1,5 +1,6 @@
 package com.trackify.auth.controller;
 
+import com.trackify.auth.dto.ChangePasswordRequest;
 import com.trackify.auth.dto.ForgotPasswordRequest;
 import com.trackify.auth.dto.LoginRequest;
 import com.trackify.auth.dto.LoginResponse;
@@ -36,5 +37,11 @@ public class AuthController {
   public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
     authService.resetPassword(request);
     return ResponseEntity.ok(ApiResponse.ok("Password reset successfully", null));
+  }
+
+  @PostMapping("/change-password")
+  public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    authService.changePassword(request);
+    return ResponseEntity.ok(ApiResponse.ok("Password changed successfully", null));
   }
 }

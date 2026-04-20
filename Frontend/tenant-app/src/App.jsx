@@ -14,11 +14,14 @@ import ProjectDetailPage from './pages/ProjectDetailPage';
 import TeamPage from './pages/TeamPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import ProfilePage from './pages/ProfilePage';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
     <Provider store={store}>
+      <ErrorBoundary>
       <ThemeProvider>
       <Toaster position="top-right" toastOptions={{ style: { background: '#161b22', color: '#f0f6fc', border: '1px solid #30363d' } }} />
       <Router>
@@ -64,11 +67,19 @@ function App() {
             </ProtectedRoute>
           } />
 
+          {/* Profile */}
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <DashboardLayout><ProfilePage /></DashboardLayout>
+            </ProtectedRoute>
+          } />
+
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
       </ThemeProvider>
+      </ErrorBoundary>
     </Provider>
   );
 }

@@ -1,5 +1,6 @@
 package com.trackify.auth.service;
 
+import com.trackify.auth.dto.ChangePasswordRequest;
 import com.trackify.auth.dto.ForgotPasswordRequest;
 import com.trackify.auth.dto.LoginRequest;
 import com.trackify.auth.dto.LoginResponse;
@@ -209,6 +210,43 @@ public class AuthService {
     } catch (Exception e) {
         log.error("Failed to process password reset: {}", e.getMessage());
         throw AppException.internalError("Failed to reset password: " + e.getMessage());
+    }
+  }
+
+  public void changePassword(ChangePasswordRequest request) {
+    UserLookup lookup = userLookupRepository.findByEmail(request.getEmail())
+        .orElseThrow(() -> AppException.notFound("User not found"));
+
+    Tenant tenant = tenantRepository.findById(lookup.getTenantId())
+        .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
+
+    try {
+        // 1. Get current password from tenant DB
+        String sqlSelect = String.format(
+            "SELECT password FROM %s.users WHERE email = ?",
+            tenant.getDbName()
+        );
+        String currentHashedPassword = jdbcTemplate.queryForObject(sqlSelect, String.class, request.getEmail());
+
+        // 2. Verify current password
+        if (currentHashedPassword == null || !passwordEncoder.matches(request.getCurrentPassword(), currentHashedPassword)) {
+            throw AppException.unauthorized("Incorrect current password");
+        }
+
+        // 3. Update to new password
+        String newHashedPassword = passwordEncoder.encode(request.getNewPassword());
+        String sqlUpdate = String.format(
+            "UPDATE %s.users SET password = ? WHERE email = ?",
+            tenant.getDbName()
+        );
+        jdbcTemplate.update(sqlUpdate, newHashedPassword, request.getEmail());
+
+        log.info("Password successfully changed for {}", request.getEmail());
+    } catch (AppException e) {
+        throw e;
+    } catch (Exception e) {
+        log.error("Failed to change password: {}", e.getMessage());
+        throw AppException.internalError("Could not update password. Please try again.");
     }
   }
 }
