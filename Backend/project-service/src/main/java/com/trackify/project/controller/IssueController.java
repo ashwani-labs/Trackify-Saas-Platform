@@ -43,6 +43,14 @@ public class IssueController {
         return ResponseEntity.ok(ApiResponse.ok("Issues fetched successfully", response));
     }
 
+    @GetMapping("/project/{projectId}/paged")
+    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<IssueResponse>>> getIssuesByProjectPaged(
+            @PathVariable Long projectId,
+            org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<IssueResponse> response = issueService.getIssuesByProject(projectId, pageable);
+        return ResponseEntity.ok(ApiResponse.ok("Issues fetched successfully", response));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<IssueResponse>> getIssueById(@PathVariable Long id) {
         IssueResponse response = issueService.getIssueById(id);

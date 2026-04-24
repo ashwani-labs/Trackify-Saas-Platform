@@ -25,6 +25,21 @@ export const fetchIssuesByProject = createAsyncThunk(
   }
 );
 
+export const fetchBacklogIssuesPaged = createAsyncThunk(
+  'issues/fetchBacklogPaged',
+  async ({ projectId, page = 0, size = 20 }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/issues/project/${projectId}/paged?page=${page}&size=${size}&sort=createdAt,desc`,
+        { headers: getAuthHeader() }
+      );
+      return response.data.data; // Spring Page object
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch backlog issues');
+    }
+  }
+);
+
 export const createIssue = createAsyncThunk(
   'issues/create',
   async (issueData, { rejectWithValue }) => {
@@ -164,6 +179,12 @@ const initialState = {
     status: 'ALL',
     priority: 'ALL',
   },
+  // Backlog pagination
+  backlogIssues: [],
+  backlogPage: 0,
+  backlogTotalPages: 0,
+  backlogTotalElements: 0,
+  isBacklogLoading: false,
   isLoading: false,
   isCommentLoading: false,
   isAttachmentLoading: false,
@@ -182,6 +203,10 @@ const issueSlice = createSlice({
     },
     clearIssues: (state) => {
       state.issues = [];
+      state.backlogIssues = [];
+      state.backlogPage = 0;
+      state.backlogTotalPages = 0;
+      state.backlogTotalElements = 0;
       state.comments = {};
       state.selectedIssue = null;
       state.error = null;
@@ -283,6 +308,23 @@ const issueSlice = createSlice({
         state.isAttachmentLoading = false;
         state.error = action.payload;
       })
+      // Backlog pagination
+      .addCase(fetchBacklogIssuesPaged.pending, (state) => {
+        state.isBacklogLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchBacklogIssuesPaged.fulfilled, (state, action) => {
+        state.isBacklogLoading = false;
+        state.backlogIssues = action.payload.content;
+        state.backlogPage = action.payload.number;
+        state.backlogTotalPages = action.payload.totalPages;
+        state.backlogTotalElements = action.payload.totalElements;
+      })
+      .addCase(fetchBacklogIssuesPaged.rejected, (state, action) => {
+        state.isBacklogLoading = false;
+        state.error = action.payload;
+      })
+
       .addCase(deleteAttachment.fulfilled, (state, action) => {
         const { issueId, attachmentId } = action.payload;
         
@@ -309,3 +351,4 @@ export const {
 } = issueSlice.actions;
 
 export default issueSlice.reducer;
+

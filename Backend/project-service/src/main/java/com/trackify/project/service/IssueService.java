@@ -101,6 +101,11 @@ public class IssueService {
                 .collect(Collectors.toList());
     }
 
+    public org.springframework.data.domain.Page<IssueResponse> getIssuesByProject(Long projectId, org.springframework.data.domain.Pageable pageable) {
+        return issueRepository.findAllByProjectId(projectId, pageable)
+                .map(this::mapToResponse);
+    }
+
     public IssueResponse getIssueById(Long id) {
         Issue issue = issueRepository.findById(id)
                 .orElseThrow(() -> AppException.notFound("Issue not found"));

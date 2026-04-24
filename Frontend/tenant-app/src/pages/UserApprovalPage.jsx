@@ -41,6 +41,27 @@ const UserApprovalPage = () => {
       {error && <div className="badge badge-danger" style={{ width: '100%', padding: '1rem', marginBottom: '2rem' }}>{error}</div>}
 
       <div style={{ display: 'grid', gap: '1.5rem' }}>
+        {isLoading && pendingUsers.length === 0 ? (
+          [...Array(3)].map((_, i) => (
+            <div key={`skel-${i}`} className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div className="skeleton" style={{ width: '56px', height: '56px', borderRadius: '50%' }} />
+                <div>
+                  <div className="skeleton" style={{ height: '18px', width: '160px', marginBottom: '10px', borderRadius: '4px' }} />
+                  <div style={{ display: 'flex', gap: '1.5rem' }}>
+                    <div className="skeleton" style={{ height: '12px', width: '140px', borderRadius: '4px' }} />
+                    <div className="skeleton" style={{ height: '12px', width: '100px', borderRadius: '4px' }} />
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div className="skeleton" style={{ height: '38px', width: '90px', borderRadius: 'var(--radius-md)' }} />
+                <div className="skeleton" style={{ height: '38px', width: '100px', borderRadius: 'var(--radius-md)' }} />
+              </div>
+            </div>
+          ))
+        ) : (
+          <>
         {pendingUsers.map((user) => (
           <div key={user.id} className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -79,6 +100,8 @@ const UserApprovalPage = () => {
             </div>
           </div>
         ))}
+          </>
+        )}
 
         {pendingUsers.length === 0 && !isLoading && (
           <div className="card" style={{ textAlign: 'center', padding: '5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>

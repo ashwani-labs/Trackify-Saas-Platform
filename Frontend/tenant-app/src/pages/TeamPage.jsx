@@ -143,6 +143,26 @@ const TeamPage = () => {
             </tr>
           </thead>
           <tbody>
+            {isLoading && allUsers.length === 0 ? (
+              [...Array(5)].map((_, i) => (
+                <tr key={`skel-${i}`}>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div className="skeleton" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+                      <div style={{ flex: 1 }}>
+                        <div className="skeleton" style={{ height: '14px', width: '60%', marginBottom: '6px', borderRadius: '4px' }} />
+                        <div className="skeleton" style={{ height: '10px', width: '40%', borderRadius: '4px' }} />
+                      </div>
+                    </div>
+                  </td>
+                  <td><div className="skeleton" style={{ height: '24px', width: '60px', borderRadius: '12px' }} /></td>
+                  <td><div className="skeleton" style={{ height: '24px', width: '60px', borderRadius: '12px' }} /></td>
+                  <td><div className="skeleton" style={{ height: '14px', width: '80px', borderRadius: '4px' }} /></td>
+                  <td><div className="skeleton" style={{ height: '28px', width: '28px', borderRadius: '8px', marginLeft: 'auto' }} /></td>
+                </tr>
+              ))
+            ) : (
+              <>
             {filtered.map((u) => (
               <tr key={u.id}>
                 <td>
@@ -197,6 +217,8 @@ const TeamPage = () => {
                   <p>No team members found.</p>
                 </td>
               </tr>
+            )}
+              </>
             )}
           </tbody>
         </table>
