@@ -9,7 +9,19 @@ import {
   addAttachment,
   deleteAttachment,
 } from '../../features/issues/issueSlice';
-import { X, Edit2, Check, Trash2, Paperclip, MessageSquare, Download, FileText, Image as ImageIcon, Send, Loader2 } from 'lucide-react';
+import {
+  X,
+  Edit2,
+  Check,
+  Trash2,
+  Paperclip,
+  MessageSquare,
+  Download,
+  FileText,
+  Image as ImageIcon,
+  Send,
+  Loader2,
+} from 'lucide-react';
 
 const formatBytes = (bytes, decimals = 2) => {
   if (!+bytes) return '0 Bytes';
@@ -26,7 +38,9 @@ const STATUS_LABELS = { TODO: 'To Do', IN_PROGRESS: 'In Progress', DONE: 'Done' 
 
 const IssueDetailPanel = () => {
   const dispatch = useDispatch();
-  const { selectedIssue, comments, isCommentLoading, isAttachmentLoading } = useSelector((s) => s.issues);
+  const { selectedIssue, comments, isCommentLoading, isAttachmentLoading } = useSelector(
+    (s) => s.issues
+  );
 
   const [commentText, setCommentText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -60,15 +74,17 @@ const IssueDetailPanel = () => {
   };
 
   const handleEditSave = () => {
-    dispatch(updateIssue({
-      id: selectedIssue.id,
-      data: {
-        ...editData,
-        sprintId: editData.sprintId ? Number(editData.sprintId) : null,
-        projectId: selectedIssue.projectId,
-        assigneeId: selectedIssue.assigneeId,
-      },
-    }));
+    dispatch(
+      updateIssue({
+        id: selectedIssue.id,
+        data: {
+          ...editData,
+          sprintId: editData.sprintId ? Number(editData.sprintId) : null,
+          projectId: selectedIssue.projectId,
+          assigneeId: selectedIssue.assigneeId,
+        },
+      })
+    );
     setIsEditing(false);
   };
 
@@ -93,60 +109,86 @@ const IssueDetailPanel = () => {
   return (
     <>
       {/* Backdrop */}
-      <div 
-        className="modal-overlay" 
-        style={{ zIndex: 90, animation: 'fadeIn 0.2s ease-out' }} 
-        onClick={handleClose} 
+      <div
+        className="modal-overlay"
+        style={{ zIndex: 90, animation: 'fadeIn 0.2s ease-out' }}
+        onClick={handleClose}
       />
 
       {/* Slide-in Panel */}
-      <aside style={{ 
-        position: 'fixed', 
-        right: 0, 
-        top: 0, 
-        height: '100vh', 
-        width: '100%', 
-        maxWidth: '550px', 
-        backgroundColor: 'var(--bg-surface)', 
-        borderLeft: '1px solid var(--border-main)',
-        zIndex: 100,
-        boxShadow: 'var(--shadow-xl)',
-        display: 'flex',
-        flexDirection: 'column',
-        animation: 'slideLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-      }}>
-        <style dangerouslySetInnerHTML={{ __html: `
+      <aside
+        style={{
+          position: 'fixed',
+          right: 0,
+          top: 0,
+          height: '100vh',
+          width: '100%',
+          maxWidth: '550px',
+          backgroundColor: 'var(--bg-surface)',
+          borderLeft: '1px solid var(--border-main)',
+          zIndex: 100,
+          boxShadow: 'var(--shadow-xl)',
+          display: 'flex',
+          flexDirection: 'column',
+          animation: 'slideLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
           @keyframes slideLeft { 
             from { transform: translateX(100%); } 
             to { transform: translateX(0); } 
           }
-        `}} />
+        `,
+          }}
+        />
 
         {/* Header */}
-        <div style={{ padding: '1.25rem 1.75rem', borderBottom: '1px solid var(--border-main)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div
+          style={{
+            padding: '1.25rem 1.75rem',
+            borderBottom: '1px solid var(--border-main)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <span style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-muted)' }}>
             {selectedIssue.projectHeaderName}-{selectedIssue.id}
           </span>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             {!isEditing ? (
-              <button 
-                className="btn btn-secondary" 
-                style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} 
+              <button
+                className="btn btn-secondary"
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                 onClick={() => setIsEditing(true)}
               >
                 <Edit2 size={14} /> Edit
               </button>
             ) : (
               <>
-                <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={handleEditSave}>
+                <button
+                  className="btn btn-primary"
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                  onClick={handleEditSave}
+                >
                   <Check size={14} /> Save
                 </button>
-                <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => setIsEditing(false)}>
+                <button
+                  className="btn btn-secondary"
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                  onClick={() => setIsEditing(false)}
+                >
                   Cancel
                 </button>
               </>
             )}
-            <button className="theme-toggle" onClick={handleDelete} style={{ color: 'var(--danger)' }}>
+            <button
+              className="theme-toggle"
+              onClick={handleDelete}
+              style={{ color: 'var(--danger)' }}
+            >
               <Trash2 size={18} />
             </button>
             <button className="theme-toggle" onClick={handleClose}>
@@ -170,15 +212,33 @@ const IssueDetailPanel = () => {
           )}
 
           {/* Meta Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '1.5rem',
+              marginBottom: '2.5rem',
+            }}
+          >
             <div>
               <label className="form-label">Status</label>
               {isEditing ? (
-                <select name="status" value={editData.status} onChange={handleEditChange} className="input-field">
-                  {STATUS_OPTIONS.map((s) => (<option key={s} value={s}>{STATUS_LABELS[s]}</option>))}
+                <select
+                  name="status"
+                  value={editData.status}
+                  onChange={handleEditChange}
+                  className="input-field"
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {STATUS_LABELS[s]}
+                    </option>
+                  ))}
                 </select>
               ) : (
-                <span className={`badge badge-${selectedIssue.status === 'DONE' ? 'success' : selectedIssue.status === 'IN_PROGRESS' ? 'primary' : 'secondary'}`}>
+                <span
+                  className={`badge badge-${selectedIssue.status === 'DONE' ? 'success' : selectedIssue.status === 'IN_PROGRESS' ? 'primary' : 'secondary'}`}
+                >
                   {STATUS_LABELS[selectedIssue.status]}
                 </span>
               )}
@@ -187,14 +247,31 @@ const IssueDetailPanel = () => {
             <div>
               <label className="form-label">Priority</label>
               {isEditing ? (
-                <select name="priority" value={editData.priority} onChange={handleEditChange} className="input-field">
-                  {PRIORITY_OPTIONS.map((p) => (<option key={p} value={p}>{p}</option>))}
+                <select
+                  name="priority"
+                  value={editData.priority}
+                  onChange={handleEditChange}
+                  className="input-field"
+                >
+                  {PRIORITY_OPTIONS.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
                 </select>
               ) : (
-                <span className="badge" style={{ 
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)', 
-                  color: selectedIssue.priority === 'HIGH' ? 'var(--danger)' : selectedIssue.priority === 'MEDIUM' ? 'var(--warning)' : 'var(--success)' 
-                }}>
+                <span
+                  className="badge"
+                  style={{
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    color:
+                      selectedIssue.priority === 'HIGH'
+                        ? 'var(--danger)'
+                        : selectedIssue.priority === 'MEDIUM'
+                          ? 'var(--warning)'
+                          : 'var(--success)',
+                  }}
+                >
                   {selectedIssue.priority}
                 </span>
               )}
@@ -203,7 +280,16 @@ const IssueDetailPanel = () => {
 
           {/* Description */}
           <div style={{ marginBottom: '2.5rem' }}>
-            <h4 style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h4
+              style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-muted)',
+                marginBottom: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
               <FileText size={16} /> Description
             </h4>
             {isEditing ? (
@@ -217,39 +303,102 @@ const IssueDetailPanel = () => {
               />
             ) : (
               <p style={{ lineHeight: '1.6', color: 'var(--text-main)' }}>
-                {selectedIssue.description || <em style={{ color: 'var(--text-muted)' }}>No description provided.</em>}
+                {selectedIssue.description || (
+                  <em style={{ color: 'var(--text-muted)' }}>No description provided.</em>
+                )}
               </p>
             )}
           </div>
 
           {/* Attachments */}
           <div style={{ marginBottom: '2.5rem' }}>
-            <h4 style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h4
+              style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-muted)',
+                marginBottom: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
               <Paperclip size={16} /> Attachments ({selectedIssue.attachments?.length || 0})
             </h4>
-            
+
             <div style={{ position: 'relative', marginBottom: '1rem' }}>
-              <input type="file" onChange={handleFileChange} style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }} />
+              <input
+                type="file"
+                onChange={handleFileChange}
+                style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }}
+              />
               <div className="btn btn-secondary" style={{ width: '100%', borderStyle: 'dashed' }}>
-                {isAttachmentLoading ? <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} /> : <Plus size={16} />} Upload File
+                {isAttachmentLoading ? (
+                  <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} />
+                ) : (
+                  <Plus size={16} />
+                )}{' '}
+                Upload File
               </div>
             </div>
 
             <div style={{ display: 'grid', gap: '0.5rem' }}>
               {selectedIssue.attachments?.map((a) => (
-                <div key={a.id} className="card" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div
+                  key={a.id}
+                  className="card"
+                  style={{
+                    padding: '0.75rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    {a.contentType?.startsWith('image/') ? <ImageIcon size={18} /> : <FileText size={18} />}
+                    {a.contentType?.startsWith('image/') ? (
+                      <ImageIcon size={18} />
+                    ) : (
+                      <FileText size={18} />
+                    )}
                     <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: '600', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.fileName}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{formatBytes(a.fileSize)}</div>
+                      <div
+                        style={{
+                          fontSize: '0.85rem',
+                          fontWeight: '600',
+                          maxWidth: '200px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {a.fileName}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        {formatBytes(a.fileSize)}
+                      </div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.25rem' }}>
-                    <button className="theme-toggle" style={{ width: '28px', height: '28px' }} onClick={() => window.open(`http://localhost:8080/issues/attachments/${a.id}/download`, '_blank')}>
+                    <button
+                      className="theme-toggle"
+                      style={{ width: '28px', height: '28px' }}
+                      onClick={() =>
+                        window.open(
+                          `http://localhost:8080/issues/attachments/${a.id}/download`,
+                          '_blank'
+                        )
+                      }
+                    >
                       <Download size={14} />
                     </button>
-                    <button className="theme-toggle" style={{ width: '28px', height: '28px', color: 'var(--danger)' }} onClick={() => dispatch(deleteAttachment({ issueId: selectedIssue.id, attachmentId: a.id }))}>
+                    <button
+                      className="theme-toggle"
+                      style={{ width: '28px', height: '28px', color: 'var(--danger)' }}
+                      onClick={() =>
+                        dispatch(
+                          deleteAttachment({ issueId: selectedIssue.id, attachmentId: a.id })
+                        )
+                      }
+                    >
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -260,7 +409,16 @@ const IssueDetailPanel = () => {
 
           {/* Comments */}
           <div style={{ marginBottom: '1rem' }}>
-            <h4 style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h4
+              style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-muted)',
+                marginBottom: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
               <MessageSquare size={16} /> Comments ({issueComments.length})
             </h4>
 
@@ -277,19 +435,44 @@ const IssueDetailPanel = () => {
                 <button
                   type="submit"
                   disabled={!commentText.trim() || isCommentLoading}
-                  style={{ position: 'absolute', bottom: '0.75rem', right: '0.75rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', padding: '0.4rem', cursor: 'pointer' }}
+                  style={{
+                    position: 'absolute',
+                    bottom: '0.75rem',
+                    right: '0.75rem',
+                    background: 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '0.4rem',
+                    cursor: 'pointer',
+                  }}
                 >
-                  {isCommentLoading ? <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} /> : <Send size={16} />}
+                  {isCommentLoading ? (
+                    <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} />
+                  ) : (
+                    <Send size={16} />
+                  )}
                 </button>
               </div>
             </form>
 
             <div style={{ display: 'grid', gap: '1.25rem' }}>
               {issueComments.map((c) => (
-                <div key={c.id} style={{ borderBottom: '1px solid var(--border-main)', paddingBottom: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div
+                  key={c.id}
+                  style={{ borderBottom: '1px solid var(--border-main)', paddingBottom: '1.25rem' }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.5rem',
+                    }}
+                  >
                     <span style={{ fontWeight: '700', fontSize: '0.85rem' }}>User #{c.userId}</span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{new Date(c.createdAt).toLocaleString()}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                      {new Date(c.createdAt).toLocaleString()}
+                    </span>
                   </div>
                   <p style={{ fontSize: '0.9rem', lineHeight: '1.5' }}>{c.content}</p>
                 </div>

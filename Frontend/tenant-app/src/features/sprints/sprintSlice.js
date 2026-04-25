@@ -1,37 +1,34 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axios';
 
-export const fetchSprintsByProject = createAsyncThunk(
-  'sprints/fetchSprints',
-  async (projectId) => {
-    const response = await axiosInstance.get(`/projects/${projectId}/sprints`);
-    return response.data.data;
-  }
-);
+export const fetchSprintsByProject = createAsyncThunk('sprints/fetchSprints', async (projectId) => {
+  const response = await axiosInstance.get(`/projects/${projectId}/sprints`);
+  return response.data.data;
+});
 
-export const createSprint = createAsyncThunk(
-  'sprints/createSprint',
-  async (sprintData) => {
-    const response = await axiosInstance.post(`/projects/${sprintData.projectId}/sprints`, sprintData);
-    return response.data.data;
-  }
-);
+export const createSprint = createAsyncThunk('sprints/createSprint', async (sprintData) => {
+  const response = await axiosInstance.post(
+    `/projects/${sprintData.projectId}/sprints`,
+    sprintData
+  );
+  return response.data.data;
+});
 
 export const updateSprint = createAsyncThunk(
   'sprints/updateSprint',
   async ({ id, projectId, ...data }) => {
-    const response = await axiosInstance.put(`/projects/${projectId}/sprints/${id}`, { ...data, projectId });
+    const response = await axiosInstance.put(`/projects/${projectId}/sprints/${id}`, {
+      ...data,
+      projectId,
+    });
     return response.data.data;
   }
 );
 
-export const startSprint = createAsyncThunk(
-  'sprints/startSprint',
-  async ({ id, projectId }) => {
-    const response = await axiosInstance.put(`/projects/${projectId}/sprints/${id}/start`);
-    return response.data.data;
-  }
-);
+export const startSprint = createAsyncThunk('sprints/startSprint', async ({ id, projectId }) => {
+  const response = await axiosInstance.put(`/projects/${projectId}/sprints/${id}/start`);
+  return response.data.data;
+});
 
 export const completeSprint = createAsyncThunk(
   'sprints/completeSprint',

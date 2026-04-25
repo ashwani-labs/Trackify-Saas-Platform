@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '../features/auth/authSlice';
 import { useTheme } from '../context/ThemeContext';
-import { 
-  LayoutDashboard, 
-  LogOut, 
-  ChevronLeft, 
+import {
+  LayoutDashboard,
+  LogOut,
+  ChevronLeft,
   ChevronRight,
   ClipboardList,
   UserCheck,
@@ -15,7 +15,7 @@ import {
   Moon,
   Menu,
   X,
-  User
+  User,
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
@@ -32,14 +32,19 @@ const DashboardLayout = ({ children }) => {
   };
 
   const menuItems = [
-    { name: 'Dashboard',     path: '/',              icon: <LayoutDashboard size={20} /> },
-    { name: 'Projects',      path: '/projects',      icon: <ClipboardList size={20} /> },
-    { name: 'Team',          path: '/team',           icon: <Users2 size={20} />,    adminOnly: true },
-    { name: 'Pending Users', path: '/pending-users',  icon: <UserCheck size={20} />, adminOnly: true },
-    { name: 'Profile',       path: '/profile',        icon: <User size={20} /> },
+    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
+    { name: 'Projects', path: '/projects', icon: <ClipboardList size={20} /> },
+    { name: 'Team', path: '/team', icon: <Users2 size={20} />, adminOnly: true },
+    {
+      name: 'Pending Users',
+      path: '/pending-users',
+      icon: <UserCheck size={20} />,
+      adminOnly: true,
+    },
+    { name: 'Profile', path: '/profile', icon: <User size={20} /> },
   ];
 
-  const filteredMenu = menuItems.filter(item => !item.adminOnly || user?.role === 'ADMIN');
+  const filteredMenu = menuItems.filter((item) => !item.adminOnly || user?.role === 'ADMIN');
 
   return (
     <div className="layout-container">
@@ -47,7 +52,11 @@ const DashboardLayout = ({ children }) => {
       <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           {!collapsed && <span className="logo-text">Trackify</span>}
-          <button className="theme-toggle hide-mobile" onClick={() => setCollapsed(!collapsed)} style={{ marginLeft: 'auto' }}>
+          <button
+            className="theme-toggle hide-mobile"
+            onClick={() => setCollapsed(!collapsed)}
+            style={{ marginLeft: 'auto' }}
+          >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
           <button className="theme-toggle show-mobile" onClick={() => setMobileOpen(false)}>
@@ -70,7 +79,11 @@ const DashboardLayout = ({ children }) => {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="nav-item" onClick={handleLogout} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}>
+          <button
+            className="nav-item"
+            onClick={handleLogout}
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
             <LogOut size={20} />
             {!collapsed && <span>Logout</span>}
           </button>
@@ -83,32 +96,40 @@ const DashboardLayout = ({ children }) => {
           <button className="theme-toggle show-mobile" onClick={() => setMobileOpen(true)}>
             <Menu size={24} />
           </button>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto' }}>
             <button className="theme-toggle" onClick={toggleTheme}>
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingLeft: '1rem', borderLeft: '1px solid var(--border-main)' }}>
-               <div className="avatar-circle">
-                 {user?.email?.charAt(0).toUpperCase()}
-               </div>
-               <div className="hide-mobile" style={{ flexDirection: 'column' }}>
-                 <span style={{ fontSize: '0.875rem', fontWeight: '600' }}>{user?.email?.split('@')[0]}</span>
-                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{user?.role}</span>
-               </div>
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                paddingLeft: '1rem',
+                borderLeft: '1px solid var(--border-main)',
+              }}
+            >
+              <div className="avatar-circle">{user?.email?.charAt(0).toUpperCase()}</div>
+              <div className="hide-mobile" style={{ flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.875rem', fontWeight: '600' }}>
+                  {user?.email?.split('@')[0]}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  {user?.role}
+                </span>
+              </div>
             </div>
           </div>
         </header>
 
-        <div className="page-body">
-          {children}
-        </div>
+        <div className="page-body">{children}</div>
       </main>
 
       {/* Mobile Overlay */}
       {mobileOpen && (
-        <div 
+        <div
           className="modal-overlay"
           style={{ zIndex: 45 }}
           onClick={() => setMobileOpen(false)}

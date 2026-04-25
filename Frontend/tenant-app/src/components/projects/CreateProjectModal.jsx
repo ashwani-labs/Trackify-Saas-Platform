@@ -10,7 +10,7 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
     name: '',
     key: '',
     description: '',
-    category: 'Software'
+    category: 'Software',
   });
 
   const handleChange = (e) => {
@@ -18,7 +18,14 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === 'name' && !formData.key ? { key: value.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, '') } : {})
+      ...(name === 'name' && !formData.key
+        ? {
+            key: value
+              .substring(0, 3)
+              .toUpperCase()
+              .replace(/[^A-Z]/g, ''),
+          }
+        : {}),
     }));
   };
 
@@ -38,7 +45,11 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 style={{ fontSize: '1.25rem' }}>Create New Project</h2>
-          <button className="theme-toggle" onClick={onClose} style={{ width: '32px', height: '32px' }}>
+          <button
+            className="theme-toggle"
+            onClick={onClose}
+            style={{ width: '32px', height: '32px' }}
+          >
             <X size={20} />
           </button>
         </div>
@@ -46,15 +57,34 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
         <div className="modal-body">
           <form id="create-project-form" onSubmit={handleSubmit}>
             {error && (
-              <div className="badge badge-danger" style={{ width: '100%', padding: '0.75rem', marginBottom: '1.5rem', justifyContent: 'center' }}>
+              <div
+                className="badge badge-danger"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  marginBottom: '1.5rem',
+                  justifyContent: 'center',
+                }}
+              >
                 {error}
               </div>
             )}
-            
+
             <div className="form-group">
-              <label className="form-label" htmlFor="name">Project Name *</label>
+              <label className="form-label" htmlFor="name">
+                Project Name *
+              </label>
               <div style={{ position: 'relative' }}>
-                <Briefcase style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                <Briefcase
+                  style={{
+                    position: 'absolute',
+                    left: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-muted)',
+                  }}
+                  size={16}
+                />
                 <input
                   type="text"
                   id="name"
@@ -70,9 +100,20 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="key">Project Key *</label>
+              <label className="form-label" htmlFor="key">
+                Project Key *
+              </label>
               <div style={{ position: 'relative' }}>
-                <Key style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                <Key
+                  style={{
+                    position: 'absolute',
+                    left: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-muted)',
+                  }}
+                  size={16}
+                />
                 <input
                   type="text"
                   id="key"
@@ -86,15 +127,33 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
                   maxLength="10"
                 />
               </div>
-              <small style={{ display: 'block', marginTop: '0.4rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+              <small
+                style={{
+                  display: 'block',
+                  marginTop: '0.4rem',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.75rem',
+                }}
+              >
                 Used as a prefix for issue IDs (e.g. APO-123).
               </small>
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="category">Category</label>
+              <label className="form-label" htmlFor="category">
+                Category
+              </label>
               <div style={{ position: 'relative' }}>
-                <Database style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                <Database
+                  style={{
+                    position: 'absolute',
+                    left: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-muted)',
+                  }}
+                  size={16}
+                />
                 <select
                   id="category"
                   name="category"
@@ -112,7 +171,9 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" htmlFor="description">Description (optional)</label>
+              <label className="form-label" htmlFor="description">
+                Description (optional)
+              </label>
               <textarea
                 id="description"
                 name="description"
@@ -128,17 +189,26 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
         </div>
 
         <div className="modal-footer">
-          <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isLoading}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onClose}
+            disabled={isLoading}
+          >
             Cancel
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             form="create-project-form"
-            className="btn btn-primary" 
+            className="btn btn-primary"
             disabled={isLoading}
             style={{ minWidth: '140px' }}
           >
-            {isLoading ? <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} /> : 'Create Project'}
+            {isLoading ? (
+              <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} />
+            ) : (
+              'Create Project'
+            )}
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 // JWT token helpers — keep token logic in ONE place
 const TOKEN_KEY = 'trackify_master_token';
-const ROLE_KEY  = 'trackify_master_role';
+const ROLE_KEY = 'trackify_master_role';
 
 export const saveToken = (token) => {
   localStorage.setItem(TOKEN_KEY, token);

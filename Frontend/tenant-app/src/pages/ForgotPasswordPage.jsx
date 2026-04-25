@@ -29,27 +29,30 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <AuthLayout 
-      title="Forgot Password" 
+    <AuthLayout
+      title="Forgot Password"
       subtitle="Enter your email to receive recovery instructions"
     >
       {success ? (
         <div style={{ textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
-          <div style={{ 
-            width: '64px', 
-            height: '64px', 
-            borderRadius: '50%', 
-            background: 'rgba(16, 185, 129, 0.1)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            margin: '0 auto 1.5rem',
-            color: 'var(--success)'
-          }}>
+          <div
+            style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(16, 185, 129, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.5rem',
+              color: 'var(--success)',
+            }}
+          >
             <CheckCircle2 size={32} />
           </div>
           <p style={{ color: 'var(--text-main)', marginBottom: '2rem', lineHeight: '1.6' }}>
-            If an account with <strong>{email}</strong> exists, an email has been sent with further instructions.
+            If an account with <strong>{email}</strong> exists, an email has been sent with further
+            instructions.
           </p>
           <Link to="/login" className="btn btn-secondary" style={{ width: '100%' }}>
             <ArrowLeft size={16} /> Back to Login
@@ -60,7 +63,16 @@ const ForgotPasswordPage = () => {
           <div className="form-group">
             <label className="form-label">Email Address</label>
             <div style={{ position: 'relative' }}>
-              <Mail style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
+              <Mail
+                style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-muted)',
+                }}
+                size={18}
+              />
               <input
                 type="email"
                 className="input-field"
@@ -74,7 +86,15 @@ const ForgotPasswordPage = () => {
           </div>
 
           {error && (
-            <div className="badge badge-danger" style={{ width: '100%', padding: '0.75rem', marginBottom: '1.5rem', justifyContent: 'center' }}>
+            <div
+              className="badge badge-danger"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                marginBottom: '1.5rem',
+                justifyContent: 'center',
+              }}
+            >
               {error}
             </div>
           )}
@@ -89,7 +109,10 @@ const ForgotPasswordPage = () => {
           </button>
 
           <p className="form-footer">
-            Remembered your password? <Link to="/login" className="form-link">Sign in</Link>
+            Remembered your password?{' '}
+            <Link to="/login" className="form-link">
+              Sign in
+            </Link>
           </p>
         </form>
       )}

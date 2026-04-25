@@ -32,7 +32,7 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const { user, tenantId, tenantDomain } = useSelector((s) => s.auth);
   const { stats, statsLoading } = useSelector((s) => s.projects);
-  
+
   const tenantUrl = `http://${tenantDomain}.trackify.com:5174`;
 
   const copyToClipboard = (text, label) => {
@@ -91,7 +91,11 @@ const DashboardPage = () => {
   ];
 
   const workloadData = [
-    { name: 'Issues', total: stats?.totalIssues || 0, active: (stats?.todoCount || 0) + (stats?.inProgressCount || 0) },
+    {
+      name: 'Issues',
+      total: stats?.totalIssues || 0,
+      active: (stats?.todoCount || 0) + (stats?.inProgressCount || 0),
+    },
   ];
 
   return (
@@ -101,7 +105,9 @@ const DashboardPage = () => {
         <div>
           <p style={{ color: 'var(--text-muted)', fontWeight: '500' }}>{greeting()},</p>
           <h1 className="hero-title">{user?.email?.split('@')[0]} 👋</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Here's what's happening in your workspace today.</p>
+          <p style={{ color: 'var(--text-muted)' }}>
+            Here's what's happening in your workspace today.
+          </p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button className="btn btn-primary" onClick={() => navigate('/projects')}>
@@ -114,37 +120,113 @@ const DashboardPage = () => {
           )}
         </div>
       </div>
-      
+
       {/* Workspace Info Banner (Admin Only) */}
       {user?.role === 'ADMIN' && (
         <div className="info-banner">
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                marginBottom: '1rem',
+              }}
+            >
               <Globe style={{ color: 'var(--primary)' }} size={24} />
               <h3 style={{ fontSize: '1.25rem' }}>Your Workspace</h3>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '1.5rem',
+              }}
+            >
               <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Workspace ID</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-                  <code style={{ background: 'var(--bg-input)', padding: '0.25rem 0.5rem', borderRadius: '4px' }}>{tenantId}</code>
-                  <button onClick={() => copyToClipboard(tenantId, 'ID')} className="theme-toggle" style={{ width: '28px', height: '28px' }}>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: 'var(--text-muted)',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Workspace ID
+                </span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginTop: '0.25rem',
+                  }}
+                >
+                  <code
+                    style={{
+                      background: 'var(--bg-input)',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    {tenantId}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(tenantId, 'ID')}
+                    className="theme-toggle"
+                    style={{ width: '28px', height: '28px' }}
+                  >
                     <Copy size={14} />
                   </button>
                 </div>
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Login URL for Employees</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
-                  <code style={{ background: 'var(--bg-input)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>{tenantUrl}</code>
-                  <button onClick={() => copyToClipboard(tenantUrl, 'URL')} className="theme-toggle" style={{ width: '28px', height: '28px' }}>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: 'var(--text-muted)',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Login URL for Employees
+                </span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    marginTop: '0.25rem',
+                  }}
+                >
+                  <code
+                    style={{
+                      background: 'var(--bg-input)',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    {tenantUrl}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(tenantUrl, 'URL')}
+                    className="theme-toggle"
+                    style={{ width: '28px', height: '28px' }}
+                  >
                     <Copy size={14} />
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <a href={tenantUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ height: 'fit-content' }}>
+          <a
+            href={tenantUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary"
+            style={{ height: 'fit-content' }}
+          >
             Visit App <ExternalLink size={16} />
           </a>
         </div>
@@ -159,7 +241,11 @@ const DashboardPage = () => {
               <span style={{ fontWeight: '500' }}>{card.label}</span>
             </div>
             <div className="stat-value">
-              {statsLoading ? <div className="skeleton" style={{ height: '2.5rem', width: '50%' }} /> : card.value}
+              {statsLoading ? (
+                <div className="skeleton" style={{ height: '2.5rem', width: '50%' }} />
+              ) : (
+                card.value
+              )}
             </div>
             <div className="stat-footer">{card.sub}</div>
           </div>
@@ -167,7 +253,14 @@ const DashboardPage = () => {
       </div>
 
       {/* Advanced Analytics */}
-      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '2rem' }}>
+      <section
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '2rem',
+          marginTop: '2rem',
+        }}
+      >
         <div className="card glass-panel">
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Issue Distribution</h3>
           <div style={{ height: '260px' }}>
@@ -184,8 +277,13 @@ const DashboardPage = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-main)', borderRadius: '8px', backdropFilter: 'blur(8px)' }}
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-main)',
+                    borderRadius: '8px',
+                    backdropFilter: 'blur(8px)',
+                  }}
                   itemStyle={{ color: 'var(--text-main)' }}
                 />
                 <Legend iconType="circle" />
@@ -199,13 +297,36 @@ const DashboardPage = () => {
           <div style={{ height: '260px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={workloadData}>
-                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-main)', borderRadius: '8px', backdropFilter: 'blur(8px)' }}
+                <XAxis
+                  dataKey="name"
+                  stroke="var(--text-muted)"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
                 />
-                <Bar dataKey="total" name="Total Issues" fill="var(--primary)" radius={[4, 4, 0, 0]} barSize={40} />
-                <Bar dataKey="active" name="Active Issues" fill="var(--accent)" radius={[4, 4, 0, 0]} barSize={40} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  contentStyle={{
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-main)',
+                    borderRadius: '8px',
+                    backdropFilter: 'blur(8px)',
+                  }}
+                />
+                <Bar
+                  dataKey="total"
+                  name="Total Issues"
+                  fill="var(--primary)"
+                  radius={[4, 4, 0, 0]}
+                  barSize={40}
+                />
+                <Bar
+                  dataKey="active"
+                  name="Active Issues"
+                  fill="var(--accent)"
+                  radius={[4, 4, 0, 0]}
+                  barSize={40}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -217,30 +338,54 @@ const DashboardPage = () => {
         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Quick Actions</h2>
         <div className="quick-actions-grid">
           <div className="action-card" onClick={() => navigate('/projects')}>
-            <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '1rem', borderRadius: 'var(--radius-lg)' }}>
+            <div
+              style={{
+                background: 'rgba(99, 102, 241, 0.1)',
+                padding: '1rem',
+                borderRadius: 'var(--radius-lg)',
+              }}
+            >
               <FolderKanban size={32} />
             </div>
             <span style={{ fontWeight: '600' }}>Browse Projects</span>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Manage and track project progress</p>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+              Manage and track project progress
+            </p>
           </div>
-          
+
           {user?.role === 'ADMIN' && (
             <div className="action-card" onClick={() => navigate('/pending-users')}>
-              <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: '1rem', borderRadius: 'var(--radius-lg)' }}>
+              <div
+                style={{
+                  background: 'rgba(167, 139, 250, 0.1)',
+                  padding: '1rem',
+                  borderRadius: 'var(--radius-lg)',
+                }}
+              >
                 <Users size={32} />
               </div>
               <span style={{ fontWeight: '600' }}>User Approvals</span>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Approve new employee requests</p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                Approve new employee requests
+              </p>
             </div>
           )}
-          
+
           {user?.role === 'ADMIN' && (
             <div className="action-card" onClick={() => navigate('/team')}>
-              <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '1rem', borderRadius: 'var(--radius-lg)' }}>
+              <div
+                style={{
+                  background: 'rgba(99, 102, 241, 0.1)',
+                  padding: '1rem',
+                  borderRadius: 'var(--radius-lg)',
+                }}
+              >
                 <Users size={32} />
               </div>
               <span style={{ fontWeight: '600' }}>Team Members</span>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Manage existing team members</p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                Manage existing team members
+              </p>
             </div>
           )}
         </div>

@@ -9,15 +9,15 @@ import AuthLayout from '../layouts/AuthLayout';
 import { Mail, Lock, Eye, EyeOff, Shield, Loader2 } from 'lucide-react';
 
 const LoginPage = () => {
-  const navigate   = useNavigate();
-  const dispatch   = useAppDispatch();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [login, { isLoading }] = useLoginMutation();
 
   useAuth({ requireGuest: true });
 
-  const [form, setForm]     = useState({ email: '', password: '' });
-  const [showPass, setShowPass]   = useState(false);
-  const [apiError, setApiError]   = useState('');
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [showPass, setShowPass] = useState(false);
+  const [apiError, setApiError] = useState('');
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -29,15 +29,17 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const result = await login({
-        email:    form.email.trim().toLowerCase(),
+        email: form.email.trim().toLowerCase(),
         password: form.password,
       }).unwrap();
 
-      dispatch(setCredentials({
-        token:     result.token,
-        role:      result.role,
-        tenant_id: result.tenant_id,
-      }));
+      dispatch(
+        setCredentials({
+          token: result.token,
+          role: result.role,
+          tenant_id: result.tenant_id,
+        })
+      );
 
       navigate(ROUTES.DASHBOARD, { replace: true });
     } catch (err) {
@@ -48,18 +50,20 @@ const LoginPage = () => {
   return (
     <AuthLayout>
       <div className="auth-header">
-        <div style={{ 
-          width: '64px', 
-          height: '64px', 
-          background: 'var(--primary)', 
-          borderRadius: 'var(--radius-lg)', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          margin: '0 auto 1.5rem',
-          color: 'white',
-          boxShadow: '0 0 20px rgba(14, 165, 233, 0.3)'
-        }}>
+        <div
+          style={{
+            width: '64px',
+            height: '64px',
+            background: 'var(--primary)',
+            borderRadius: 'var(--radius-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem',
+            color: 'white',
+            boxShadow: '0 0 20px rgba(14, 165, 233, 0.3)',
+          }}
+        >
           <Shield size={32} />
         </div>
         <h1 className="auth-title">Master Control</h1>
@@ -70,7 +74,16 @@ const LoginPage = () => {
         <div className="form-group">
           <label className="form-label">Email Address</label>
           <div style={{ position: 'relative' }}>
-            <Mail style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
+            <Mail
+              style={{
+                position: 'absolute',
+                left: '1rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+              size={18}
+            />
             <input
               name="email"
               type="email"
@@ -87,7 +100,16 @@ const LoginPage = () => {
         <div className="form-group">
           <label className="form-label">Password</label>
           <div style={{ position: 'relative' }}>
-            <Lock style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
+            <Lock
+              style={{
+                position: 'absolute',
+                left: '1rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+              size={18}
+            />
             <input
               name="password"
               type={showPass ? 'text' : 'password'}
@@ -98,11 +120,18 @@ const LoginPage = () => {
               onChange={handleChange}
               required
             />
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setShowPass(!showPass)}
               className="theme-toggle"
-              style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', width: '32px', height: '32px' }}
+              style={{
+                position: 'absolute',
+                right: '0.5rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '32px',
+                height: '32px',
+              }}
             >
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -110,20 +139,30 @@ const LoginPage = () => {
         </div>
 
         {apiError && (
-          <div className="badge badge-danger" style={{ width: '100%', padding: '0.75rem', marginBottom: '1.5rem', justifyContent: 'center' }}>
+          <div
+            className="badge badge-danger"
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              marginBottom: '1.5rem',
+              justifyContent: 'center',
+            }}
+          >
             {apiError}
           </div>
         )}
 
-        <button 
-          type="submit" 
-          disabled={isLoading} 
+        <button
+          type="submit"
+          disabled={isLoading}
           className="btn btn-primary"
           style={{ width: '100%', height: '48px', fontSize: '1rem', marginTop: '1rem' }}
         >
           {isLoading ? (
             <Loader2 style={{ animation: 'loading 2s linear infinite' }} size={20} />
-          ) : 'Access Master Panel'}
+          ) : (
+            'Access Master Panel'
+          )}
         </button>
 
         <p className="form-footer" style={{ fontSize: '0.8rem' }}>

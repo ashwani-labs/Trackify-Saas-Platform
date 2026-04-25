@@ -4,69 +4,67 @@
 
 :root {
   /* ── Background Scale ── */
-  --clr-bg-base:      #080a14;
-  --clr-bg-surface:   #0d1020;
-  --clr-bg-card:      #131729;
-  --clr-bg-elevated:  #181d30;
-  --clr-bg-input:     #0f1222;
+  --clr-bg-base: #080a14;
+  --clr-bg-surface: #0d1020;
+  --clr-bg-card: #131729;
+  --clr-bg-elevated: #181d30;
+  --clr-bg-input: #0f1222;
 
   /* ── Accent — Indigo/Violet ── */
-  --clr-accent:       #7c6fff;
+  --clr-accent: #7c6fff;
   --clr-accent-light: #a78bfa;
-  --clr-accent-dark:  #5b52d4;
-  --clr-accent-glow:  rgba(124, 111, 255, 0.4);
+  --clr-accent-dark: #5b52d4;
+  --clr-accent-glow: rgba(124, 111, 255, 0.4);
   --clr-accent-muted: rgba(124, 111, 255, 0.1);
-  --clr-accent-border:rgba(124, 111, 255, 0.35);
+  --clr-accent-border: rgba(124, 111, 255, 0.35);
 
   /* ── Semantic Colors ── */
-  --clr-success:      #34d399;
-  --clr-warning:      #fbbf24;
-  --clr-error:        #f87171;
-  --clr-info:         #38bdf8;
+  --clr-success: #34d399;
+  --clr-warning: #fbbf24;
+  --clr-error: #f87171;
+  --clr-info: #38bdf8;
 
   /* ── Text Scale ── */
-  --clr-text-primary:   #eef0ff;
+  --clr-text-primary: #eef0ff;
   --clr-text-secondary: #8b92b3;
-  --clr-text-muted:     #4e5674;
-  --clr-text-disabled:  #363d57;
+  --clr-text-muted: #4e5674;
+  --clr-text-disabled: #363d57;
 
   /* ── Borders ── */
-  --clr-border:         rgba(255, 255, 255, 0.06);
-  --clr-border-subtle:  rgba(255, 255, 255, 0.03);
-  --clr-border-focus:   rgba(124, 111, 255, 0.55);
-  --clr-border-active:  rgba(124, 111, 255, 0.8);
+  --clr-border: rgba(255, 255, 255, 0.06);
+  --clr-border-subtle: rgba(255, 255, 255, 0.03);
+  --clr-border-focus: rgba(124, 111, 255, 0.55);
+  --clr-border-active: rgba(124, 111, 255, 0.8);
 
   /* ── Typography ── */
-  --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Outfit', 'Inter', system-ui, sans-serif;
 
   /* ── Border Radius ── */
-  --radius-xs:  4px;
-  --radius-sm:  8px;
-  --radius-md:  12px;
-  --radius-lg:  18px;
-  --radius-xl:  24px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
   --radius-2xl: 32px;
   --radius-full: 9999px;
 
   /* ── Shadows ── */
-  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md:   0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-lg:   0 16px 48px rgba(0, 0, 0, 0.6);
-  --shadow-card: 0 0 0 1px rgba(255,255,255,0.04),
-                 0 24px 64px rgba(0,0,0,0.7),
-                 0 8px 24px rgba(0,0,0,0.4);
-  --shadow-glow: 0 0 32px rgba(124,111,255,0.3),
-                 0 0 80px rgba(124,111,255,0.1);
-  --shadow-btn:  0 4px 24px rgba(124,111,255,0.55),
-                 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-card:
+    0 0 0 1px rgba(255, 255, 255, 0.04), 0 24px 64px rgba(0, 0, 0, 0.7),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 32px rgba(124, 111, 255, 0.3), 0 0 80px rgba(124, 111, 255, 0.1);
+  --shadow-btn: 0 4px 24px rgba(124, 111, 255, 0.55), 0 2px 8px rgba(0, 0, 0, 0.3);
 
   /* ── Transitions ── */
-  --ease-spring:  cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-smooth:  cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-bounce:  cubic-bezier(0.34, 1.56, 0.64, 1);
-  --duration-fast:   150ms;
-  --duration-base:   250ms;
-  --duration-slow:   400ms;
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
   --duration-slower: 600ms;
 }

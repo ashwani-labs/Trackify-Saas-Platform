@@ -9,7 +9,10 @@ const getAuthHeaders = () => ({
 });
 
 export const fetchAllTenants = async (page = 0, size = 10) => {
-  const response = await axios.get(`${API_BASE_URL}/tenants?page=${page}&size=${size}`, getAuthHeaders());
+  const response = await axios.get(
+    `${API_BASE_URL}/tenants?page=${page}&size=${size}`,
+    getAuthHeaders()
+  );
   return response.data;
 };
 

@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from './constants/routes';
 import { ThemeProvider } from './context/ThemeContext';
-import LoginPage     from './pages/LoginPage';
+import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import TenantManagementPage from './pages/TenantManagementPage';
 import ProtectedRoute from './components/common/ProtectedRoute';

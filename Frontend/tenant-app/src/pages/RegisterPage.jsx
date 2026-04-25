@@ -13,7 +13,7 @@ const RegisterPage = () => {
     tenantId: '',
   });
   const [isSuccess, setIsSuccess] = useState(false);
-  
+
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
 
@@ -31,27 +31,27 @@ const RegisterPage = () => {
 
   if (isSuccess) {
     return (
-      <AuthLayout 
-        title="Check your email" 
-        subtitle="We've received your request"
-      >
+      <AuthLayout title="Check your email" subtitle="We've received your request">
         <div style={{ textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
-          <div style={{ 
-            width: '80px', 
-            height: '80px', 
-            borderRadius: '50%', 
-            background: 'var(--success)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            margin: '0 auto 2rem',
-            color: 'white',
-            boxShadow: '0 0 20px rgba(16, 185, 129, 0.3)'
-          }}>
+          <div
+            style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: 'var(--success)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 2rem',
+              color: 'white',
+              boxShadow: '0 0 20px rgba(16, 185, 129, 0.3)',
+            }}
+          >
             <CheckCircle2 size={40} />
           </div>
           <p style={{ color: 'var(--text-main)', marginBottom: '2rem', lineHeight: '1.6' }}>
-            Your registration is pending approval by your workspace administrator. You'll receive an email once your account is active.
+            Your registration is pending approval by your workspace administrator. You'll receive an
+            email once your account is active.
           </p>
           <Link to="/login" className="btn btn-primary" style={{ width: '100%' }}>
             Back to Login
@@ -62,15 +62,21 @@ const RegisterPage = () => {
   }
 
   return (
-    <AuthLayout 
-      title="Join your team" 
-      subtitle="Create an account to start collaborating"
-    >
+    <AuthLayout title="Join your team" subtitle="Create an account to start collaborating">
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label className="form-label">Full Name</label>
           <div style={{ position: 'relative' }}>
-            <User style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
+            <User
+              style={{
+                position: 'absolute',
+                left: '1rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+              size={18}
+            />
             <input
               name="fullName"
               className="input-field"
@@ -87,7 +93,16 @@ const RegisterPage = () => {
         <div className="form-group">
           <label className="form-label">Email Address</label>
           <div style={{ position: 'relative' }}>
-            <Mail style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
+            <Mail
+              style={{
+                position: 'absolute',
+                left: '1rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+              size={18}
+            />
             <input
               name="email"
               className="input-field"
@@ -104,7 +119,16 @@ const RegisterPage = () => {
         <div className="form-group">
           <label className="form-label">Workspace ID</label>
           <div style={{ position: 'relative' }}>
-            <Globe style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
+            <Globe
+              style={{
+                position: 'absolute',
+                left: '1rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+              size={18}
+            />
             <input
               name="tenantId"
               className="input-field"
@@ -121,7 +145,16 @@ const RegisterPage = () => {
         <div className="form-group">
           <label className="form-label">Password</label>
           <div style={{ position: 'relative' }}>
-            <Lock style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
+            <Lock
+              style={{
+                position: 'absolute',
+                left: '1rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+              size={18}
+            />
             <input
               name="password"
               className="input-field"
@@ -136,14 +169,22 @@ const RegisterPage = () => {
         </div>
 
         {error && (
-          <div className="badge badge-danger" style={{ width: '100%', padding: '0.75rem', marginBottom: '1.5rem', justifyContent: 'center' }}>
+          <div
+            className="badge badge-danger"
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              marginBottom: '1.5rem',
+              justifyContent: 'center',
+            }}
+          >
             {error}
           </div>
         )}
 
-        <button 
-          type="submit" 
-          disabled={loading} 
+        <button
+          type="submit"
+          disabled={loading}
           className="btn btn-primary"
           style={{ width: '100%', height: '48px', marginTop: '1rem' }}
         >
@@ -157,7 +198,10 @@ const RegisterPage = () => {
         </button>
 
         <p className="form-footer">
-          Already have an account? <Link to="/login" className="form-link">Sign in instead</Link>
+          Already have an account?{' '}
+          <Link to="/login" className="form-link">
+            Sign in instead
+          </Link>
         </p>
       </form>
     </AuthLayout>

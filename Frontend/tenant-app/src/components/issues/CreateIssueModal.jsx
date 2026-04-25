@@ -35,14 +35,20 @@ const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Create Issue</h2>
-          <button className="theme-toggle" onClick={onClose} style={{ width: '32px', height: '32px' }}>
+          <button
+            className="theme-toggle"
+            onClick={onClose}
+            style={{ width: '32px', height: '32px' }}
+          >
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-body">
           <div className="form-group">
-            <label className="form-label" htmlFor="issue-title">Issue title *</label>
+            <label className="form-label" htmlFor="issue-title">
+              Issue title *
+            </label>
             <input
               id="issue-title"
               type="text"
@@ -57,7 +63,9 @@ const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="issue-desc">Description</label>
+            <label className="form-label" htmlFor="issue-desc">
+              Description
+            </label>
             <textarea
               id="issue-desc"
               name="description"
@@ -72,7 +80,9 @@ const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label" htmlFor="issue-priority">Priority</label>
+              <label className="form-label" htmlFor="issue-priority">
+                Priority
+              </label>
               <select
                 id="issue-priority"
                 name="priority"
@@ -87,7 +97,9 @@ const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="issue-status">Status</label>
+              <label className="form-label" htmlFor="issue-status">
+                Status
+              </label>
               <select
                 id="issue-status"
                 name="status"

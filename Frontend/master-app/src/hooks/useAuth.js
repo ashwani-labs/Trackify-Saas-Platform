@@ -12,8 +12,8 @@ import { ROUTES } from '../constants/routes';
 export const useAuth = ({ requireAuth = false, requireGuest = false } = {}) => {
   const navigate = useNavigate();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const role            = useAppSelector(selectAuthRole);
-  const token           = useAppSelector(selectAuthToken);
+  const role = useAppSelector(selectAuthRole);
+  const token = useAppSelector(selectAuthToken);
 
   useEffect(() => {
     if (requireAuth && !isAuthenticated) {

@@ -59,7 +59,9 @@ body {
   font-family: var(--font-main);
   background-color: var(--bg-main);
   color: var(--text-main);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -69,7 +71,10 @@ body {
 }
 
 /* Typography */
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-heading);
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -84,7 +89,9 @@ h1, h2, h3, h4 {
 }
 
 @media (min-width: 768px) {
-  .container { padding: 0 2rem; }
+  .container {
+    padding: 0 2rem;
+  }
 }
 
 /* Glassmorphism Effect */
@@ -102,7 +109,9 @@ h1, h2, h3, h4 {
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card:hover {
@@ -174,22 +183,43 @@ h1, h2, h3, h4 {
   text-transform: uppercase;
 }
 
-.badge-success { background-color: rgba(16, 185, 129, 0.1); color: var(--success); }
-.badge-warning { background-color: rgba(245, 158, 11, 0.1); color: var(--warning); }
-.badge-danger { background-color: rgba(239, 68, 68, 0.1); color: var(--danger); }
-.badge-primary { background-color: rgba(99, 102, 241, 0.1); color: var(--primary); }
+.badge-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+.badge-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+.badge-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+.badge-primary {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+}
 
 /* Skeleton Loading */
 .skeleton {
-  background: linear-gradient(90deg, var(--bg-input) 25%, var(--border-main) 50%, var(--bg-input) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--bg-input) 25%,
+    var(--border-main) 50%,
+    var(--bg-input) 75%
+  );
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
   border-radius: var(--radius-sm);
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Scrollbar Customization */
@@ -318,13 +348,13 @@ h1, h2, h3, h4 {
     height: 100vh;
     left: -260px;
   }
-  
+
   .sidebar.open {
     left: 0;
   }
-  
+
   .main-content {
-      width: 100%;
+    width: 100%;
   }
 
   .top-bar {
@@ -391,7 +421,9 @@ h1, h2, h3, h4 {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stat-card:hover {
@@ -493,7 +525,8 @@ thead {
   letter-spacing: 0.05em;
 }
 
-th, td {
+th,
+td {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border-main);
 }
@@ -530,13 +563,23 @@ tr:hover td {
 }
 
 @keyframes modalScale {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-header {
@@ -583,8 +626,12 @@ tr:hover td {
 }
 
 @keyframes float {
-  from { transform: translate(-10%, -10%); }
-  to { transform: translate(10%, 10%); }
+  from {
+    transform: translate(-10%, -10%);
+  }
+  to {
+    transform: translate(10%, 10%);
+  }
 }
 
 .auth-card {
@@ -694,9 +741,15 @@ tr:hover td {
   border-bottom: 2px solid transparent;
 }
 
-.kanban-column[data-status='TODO'] .kanban-header { border-color: var(--text-muted); }
-.kanban-column[data-status='IN_PROGRESS'] .kanban-header { border-color: var(--warning); }
-.kanban-column[data-status='DONE'] .kanban-header { border-color: var(--success); }
+.kanban-column[data-status='TODO'] .kanban-header {
+  border-color: var(--text-muted);
+}
+.kanban-column[data-status='IN_PROGRESS'] .kanban-header {
+  border-color: var(--warning);
+}
+.kanban-column[data-status='DONE'] .kanban-header {
+  border-color: var(--success);
+}
 
 .column-title {
   font-weight: 700;
@@ -806,19 +859,34 @@ tr:hover td {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes loading {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}.hide-mobile {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.hide-mobile {
   display: none !important;
 }
 
@@ -848,7 +916,8 @@ tr:hover td {
   justify-content: center;
   font-weight: 600;
   flex-shrink: 0;
-}.info-banner {
+}
+.info-banner {
   background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-input) 100%);
   border: 1px solid var(--border-main);
   border-radius: var(--radius-xl);

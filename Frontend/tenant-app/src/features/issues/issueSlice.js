@@ -14,10 +14,9 @@ export const fetchIssuesByProject = createAsyncThunk(
   'issues/fetchByProject',
   async (projectId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/issues/project/${projectId}`,
-        { headers: getAuthHeader() }
-      );
+      const response = await axios.get(`${API_BASE_URL}/issues/project/${projectId}`, {
+        headers: getAuthHeader(),
+      });
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch issues');
@@ -44,11 +43,9 @@ export const createIssue = createAsyncThunk(
   'issues/create',
   async (issueData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/issues`,
-        issueData,
-        { headers: getAuthHeader() }
-      );
+      const response = await axios.post(`${API_BASE_URL}/issues`, issueData, {
+        headers: getAuthHeader(),
+      });
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create issue');
@@ -60,11 +57,9 @@ export const updateIssue = createAsyncThunk(
   'issues/update',
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(
-        `${API_BASE_URL}/issues/${id}`,
-        data,
-        { headers: getAuthHeader() }
-      );
+      const response = await axios.put(`${API_BASE_URL}/issues/${id}`, data, {
+        headers: getAuthHeader(),
+      });
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to update issue');
@@ -72,26 +67,22 @@ export const updateIssue = createAsyncThunk(
   }
 );
 
-export const deleteIssue = createAsyncThunk(
-  'issues/delete',
-  async (id, { rejectWithValue }) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/issues/${id}`, { headers: getAuthHeader() });
-      return id;
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete issue');
-    }
+export const deleteIssue = createAsyncThunk('issues/delete', async (id, { rejectWithValue }) => {
+  try {
+    await axios.delete(`${API_BASE_URL}/issues/${id}`, { headers: getAuthHeader() });
+    return id;
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || 'Failed to delete issue');
   }
-);
+});
 
 export const fetchIssueComments = createAsyncThunk(
   'issues/fetchComments',
   async (issueId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/issues/${issueId}/comments`,
-        { headers: getAuthHeader() }
-      );
+      const response = await axios.get(`${API_BASE_URL}/issues/${issueId}/comments`, {
+        headers: getAuthHeader(),
+      });
       return { issueId, comments: response.data.data };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch comments');
@@ -119,10 +110,9 @@ export const fetchIssueAttachments = createAsyncThunk(
   'issues/fetchAttachments',
   async (issueId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/issues/${issueId}/attachments`,
-        { headers: getAuthHeader() }
-      );
+      const response = await axios.get(`${API_BASE_URL}/issues/${issueId}/attachments`, {
+        headers: getAuthHeader(),
+      });
       return { issueId, attachments: response.data.data };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch attachments');
@@ -136,17 +126,13 @@ export const addAttachment = createAsyncThunk(
     try {
       const formData = new FormData();
       formData.append('file', file);
-      
-      const response = await axios.post(
-        `${API_BASE_URL}/issues/${issueId}/attachments`,
-        formData,
-        {
-          headers: {
-            ...getAuthHeader(),
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+
+      const response = await axios.post(`${API_BASE_URL}/issues/${issueId}/attachments`, formData, {
+        headers: {
+          ...getAuthHeader(),
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return { issueId, attachment: response.data.data };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to upload attachment');
@@ -158,10 +144,9 @@ export const deleteAttachment = createAsyncThunk(
   'issues/deleteAttachment',
   async ({ issueId, attachmentId }, { rejectWithValue }) => {
     try {
-      await axios.delete(
-        `${API_BASE_URL}/issues/attachments/${attachmentId}`,
-        { headers: getAuthHeader() }
-      );
+      await axios.delete(`${API_BASE_URL}/issues/attachments/${attachmentId}`, {
+        headers: getAuthHeader(),
+      });
       return { issueId, attachmentId };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to delete attachment');
@@ -172,9 +157,9 @@ export const deleteAttachment = createAsyncThunk(
 // ── Slice ────────────────────────────────────────────────────────────────────
 
 const initialState = {
-  issues: [],           // all issues for current project
-  comments: {},         // { [issueId]: [comments] }
-  selectedIssue: null,  // issue open in detail panel
+  issues: [], // all issues for current project
+  comments: {}, // { [issueId]: [comments] }
+  selectedIssue: null, // issue open in detail panel
   filters: {
     status: 'ALL',
     priority: 'ALL',
@@ -245,7 +230,9 @@ const issueSlice = createSlice({
       })
 
       // createIssue
-      .addCase(createIssue.pending, (state) => { state.isLoading = true; })
+      .addCase(createIssue.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(createIssue.fulfilled, (state, action) => {
         state.isLoading = false;
         state.issues.push(action.payload);
@@ -271,12 +258,16 @@ const issueSlice = createSlice({
       })
 
       // fetchIssueComments
-      .addCase(fetchIssueComments.pending, (state) => { state.isCommentLoading = true; })
+      .addCase(fetchIssueComments.pending, (state) => {
+        state.isCommentLoading = true;
+      })
       .addCase(fetchIssueComments.fulfilled, (state, action) => {
         state.isCommentLoading = false;
         state.comments[action.payload.issueId] = action.payload.comments;
       })
-      .addCase(fetchIssueComments.rejected, (state) => { state.isCommentLoading = false; })
+      .addCase(fetchIssueComments.rejected, (state) => {
+        state.isCommentLoading = false;
+      })
 
       // addComment
       .addCase(addComment.fulfilled, (state, action) => {
@@ -286,19 +277,21 @@ const issueSlice = createSlice({
       })
 
       // Attachments Handling
-      .addCase(addAttachment.pending, (state) => { state.isAttachmentLoading = true; })
+      .addCase(addAttachment.pending, (state) => {
+        state.isAttachmentLoading = true;
+      })
       .addCase(addAttachment.fulfilled, (state, action) => {
         state.isAttachmentLoading = false;
         const { issueId, attachment } = action.payload;
-        
+
         // Update attachments in selectedIssue if it's the one we're editing
         if (state.selectedIssue && state.selectedIssue.id === issueId) {
           if (!state.selectedIssue.attachments) state.selectedIssue.attachments = [];
           state.selectedIssue.attachments.push(attachment);
         }
-        
+
         // Update in global issues list as well
-        const issue = state.issues.find(i => i.id === issueId);
+        const issue = state.issues.find((i) => i.id === issueId);
         if (issue) {
           if (!issue.attachments) issue.attachments = [];
           issue.attachments.push(attachment);
@@ -327,14 +320,16 @@ const issueSlice = createSlice({
 
       .addCase(deleteAttachment.fulfilled, (state, action) => {
         const { issueId, attachmentId } = action.payload;
-        
+
         if (state.selectedIssue && state.selectedIssue.id === issueId) {
-          state.selectedIssue.attachments = state.selectedIssue.attachments.filter(a => a.id !== attachmentId);
+          state.selectedIssue.attachments = state.selectedIssue.attachments.filter(
+            (a) => a.id !== attachmentId
+          );
         }
-        
-        const issue = state.issues.find(i => i.id === issueId);
+
+        const issue = state.issues.find((i) => i.id === issueId);
         if (issue && issue.attachments) {
-          issue.attachments = issue.attachments.filter(a => a.id !== attachmentId);
+          issue.attachments = issue.attachments.filter((a) => a.id !== attachmentId);
         }
       });
   },
@@ -351,4 +346,3 @@ export const {
 } = issueSlice.actions;
 
 export default issueSlice.reducer;
-

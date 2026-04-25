@@ -9,7 +9,7 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
     name: '',
     code: '',
     adminEmail: '',
-    plan: 'FREE'
+    plan: 'FREE',
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +53,11 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 style={{ fontSize: '1.25rem' }}>Provision New Organization</h2>
-          <button className="theme-toggle" onClick={onClose} style={{ width: '32px', height: '32px' }}>
+          <button
+            className="theme-toggle"
+            onClick={onClose}
+            style={{ width: '32px', height: '32px' }}
+          >
             <X size={20} />
           </button>
         </div>
@@ -61,11 +65,19 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
         <div className="modal-body">
           <form id="create-tenant-form" onSubmit={handleSubmit}>
             {errors.form && (
-              <div className="badge badge-danger" style={{ width: '100%', padding: '0.75rem', marginBottom: '1.5rem', justifyContent: 'center' }}>
+              <div
+                className="badge badge-danger"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  marginBottom: '1.5rem',
+                  justifyContent: 'center',
+                }}
+              >
                 {errors.form}
               </div>
             )}
-            
+
             <div className="form-group">
               <label className="form-label">Organization Name</label>
               <input
@@ -75,13 +87,24 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
-              {errors.name && <span style={{ color: 'var(--danger)', fontSize: '0.75rem' }}>{errors.name}</span>}
+              {errors.name && (
+                <span style={{ color: 'var(--danger)', fontSize: '0.75rem' }}>{errors.name}</span>
+              )}
             </div>
 
             <div className="form-group">
               <label className="form-label">Tenant Domain Code</label>
               <div style={{ position: 'relative' }}>
-                <Globe style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                <Globe
+                  style={{
+                    position: 'absolute',
+                    left: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-muted)',
+                  }}
+                  size={16}
+                />
                 <input
                   type="text"
                   className="input-field"
@@ -93,17 +116,37 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
                     setFormData({ ...formData, code: val });
                   }}
                 />
-                <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    right: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.8rem',
+                  }}
+                >
                   .trackify.io
                 </span>
               </div>
-              {errors.code && <span style={{ color: 'var(--danger)', fontSize: '0.75rem' }}>{errors.code}</span>}
+              {errors.code && (
+                <span style={{ color: 'var(--danger)', fontSize: '0.75rem' }}>{errors.code}</span>
+              )}
             </div>
 
             <div className="form-group">
               <label className="form-label">Admin Email Address</label>
               <div style={{ position: 'relative' }}>
-                <Mail style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                <Mail
+                  style={{
+                    position: 'absolute',
+                    left: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-muted)',
+                  }}
+                  size={16}
+                />
                 <input
                   type="email"
                   className="input-field"
@@ -113,13 +156,26 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
                   onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
                 />
               </div>
-              {errors.adminEmail && <span style={{ color: 'var(--danger)', fontSize: '0.75rem' }}>{errors.adminEmail}</span>}
+              {errors.adminEmail && (
+                <span style={{ color: 'var(--danger)', fontSize: '0.75rem' }}>
+                  {errors.adminEmail}
+                </span>
+              )}
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Subscription Plan</label>
               <div style={{ position: 'relative' }}>
-                <Briefcase style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
+                <Briefcase
+                  style={{
+                    position: 'absolute',
+                    left: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-muted)',
+                  }}
+                  size={16}
+                />
                 <select
                   className="input-field"
                   style={{ paddingLeft: '2.5rem', appearance: 'none' }}
@@ -139,15 +195,17 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
           <button className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </button>
-          <button 
-            className="btn btn-primary" 
-            onClick={handleSubmit} 
+          <button
+            className="btn btn-primary"
+            onClick={handleSubmit}
             disabled={isSubmitting}
             style={{ minWidth: '160px' }}
           >
             {isSubmitting ? (
               <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} />
-            ) : 'Provision Tenant'}
+            ) : (
+              'Provision Tenant'
+            )}
           </button>
         </div>
       </div>

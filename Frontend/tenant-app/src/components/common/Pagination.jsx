@@ -7,7 +7,15 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const pages = Array.from({ length: totalPages }, (_, i) => i);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '2rem' }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '0.5rem',
+        marginTop: '2rem',
+      }}
+    >
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 0}
@@ -18,7 +26,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       </button>
 
       <div style={{ display: 'flex', gap: '0.25rem' }}>
-        {pages.map(page => (
+        {pages.map((page) => (
           <button
             key={page}
             onClick={() => onPageChange(page)}

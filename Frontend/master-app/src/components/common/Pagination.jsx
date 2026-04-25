@@ -16,13 +16,13 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       </button>
 
       <div className="flex space-x-2">
-        {pages.map(page => (
+        {pages.map((page) => (
           <button
             key={page}
             onClick={() => onPageChange(page)}
             className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-              currentPage === page 
-                ? 'bg-blue-600 text-white' 
+              currentPage === page
+                ? 'bg-blue-600 text-white'
                 : 'bg-transparent text-[#a0aec0] hover:bg-[#272e3f] hover:text-white'
             }`}
           >

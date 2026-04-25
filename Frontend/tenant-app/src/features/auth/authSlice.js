@@ -9,12 +9,12 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
       const { token, role, tenant_id: tenantId, domain } = response.data;
-      
+
       // Store token and tenant info in localStorage
       localStorage.setItem('tenantToken', token);
       localStorage.setItem('tenantId', tenantId);
       localStorage.setItem('tenantDomain', domain);
-      
+
       return { token, role, tenantId, domain, email };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');

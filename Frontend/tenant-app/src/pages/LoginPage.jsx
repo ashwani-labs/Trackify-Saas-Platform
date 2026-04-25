@@ -8,7 +8,7 @@ import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
@@ -28,15 +28,23 @@ const LoginPage = () => {
   };
 
   return (
-    <AuthLayout 
-      title="Welcome Back" 
-      subtitle="Sign in to your Trackify workspace"
-    >
+    <AuthLayout title="Welcome Back" subtitle="Sign in to your Trackify workspace">
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label" htmlFor="email">Email Address</label>
+          <label className="form-label" htmlFor="email">
+            Email Address
+          </label>
           <div style={{ position: 'relative' }}>
-            <Mail style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
+            <Mail
+              style={{
+                position: 'absolute',
+                left: '1rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+              size={18}
+            />
             <input
               id="email"
               type="email"
@@ -51,12 +59,32 @@ const LoginPage = () => {
         </div>
 
         <div className="form-group">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <label className="form-label" style={{ marginBottom: 0 }} htmlFor="password">Password</label>
-            <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>Forgot password?</Link>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '0.5rem',
+            }}
+          >
+            <label className="form-label" style={{ marginBottom: 0 }} htmlFor="password">
+              Password
+            </label>
+            <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>
+              Forgot password?
+            </Link>
           </div>
           <div style={{ position: 'relative' }}>
-            <Lock style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
+            <Lock
+              style={{
+                position: 'absolute',
+                left: '1rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+              size={18}
+            />
             <input
               id="password"
               type="password"
@@ -71,14 +99,22 @@ const LoginPage = () => {
         </div>
 
         {error && (
-          <div className="badge badge-danger" style={{ width: '100%', padding: '0.75rem', marginBottom: '1.5rem', justifyContent: 'center' }}>
+          <div
+            className="badge badge-danger"
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              marginBottom: '1.5rem',
+              justifyContent: 'center',
+            }}
+          >
             {error}
           </div>
         )}
 
-        <button 
-          type="submit" 
-          disabled={loading} 
+        <button
+          type="submit"
+          disabled={loading}
           className="btn btn-primary"
           style={{ width: '100%', height: '48px', fontSize: '1rem' }}
         >
@@ -92,7 +128,10 @@ const LoginPage = () => {
         </button>
 
         <p className="form-footer">
-          New to Trackify? <Link to="/register" className="form-link">Join your team</Link>
+          New to Trackify?{' '}
+          <Link to="/register" className="form-link">
+            Join your team
+          </Link>
         </p>
       </form>
     </AuthLayout>

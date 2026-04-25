@@ -9,9 +9,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
           <h1 className="auth-title">{title}</h1>
           <p className="auth-subtitle">{subtitle}</p>
         </div>
-        <div>
-          {children}
-        </div>
+        <div>{children}</div>
       </div>
     </div>
   );

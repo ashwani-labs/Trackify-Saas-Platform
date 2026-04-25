@@ -83,9 +83,13 @@ export const addProjectMember = createAsyncThunk(
   'projects/addMember',
   async ({ projectId, memberData }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/projects/${projectId}/members`, memberData, {
-        headers: getAuthHeader(),
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/projects/${projectId}/members`,
+        memberData,
+        {
+          headers: getAuthHeader(),
+        }
+      );
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to add member');
@@ -192,7 +196,7 @@ const projectSlice = createSlice({
         state.members.push(action.payload);
       })
       .addCase(removeProjectMember.fulfilled, (state, action) => {
-        state.members = state.members.filter(m => m.userId !== action.payload);
+        state.members = state.members.filter((m) => m.userId !== action.payload);
       });
   },
 });

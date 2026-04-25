@@ -4,9 +4,7 @@ const AuthLayout = ({ children }) => {
   return (
     <div className="auth-container">
       <div className="auth-bg-blob"></div>
-      <div className="auth-card">
-        {children}
-      </div>
+      <div className="auth-card">{children}</div>
     </div>
   );
 };
