@@ -111,6 +111,8 @@ public class AuthService {
       }
 
       return user;
+    } catch (AppException e) {
+      throw e;
     } catch (Exception e) {
       log.error(
           "Error authenticating against tenant DB {}: {}. Root cause: {}", 
