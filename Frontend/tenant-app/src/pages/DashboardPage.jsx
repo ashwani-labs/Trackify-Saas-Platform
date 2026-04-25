@@ -15,6 +15,17 @@ import {
   Globe,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  Tooltip,
+  Legend,
+} from 'recharts';
 
 const DashboardPage = () => {
   const dispatch = useDispatch();
@@ -71,6 +82,16 @@ const DashboardPage = () => {
       icon: <CheckCircle2 size={24} />,
       sub: 'Completed',
     },
+  ];
+
+  const issueDistributionData = [
+    { name: 'To Do', value: stats?.todoCount || 0, color: 'var(--text-muted)' },
+    { name: 'In Progress', value: stats?.inProgressCount || 0, color: 'var(--warning)' },
+    { name: 'Done', value: stats?.doneCount || 0, color: 'var(--success)' },
+  ];
+
+  const workloadData = [
+    { name: 'Issues', total: stats?.totalIssues || 0, active: (stats?.todoCount || 0) + (stats?.inProgressCount || 0) },
   ];
 
   return (
@@ -144,6 +165,52 @@ const DashboardPage = () => {
           </div>
         ))}
       </div>
+
+      {/* Advanced Analytics */}
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '2rem' }}>
+        <div className="card glass-panel">
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Issue Distribution</h3>
+          <div style={{ height: '260px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={issueDistributionData}
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {issueDistributionData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-main)', borderRadius: '8px', backdropFilter: 'blur(8px)' }}
+                  itemStyle={{ color: 'var(--text-main)' }}
+                />
+                <Legend iconType="circle" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="card glass-panel">
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Workload Overview</h3>
+          <div style={{ height: '260px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={workloadData}>
+                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-main)', borderRadius: '8px', backdropFilter: 'blur(8px)' }}
+                />
+                <Bar dataKey="total" name="Total Issues" fill="var(--primary)" radius={[4, 4, 0, 0]} barSize={40} />
+                <Bar dataKey="active" name="Active Issues" fill="var(--accent)" radius={[4, 4, 0, 0]} barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </section>
 
       {/* Quick Actions */}
       <div style={{ marginTop: '4rem' }}>

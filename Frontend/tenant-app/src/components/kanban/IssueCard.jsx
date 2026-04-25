@@ -16,14 +16,24 @@ const IssueCard = ({ issue, onDragStart }) => {
     dispatch(setSelectedIssue(issue));
   };
 
+  const [isDragging, setIsDragging] = React.useState(false);
+
   return (
     <div
-      className="issue-card"
+      className={`issue-card ${isDragging ? 'dragging' : ''}`}
       draggable
       onDragStart={(e) => {
+        setIsDragging(true);
         e.dataTransfer.setData('issueId', String(issue.id));
         e.dataTransfer.setData('currentStatus', issue.status);
         onDragStart && onDragStart(issue.id);
+        
+        // This makes sure the card looks transparent during drag
+        setTimeout(() => e.target.style.opacity = '0.5', 0);
+      }}
+      onDragEnd={(e) => {
+        setIsDragging(false);
+        e.target.style.opacity = '1';
       }}
       onClick={handleClick}
     >

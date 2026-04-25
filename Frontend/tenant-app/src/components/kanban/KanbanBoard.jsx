@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   updateIssue,
@@ -17,17 +17,25 @@ const KanbanBoard = ({ projectId, filteredIssues, onCreateIssue }) => {
   const dispatch = useDispatch();
   const { issues: allIssues, isLoading } = useSelector((state) => state.issues);
   const issues = filteredIssues ?? allIssues;
-  const dragOverColumn = useRef(null);
+  const [dragOverColumn, setDragOverColumn] = useState(null);
 
   const issuesByStatus = (status) => issues.filter((i) => i.status === status);
 
   const handleDragOver = (e, status) => {
     e.preventDefault();
-    dragOverColumn.current = status;
+    if (dragOverColumn !== status) {
+      setDragOverColumn(status);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOverColumn(null);
   };
 
   const handleDrop = (e, newStatus) => {
     e.preventDefault();
+    setDragOverColumn(null);
     const issueId = Number(e.dataTransfer.getData('issueId'));
     const currentStatus = e.dataTransfer.getData('currentStatus');
 
@@ -70,10 +78,17 @@ const KanbanBoard = ({ projectId, filteredIssues, onCreateIssue }) => {
         return (
           <div
             key={status}
-            className="kanban-column"
+            className={`kanban-column ${dragOverColumn === status ? 'drag-over' : ''}`}
             data-status={status}
             onDragOver={(e) => handleDragOver(e, status)}
+            onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, status)}
+            style={{
+              transition: 'all 0.2s ease',
+              transform: dragOverColumn === status ? 'scale(1.02)' : 'scale(1)',
+              borderColor: dragOverColumn === status ? 'var(--primary)' : 'var(--border-main)',
+              boxShadow: dragOverColumn === status ? '0 0 0 2px rgba(99,102,241,0.2)' : 'none'
+            }}
           >
             <div className="kanban-header">
               <span className="column-title">{label}</span>

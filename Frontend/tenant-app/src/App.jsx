@@ -26,7 +26,17 @@ function App() {
     <Provider store={store}>
       <ErrorBoundary>
       <ThemeProvider>
-      <Toaster position="top-right" toastOptions={{ style: { background: '#161b22', color: '#f0f6fc', border: '1px solid #30363d' } }} />
+      <Toaster position="top-right" toastOptions={{ 
+        className: 'glass-panel',
+        style: { 
+          background: 'var(--bg-surface)', 
+          color: 'var(--text-main)', 
+          border: '1px solid var(--border-main)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          boxShadow: 'var(--shadow-lg)'
+        } 
+      }} />
       <Router>
         <Suspense fallback={<PageLoader />}>
         <Routes>

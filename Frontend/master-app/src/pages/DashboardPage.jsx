@@ -72,7 +72,7 @@ const DashboardPage = () => {
       </section>
 
       <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
-        <div className="card">
+        <div className="card glass-panel">
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Workspace Status Distribution</h3>
           <div style={{ height: '240px' }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -89,7 +89,7 @@ const DashboardPage = () => {
                   ))}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-main)', borderRadius: '8px' }}
+                  contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border-main)', borderRadius: '8px', backdropFilter: 'blur(8px)' }}
                   itemStyle={{ color: 'var(--text-main)' }}
                 />
                 <Legend iconType="circle" />
@@ -98,7 +98,7 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card glass-panel">
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Provisioning Trend</h3>
           <div style={{ height: '240px' }}>
             <ResponsiveContainer width="100%" height="100%">
