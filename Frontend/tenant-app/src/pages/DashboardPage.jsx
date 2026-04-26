@@ -263,8 +263,8 @@ const DashboardPage = () => {
       >
         <div className="card glass-panel">
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Issue Distribution</h3>
-          <div style={{ height: '260px' }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ height: '260px', minWidth: 0, position: 'relative' }}>
+            <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
                   data={issueDistributionData}
@@ -294,8 +294,8 @@ const DashboardPage = () => {
 
         <div className="card glass-panel">
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Workload Overview</h3>
-          <div style={{ height: '260px' }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ height: '260px', minWidth: 0, position: 'relative' }}>
+            <ResponsiveContainer width="100%" height={260}>
               <BarChart data={workloadData}>
                 <XAxis
                   dataKey="name"

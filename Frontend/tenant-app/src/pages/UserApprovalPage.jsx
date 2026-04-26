@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPendingUsers, updateUserStatus } from '../features/users/userSlice';
 import Pagination from '../components/common/Pagination';
-import { UserCheck, UserX, Clock, User, Mail, RefreshCw, ShieldAlert } from 'lucide-react';
+import { UserCheck, UserX, Clock, User, Mail, RefreshCw, ShieldCheck } from 'lucide-react';
 
 const UserApprovalPage = () => {
   const dispatch = useDispatch();

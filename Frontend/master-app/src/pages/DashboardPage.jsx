@@ -111,8 +111,8 @@ const DashboardPage = () => {
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>
             Workspace Status Distribution
           </h3>
-          <div style={{ height: '240px' }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ height: '240px', minWidth: 0, position: 'relative' }}>
+            <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
                   data={statusData}
@@ -142,8 +142,8 @@ const DashboardPage = () => {
 
         <div className="card glass-panel">
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Provisioning Trend</h3>
-          <div style={{ height: '240px' }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ height: '240px', minWidth: 0, position: 'relative' }}>
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={distributionData}>
                 <XAxis
                   dataKey="month"
