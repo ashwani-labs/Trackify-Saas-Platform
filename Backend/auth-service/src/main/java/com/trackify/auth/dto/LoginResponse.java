@@ -19,4 +19,16 @@ public class LoginResponse {
   private Long tenantId;
 
   private String domain;
+
+  @JsonProperty("profile_photo_url")
+  private String profilePhotoUrl;
+
+  @JsonProperty("company_name")
+  private String companyName;
+
+  @JsonProperty("logo_url")
+  private String logoUrl;
+
+  @JsonProperty("primary_color")
+  private String primaryColor;
 }

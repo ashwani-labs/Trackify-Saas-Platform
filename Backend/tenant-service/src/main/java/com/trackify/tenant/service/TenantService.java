@@ -77,6 +77,9 @@ public class TenantService {
             .dbPort(3306)
             .dbUsername(dbUsername)
             .dbPassword(dbPassword)
+            .companyName(request.getCompanyName())
+            .logoUrl(request.getLogoUrl())
+            .primaryColor(request.getPrimaryColor() != null ? request.getPrimaryColor() : "#6366f1")
             .build();
 
         tenant = tenantRepository.save(tenant);
@@ -429,6 +432,7 @@ public class TenantService {
                   full_name    VARCHAR(255),
                   role         ENUM('ADMIN','USER') NOT NULL DEFAULT 'USER',
                   status       ENUM('PENDING','ACTIVE','INACTIVE') DEFAULT 'PENDING',
+                  profile_photo_url VARCHAR(255),
                   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
                   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 );
@@ -521,6 +525,9 @@ public class TenantService {
         .status(tenant.getStatus())
         .createdAt(tenant.getCreatedAt())
         .updatedAt(tenant.getUpdatedAt())
+        .companyName(tenant.getCompanyName())
+        .logoUrl(tenant.getLogoUrl())
+        .primaryColor(tenant.getPrimaryColor())
         .build();
   }
 }

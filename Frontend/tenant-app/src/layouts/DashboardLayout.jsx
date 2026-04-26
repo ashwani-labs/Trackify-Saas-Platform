@@ -21,7 +21,7 @@ import {
 const DashboardLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user } = useSelector((state) => state.auth);
+  const { user, tenantLogo, primaryColor } = useSelector((state) => state.auth);
   const { theme, toggleTheme } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -50,8 +50,16 @@ const DashboardLayout = ({ children }) => {
     <div className="layout-container">
       {/* Sidebar */}
       <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          {!collapsed && <span className="logo-text">Trackify</span>}
+        <div className="sidebar-header" style={{ borderBottomColor: primaryColor }}>
+          {!collapsed && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {tenantLogo ? (
+                <img src={tenantLogo} alt="Logo" style={{ height: '32px', borderRadius: '4px' }} />
+              ) : (
+                <span className="logo-text">Trackify</span>
+              )}
+            </div>
+          )}
           <button
             className="theme-toggle hide-mobile"
             onClick={() => setCollapsed(!collapsed)}
@@ -111,7 +119,20 @@ const DashboardLayout = ({ children }) => {
                 borderLeft: '1px solid var(--border-main)',
               }}
             >
-              <div className="avatar-circle">{user?.email?.charAt(0).toUpperCase()}</div>
+              <div
+                className="avatar-circle"
+                style={{ overflow: 'hidden', backgroundColor: !user?.profilePhotoUrl ? primaryColor : undefined }}
+              >
+                {user?.profilePhotoUrl ? (
+                  <img
+                    src={user.profilePhotoUrl}
+                    alt="Profile"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  user?.email?.charAt(0).toUpperCase()
+                )}
+              </div>
               <div className="hide-mobile" style={{ flexDirection: 'column' }}>
                 <span style={{ fontSize: '0.875rem', fontWeight: '600' }}>
                   {user?.email?.split('@')[0]}

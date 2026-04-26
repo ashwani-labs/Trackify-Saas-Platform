@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: api-gateway
+  servlet:
+    multipart:
+      enabled: false
 
 services:
   auth-url: http://localhost:8081

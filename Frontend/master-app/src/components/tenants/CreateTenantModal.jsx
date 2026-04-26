@@ -10,6 +10,9 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
     code: '',
     adminEmail: '',
     plan: 'FREE',
+    companyName: '',
+    logoUrl: '',
+    primaryColor: '#6366f1',
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -161,6 +164,53 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
                   {errors.adminEmail}
                 </span>
               )}
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Company Display Name</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="e.g. Acme Corporation"
+                  value={formData.companyName}
+                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Primary Color</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="color"
+                    className="input-field"
+                    style={{ width: '45px', padding: '2px', height: '42px' }}
+                    value={formData.primaryColor}
+                    onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  />
+                  <input
+                    type="text"
+                    className="input-field"
+                    style={{ flex: 1 }}
+                    value={formData.primaryColor}
+                    onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Company Logo URL</label>
+              <input
+                type="text"
+                className="input-field"
+                placeholder="https://example.com/logo.png"
+                value={formData.logoUrl}
+                onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+              />
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                Paste a direct link to your organization's logo.
+              </span>
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>

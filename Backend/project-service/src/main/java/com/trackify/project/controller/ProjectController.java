@@ -24,8 +24,12 @@ public class ProjectController {
     private final JwtUtil jwtUtil;
 
     @GetMapping("/stats")
-    public ResponseEntity<ApiResponse<ProjectStatsResponse>> getProjectStats() {
-        return ResponseEntity.ok(ApiResponse.ok("Stats fetched successfully", projectService.getProjectStats()));
+    public ResponseEntity<ApiResponse<ProjectStatsResponse>> getProjectStats(
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+        String role = jwtUtil.extractRole(token);
+        return ResponseEntity.ok(ApiResponse.ok("Stats fetched successfully", projectService.getProjectStats(userId, role)));
     }
 
     @PostMapping
@@ -39,14 +43,25 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ProjectResponse>>> getAllProjects(Pageable pageable) {
-        Page<ProjectResponse> response = projectService.getAllProjects(pageable);
+    public ResponseEntity<ApiResponse<Page<ProjectResponse>>> getAllProjects(
+            @RequestHeader("Authorization") String authHeader,
+            Pageable pageable) {
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+        String role = jwtUtil.extractRole(token);
+        
+        Page<ProjectResponse> response = projectService.getAllProjects(pageable, userId, role);
         return ResponseEntity.ok(ApiResponse.ok("Projects fetched successfully", response));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProjectResponse>> getProjectById(@PathVariable("id") Long id) {
-        ProjectResponse response = projectService.getProjectById(id);
+    public ResponseEntity<ApiResponse<ProjectResponse>> getProjectById(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable("id") Long id) {
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+        String role = jwtUtil.extractRole(token);
+        ProjectResponse response = projectService.getProjectById(id, userId, role);
         return ResponseEntity.ok(ApiResponse.ok("Project fetched successfully", response));
     }
 

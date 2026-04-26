@@ -34,8 +34,8 @@ public class GatewayController {
   private String projectUrl;
 
   @RequestMapping("/**")
-  public ResponseEntity<String> proxyRequest(
-      HttpServletRequest request, @RequestBody(required = false) String body, HttpMethod method) {
+  public ResponseEntity<byte[]> proxyRequest(
+      HttpServletRequest request, HttpMethod method) {
     String path = request.getRequestURI();
     String queryParams = request.getQueryString() != null ? "?" + request.getQueryString() : "";
     String targetBaseUrl;
@@ -56,22 +56,38 @@ public class GatewayController {
     Enumeration<String> headerNames = request.getHeaderNames();
     while (headerNames.hasMoreElements()) {
       String headerName = headerNames.nextElement();
-      headers.add(headerName, request.getHeader(headerName));
+      if (!headerName.equalsIgnoreCase("Content-Length")) {
+        Enumeration<String> values = request.getHeaders(headerName);
+        while (values.hasMoreElements()) {
+          headers.add(headerName, values.nextElement());
+        }
+      }
     }
 
-    HttpEntity<String> entity = new HttpEntity<>(body, headers);
+    byte[] bodyBytes = null;
+    if (request.getContentLengthLong() > 0 || "chunked".equalsIgnoreCase(request.getHeader("Transfer-Encoding"))) {
+        try {
+            bodyBytes = request.getInputStream().readAllBytes();
+        } catch (Exception e) {
+            log.error("Failed to read request body: {}", e.getMessage());
+        }
+    }
+
+    HttpEntity<byte[]> entity = new HttpEntity<>(bodyBytes, headers);
 
     try {
-      log.info("Proxying request: {} {}", method, targetUrl);
-      return restTemplate.exchange(URI.create(targetUrl), method, entity, String.class);
+      log.info("Proxying request: {} {} with headers: {}", method, targetUrl, headers);
+      return restTemplate.exchange(URI.create(targetUrl), method, entity, byte[].class);
     } catch (HttpClientErrorException | HttpServerErrorException e) {
       return ResponseEntity.status(e.getStatusCode())
           .headers(e.getResponseHeaders())
-          .body(e.getResponseBodyAsString());
+          .body(e.getResponseBodyAsByteArray());
     } catch (Exception e) {
       log.error("Proxy error: {}", e.getMessage(), e);
+      String errorJson = String.format("{\"success\":false,\"message\":\"Internal Gateway Error: %s\"}", e.getMessage());
       return ResponseEntity.internalServerError()
-          .body(String.format("{\"success\":false,\"message\":\"Internal Gateway Error: %s\"}", e.getMessage()));
+          .header("Content-Type", "application/json")
+          .body(errorJson.getBytes());
     }
   }
 }

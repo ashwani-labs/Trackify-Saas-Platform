@@ -42,12 +42,32 @@ public class ProjectService {
         return mapToResponse(project);
     }
 
-    public ProjectStatsResponse getProjectStats() {
-        long totalProjects = projectRepository.count();
-        long todoCount = issueRepository.countByStatus(IssueStatus.TODO);
-        long inProgressCount = issueRepository.countByStatus(IssueStatus.IN_PROGRESS);
-        long doneCount = issueRepository.countByStatus(IssueStatus.DONE);
-        long totalIssues = todoCount + inProgressCount + doneCount;
+    public ProjectStatsResponse getProjectStats(Long userId, String role) {
+        long totalProjects, todoCount, inProgressCount, doneCount, totalIssues;
+
+        if ("ADMIN".equalsIgnoreCase(role) || "MASTER".equalsIgnoreCase(role)) {
+            totalProjects = projectRepository.count();
+            todoCount = issueRepository.countByStatus(IssueStatus.TODO);
+            inProgressCount = issueRepository.countByStatus(IssueStatus.IN_PROGRESS);
+            doneCount = issueRepository.countByStatus(IssueStatus.DONE);
+            totalIssues = todoCount + inProgressCount + doneCount;
+        } else {
+            List<Long> projectIds = projectRepository.findProjectIdsByUserId(userId);
+            if (projectIds.isEmpty()) {
+                return ProjectStatsResponse.builder()
+                        .totalProjects(0)
+                        .todoCount(0)
+                        .inProgressCount(0)
+                        .doneCount(0)
+                        .totalIssues(0)
+                        .build();
+            }
+            totalProjects = projectIds.size();
+            todoCount = issueRepository.countByStatusAndProjectIdIn(IssueStatus.TODO, projectIds);
+            inProgressCount = issueRepository.countByStatusAndProjectIdIn(IssueStatus.IN_PROGRESS, projectIds);
+            doneCount = issueRepository.countByStatusAndProjectIdIn(IssueStatus.DONE, projectIds);
+            totalIssues = issueRepository.countByProjectIdIn(projectIds);
+        }
 
         return ProjectStatsResponse.builder()
                 .totalProjects(totalProjects)
@@ -58,13 +78,25 @@ public class ProjectService {
                 .build();
     }
 
-    public Page<ProjectResponse> getAllProjects(Pageable pageable) {
-        return projectRepository.findAll(pageable).map(this::mapToResponse);
+    public Page<ProjectResponse> getAllProjects(Pageable pageable, Long userId, String role) {
+        log.info("Fetching projects for user: {} with role: {}", userId, role);
+        if ("ADMIN".equalsIgnoreCase(role) || "MASTER".equalsIgnoreCase(role)) {
+            return projectRepository.findAll(pageable).map(this::mapToResponse);
+        }
+        return projectRepository.findByMemberUserId(userId, pageable).map(this::mapToResponse);
     }
 
-    public ProjectResponse getProjectById(Long id) {
+    public ProjectResponse getProjectById(Long id, Long userId, String role) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> AppException.notFound("Project not found"));
+        
+        if (!"ADMIN".equalsIgnoreCase(role) && !"MASTER".equalsIgnoreCase(role)) {
+            List<Long> memberProjectIds = projectRepository.findProjectIdsByUserId(userId);
+            if (!memberProjectIds.contains(id)) {
+                throw AppException.forbidden("You do not have access to this project");
+            }
+        }
+        
         return mapToResponse(project);
     }
 

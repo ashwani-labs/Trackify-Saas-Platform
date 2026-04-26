@@ -20,4 +20,7 @@ public class TenantResponse {
   private TenantStatus status;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
+  private String companyName;
+  private String logoUrl;
+  private String primaryColor;
 }

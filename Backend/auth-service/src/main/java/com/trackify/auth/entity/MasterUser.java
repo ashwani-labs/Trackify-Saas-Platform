@@ -35,6 +35,9 @@ public class MasterUser {
   @Builder.Default
   private boolean isActive = true;
 
+  @Column(name = "profile_photo_url")
+  private String profilePhotoUrl;
+
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;

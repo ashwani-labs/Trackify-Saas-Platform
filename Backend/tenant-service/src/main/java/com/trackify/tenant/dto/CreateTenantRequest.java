@@ -19,4 +19,8 @@ public class CreateTenantRequest {
   private String adminEmail;
 
   private Plan plan;
+
+  private String companyName;
+  private String logoUrl;
+  private String primaryColor;
 }

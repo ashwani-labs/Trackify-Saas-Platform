@@ -54,6 +54,16 @@ public class Tenant {
   @Column(name = "db_password", nullable = false)
   private String dbPassword;
 
+  @Column(name = "logo_url")
+  private String logoUrl;
+
+  @Column(name = "company_name")
+  private String companyName;
+
+  @Column(name = "primary_color")
+  @Builder.Default
+  private String primaryColor = "#6366f1"; // Default indigo
+
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;

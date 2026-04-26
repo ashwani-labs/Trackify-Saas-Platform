@@ -8,14 +8,38 @@ export const loginUser = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
-      const { token, role, tenant_id: tenantId, domain } = response.data;
+      const {
+        token,
+        role,
+        tenant_id: tenantId,
+        domain,
+        profile_photo_url: profilePhotoUrl,
+        company_name: companyName,
+        logo_url: logoUrl,
+        primary_color: primaryColor,
+      } = response.data;
 
-      // Store token and tenant info in localStorage
+      // Store in localStorage
       localStorage.setItem('tenantToken', token);
       localStorage.setItem('tenantId', tenantId);
       localStorage.setItem('tenantDomain', domain);
+      localStorage.setItem('tenantLogo', logoUrl || '');
+      localStorage.setItem('tenantColor', primaryColor || '#6366f1');
+      localStorage.setItem('tenantUserEmail', email || '');
+      localStorage.setItem('tenantUserRole', role || '');
+      localStorage.setItem('tenantUserProfilePhoto', profilePhotoUrl || '');
 
-      return { token, role, tenantId, domain, email };
+      return {
+        token,
+        role,
+        tenantId,
+        domain,
+        email,
+        profilePhotoUrl,
+        companyName,
+        logoUrl,
+        primaryColor,
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
@@ -57,10 +81,16 @@ export const changePassword = createAsyncThunk(
 );
 
 const initialState = {
-  user: null,
+  user: localStorage.getItem('tenantToken') ? {
+    email: localStorage.getItem('tenantUserEmail'),
+    role: localStorage.getItem('tenantUserRole'),
+    profilePhotoUrl: localStorage.getItem('tenantUserProfilePhoto'),
+  } : null,
   token: localStorage.getItem('tenantToken'),
   tenantId: localStorage.getItem('tenantId'),
   tenantDomain: localStorage.getItem('tenantDomain'),
+  tenantLogo: localStorage.getItem('tenantLogo'),
+  primaryColor: localStorage.getItem('tenantColor') || '#6366f1',
   isAuthenticated: !!localStorage.getItem('tenantToken'),
   loading: false,
   error: null,
@@ -76,9 +106,21 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       localStorage.removeItem('tenantToken');
       localStorage.removeItem('tenantId');
+      localStorage.removeItem('tenantDomain');
+      localStorage.removeItem('tenantLogo');
+      localStorage.removeItem('tenantColor');
+      localStorage.removeItem('tenantUserEmail');
+      localStorage.removeItem('tenantUserRole');
+      localStorage.removeItem('tenantUserProfilePhoto');
     },
     clearError: (state) => {
       state.error = null;
+    },
+    updateProfilePhoto: (state, action) => {
+      if (state.user) {
+        state.user.profilePhotoUrl = action.payload;
+        localStorage.setItem('tenantUserProfilePhoto', action.payload);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -93,7 +135,13 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.tenantId = action.payload.tenantId;
         state.tenantDomain = action.payload.domain;
-        state.user = { email: action.payload.email, role: action.payload.role };
+        state.tenantLogo = action.payload.logoUrl;
+        state.primaryColor = action.payload.primaryColor || '#6366f1';
+        state.user = {
+          email: action.payload.email,
+          role: action.payload.role,
+          profilePhotoUrl: action.payload.profilePhotoUrl,
+        };
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -123,5 +171,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, updateProfilePhoto } = authSlice.actions;
 export default authSlice.reducer;

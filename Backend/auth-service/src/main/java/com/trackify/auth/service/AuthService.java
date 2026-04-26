@@ -54,7 +54,11 @@ public class AuthService {
         throw AppException.unauthorized("Invalid email or password");
       }
       String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name(), null, user.getId());
-      return LoginResponse.builder().token(token).role(user.getRole().name()).build();
+      return LoginResponse.builder()
+          .token(token)
+          .role(user.getRole().name())
+          .profilePhotoUrl(user.getProfilePhotoUrl())
+          .build();
     }
 
     // 2. Try Tenant User (via lookup)
@@ -84,6 +88,10 @@ public class AuthService {
         .role(role)
         .tenantId(tenant.getId())
         .domain(tenant.getDomain())
+        .profilePhotoUrl((String) userData.get("profile_photo_url"))
+        .companyName(tenant.getCompanyName())
+        .logoUrl(tenant.getLogoUrl())
+        .primaryColor(tenant.getPrimaryColor())
         .build();
   }
 
@@ -94,7 +102,7 @@ public class AuthService {
 
     try {
       String sql = String.format(
-          "SELECT id, password, role, status FROM %s.users WHERE email = ?", 
+          "SELECT id, password, role, status, profile_photo_url FROM %s.users WHERE email = ?", 
           tenant.getDbName()
       );
       
@@ -249,6 +257,37 @@ public class AuthService {
     } catch (Exception e) {
         log.error("Failed to change password: {}", e.getMessage());
         throw AppException.internalError("Could not update password. Please try again.");
+    }
+  }
+
+  public void updateProfilePhoto(String email, String photoUrl) {
+    // 1. Try Platform Master User
+    Optional<MasterUser> masterUserOpt = masterUserRepository.findByEmail(email);
+    if (masterUserOpt.isPresent()) {
+      MasterUser user = masterUserOpt.get();
+      user.setProfilePhotoUrl(photoUrl);
+      masterUserRepository.save(user);
+      return;
+    }
+
+    // 2. Try Tenant User
+    UserLookup lookup =
+        userLookupRepository
+            .findByEmail(email)
+            .orElseThrow(() -> AppException.notFound("User not found"));
+
+    Tenant tenant =
+        tenantRepository
+            .findById(lookup.getTenantId())
+            .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
+
+    try {
+      String sql =
+          String.format("UPDATE %s.users SET profile_photo_url = ? WHERE email = ?", tenant.getDbName());
+      jdbcTemplate.update(sql, photoUrl, email);
+    } catch (Exception e) {
+      log.error("Failed to update profile photo: {}", e.getMessage());
+      throw AppException.internalError("Could not update profile photo");
     }
   }
 }

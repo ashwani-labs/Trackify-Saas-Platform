@@ -12,8 +12,10 @@ import {
   CheckCircle2,
   Loader2,
 } from 'lucide-react';
-import { changePassword } from '../features/auth/authSlice';
+import { changePassword, updateProfilePhoto } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
+import axios from '../utils/axios';
+import { Camera } from 'lucide-react';
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -60,6 +62,42 @@ const ProfilePage = () => {
     }
   };
 
+  const [isUploading, setIsUploading] = useState(false);
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    // Validate size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('File size must be less than 2MB');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setIsUploading(true);
+    try {
+      const response = await axios.post('/auth/profile/photo', formData);
+      
+      if (response.data.status === 'success') {
+        const photoUrl = response.data.data.url;
+        toast.success('Profile photo updated');
+        dispatch(updateProfilePhoto(photoUrl));
+      }
+    } catch (err) {
+      toast.error('Failed to upload photo');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1000px', margin: '0 auto' }}>
       <header className="hero-section" style={{ marginBottom: '3rem' }}>
@@ -83,17 +121,51 @@ const ProfilePage = () => {
           <div
             style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}
           >
-            <div
-              className="avatar-circle"
-              style={{
-                width: '80px',
-                height: '80px',
-                fontSize: '2rem',
-                background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
-                color: 'white',
-              }}
-            >
-              {user?.email?.charAt(0).toUpperCase()}
+            <div style={{ position: 'relative' }}>
+              <div
+                className="avatar-circle"
+                style={{
+                  width: '100px',
+                  height: '100px',
+                  fontSize: '2.5rem',
+                  background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
+                  color: 'white',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}
+              >
+                {user?.profilePhotoUrl ? (
+                  <img src={user.profilePhotoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  user?.email?.charAt(0).toUpperCase()
+                )}
+                
+                {isUploading && (
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Loader2 size={24} style={{ animation: 'loading 2s linear infinite', color: 'white' }} />
+                  </div>
+                )}
+              </div>
+              
+              <label 
+                style={{ 
+                  position: 'absolute', 
+                  bottom: '0', 
+                  right: '0', 
+                  background: 'var(--primary)', 
+                  color: 'white', 
+                  padding: '6px', 
+                  borderRadius: '50%', 
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Camera size={14} />
+                <input type="file" hidden accept="image/*" onChange={handlePhotoUpload} disabled={isUploading} />
+              </label>
             </div>
             <div>
               <h2 style={{ fontSize: '1.5rem' }}>{user?.email?.split('@')[0]}</h2>

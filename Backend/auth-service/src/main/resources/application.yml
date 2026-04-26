@@ -16,6 +16,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    servlet:
+      multipart:
+        max-file-size: 10MB
+        max-request-size: 10MB
 
 jwt:
   secret: ${JWT_SECRET:8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=}
