@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 import { LayoutDashboard, Users, LogOut, Sun, Moon, Menu, X, Search, Layout } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
