@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectStatsResponse {
-    private long totalProjects;
-    private long todoCount;
-    private long inProgressCount;
-    private long doneCount;
-    private long totalIssues;
+  private long totalProjects;
+  private long todoCount;
+  private long inProgressCount;
+  private long doneCount;
+  private long totalIssues;
 }

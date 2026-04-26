@@ -2,21 +2,27 @@ package com.trackify.project.repository;
 
 import com.trackify.project.entity.Issue;
 import com.trackify.project.enums.IssueStatus;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface IssueRepository extends JpaRepository<Issue, Long> {
-    List<Issue> findAllByProjectId(Long projectId);
-    Page<Issue> findAllByProjectId(Long projectId, Pageable pageable);
-    List<Issue> findAllByAssigneeId(Long assigneeId);
-    List<Issue> findAllByProjectIdAndStatus(Long projectId, IssueStatus status);
-    List<Issue> findAllBySprintId(Long sprintId);
-    long countByStatus(IssueStatus status);
-    long countByProjectIdIn(List<Long> projectIds);
-    long countByStatusAndProjectIdIn(IssueStatus status, List<Long> projectIds);
+  List<Issue> findAllByProjectId(Long projectId);
+
+  Page<Issue> findAllByProjectId(Long projectId, Pageable pageable);
+
+  List<Issue> findAllByAssigneeId(Long assigneeId);
+
+  List<Issue> findAllByProjectIdAndStatus(Long projectId, IssueStatus status);
+
+  List<Issue> findAllBySprintId(Long sprintId);
+
+  long countByStatus(IssueStatus status);
+
+  long countByProjectIdIn(List<Long> projectIds);
+
+  long countByStatusAndProjectIdIn(IssueStatus status, List<Long> projectIds);
 }

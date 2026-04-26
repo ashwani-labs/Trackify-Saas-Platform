@@ -38,18 +38,21 @@ class TenantControllerTest {
     request.setAdminEmail("admin@acme.com");
     request.setPlan(Plan.PRO);
 
-    TenantResponse response = TenantResponse.builder()
-        .id(1L)
-        .name("Acme Corp")
-        .domain("acme")
-        .status(TenantStatus.ACTIVE)
-        .build();
+    TenantResponse response =
+        TenantResponse.builder()
+            .id(1L)
+            .name("Acme Corp")
+            .domain("acme")
+            .status(TenantStatus.ACTIVE)
+            .build();
 
     when(tenantService.createTenant(any(CreateTenantRequest.class))).thenReturn(response);
 
-    mockMvc.perform(post("/tenants")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+    mockMvc
+        .perform(
+            post("/tenants")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.data.id").value(1L))
         .andExpect(jsonPath("$.data.name").value("Acme Corp"))

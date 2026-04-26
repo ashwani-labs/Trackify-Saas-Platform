@@ -35,12 +35,13 @@ class ProjectServiceTest {
 
   @Test
   void testCreateProject_Success() {
-    Project savedProject = Project.builder()
-        .id(1L)
-        .name("Test Project")
-        .description("Description")
-        .ownerId(10L)
-        .build();
+    Project savedProject =
+        Project.builder()
+            .id(1L)
+            .name("Test Project")
+            .description("Description")
+            .ownerId(10L)
+            .build();
 
     when(projectRepository.save(any(Project.class))).thenReturn(savedProject);
 

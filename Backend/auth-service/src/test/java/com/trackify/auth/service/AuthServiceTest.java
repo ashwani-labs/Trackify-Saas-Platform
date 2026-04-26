@@ -1,14 +1,12 @@
 package com.trackify.auth.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import com.trackify.auth.dto.LoginRequest;
 import com.trackify.auth.dto.LoginResponse;
-
 import com.trackify.auth.entity.Tenant;
 import com.trackify.auth.entity.UserLookup;
 import com.trackify.auth.repository.MasterUserRepository;
@@ -64,15 +62,16 @@ class AuthServiceTest {
     tenant.setDbName("tenant_testcorp");
     when(tenantRepository.findById(1L)).thenReturn(Optional.of(tenant));
 
-    Map<String, Object> userData = Map.of(
-        "id", 100L,
-        "password", "hashed_password",
-        "role", "EMPLOYEE",
-        "status", "ACTIVE"
-    );
+    Map<String, Object> userData =
+        Map.of(
+            "id", 100L,
+            "password", "hashed_password",
+            "role", "EMPLOYEE",
+            "status", "ACTIVE");
     when(jdbcTemplate.queryForMap(anyString(), eq("test@trackify.com"))).thenReturn(userData);
     when(passwordEncoder.matches("password123", "hashed_password")).thenReturn(true);
-    when(jwtUtil.generateToken("test@trackify.com", "EMPLOYEE", 1L, 100L)).thenReturn("mock-jwt-token");
+    when(jwtUtil.generateToken("test@trackify.com", "EMPLOYEE", 1L, 100L))
+        .thenReturn("mock-jwt-token");
 
     // Act
     LoginResponse response = authService.login(loginRequest);
@@ -100,17 +99,18 @@ class AuthServiceTest {
     tenant.setDbName("tenant_testcorp");
     when(tenantRepository.findById(1L)).thenReturn(Optional.of(tenant));
 
-    Map<String, Object> userData = Map.of(
-        "id", 100L,
-        "password", "hashed_password",
-        "role", "EMPLOYEE",
-        "status", "ACTIVE"
-    );
+    Map<String, Object> userData =
+        Map.of(
+            "id", 100L,
+            "password", "hashed_password",
+            "role", "EMPLOYEE",
+            "status", "ACTIVE");
     when(jdbcTemplate.queryForMap(anyString(), eq("test@trackify.com"))).thenReturn(userData);
     when(passwordEncoder.matches("password123", "hashed_password")).thenReturn(false);
 
     // Act & Assert
-    AppException exception = assertThrows(AppException.class, () -> authService.login(loginRequest));
+    AppException exception =
+        assertThrows(AppException.class, () -> authService.login(loginRequest));
     assertEquals("Invalid email or password", exception.getMessage());
   }
 
@@ -129,16 +129,17 @@ class AuthServiceTest {
     tenant.setDbName("tenant_testcorp");
     when(tenantRepository.findById(1L)).thenReturn(Optional.of(tenant));
 
-    Map<String, Object> userData = Map.of(
-        "id", 100L,
-        "password", "hashed_password",
-        "role", "EMPLOYEE",
-        "status", "INACTIVE"
-    );
+    Map<String, Object> userData =
+        Map.of(
+            "id", 100L,
+            "password", "hashed_password",
+            "role", "EMPLOYEE",
+            "status", "INACTIVE");
     when(jdbcTemplate.queryForMap(anyString(), eq("test@trackify.com"))).thenReturn(userData);
 
     // Act & Assert
-    AppException exception = assertThrows(AppException.class, () -> authService.login(loginRequest));
+    AppException exception =
+        assertThrows(AppException.class, () -> authService.login(loginRequest));
     assertEquals("Your account is inactive", exception.getMessage());
   }
 }

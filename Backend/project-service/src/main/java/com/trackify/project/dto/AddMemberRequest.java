@@ -7,8 +7,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddMemberRequest {
-    private Long userId;
-    private String userEmail;
-    private String userName;
-    private String userRole;
+  private Long userId;
+  private String userEmail;
+  private String userName;
+  private String userRole;
 }

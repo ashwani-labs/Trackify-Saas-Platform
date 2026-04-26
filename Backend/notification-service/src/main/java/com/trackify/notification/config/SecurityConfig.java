@@ -12,16 +12,20 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/notifications/**").permitAll()
-                .requestMatchers("/health/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers("/api/notifications/**")
+                    .permitAll()
+                    .requestMatchers("/health/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        return http.build();
-    }
+    return http.build();
+  }
 }

@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IssueAttachmentRepository extends JpaRepository<IssueAttachment, Long> {
-    List<IssueAttachment> findAllByIssueId(Long issueId);
+  List<IssueAttachment> findAllByIssueId(Long issueId);
 }

@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final EmailService emailService;
+  private final EmailService emailService;
 
-    @PostMapping("/email")
-    public ResponseEntity<ApiResponse<String>> sendEmail(@RequestBody EmailRequest request) {
-        // Run in separate thread or handle normally, kept synchronous for simplicity right now
-        emailService.sendEmail(request);
-        return ResponseEntity.ok(ApiResponse.ok("Email request processed", null));
-    }
+  @PostMapping("/email")
+  public ResponseEntity<ApiResponse<String>> sendEmail(@RequestBody EmailRequest request) {
+    // Run in separate thread or handle normally, kept synchronous for simplicity right now
+    emailService.sendEmail(request);
+    return ResponseEntity.ok(ApiResponse.ok("Email request processed", null));
+  }
 }

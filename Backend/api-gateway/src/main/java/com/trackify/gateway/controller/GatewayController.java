@@ -10,7 +10,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
@@ -34,8 +33,7 @@ public class GatewayController {
   private String projectUrl;
 
   @RequestMapping("/**")
-  public ResponseEntity<byte[]> proxyRequest(
-      HttpServletRequest request, HttpMethod method) {
+  public ResponseEntity<byte[]> proxyRequest(HttpServletRequest request, HttpMethod method) {
     String path = request.getRequestURI();
     String queryParams = request.getQueryString() != null ? "?" + request.getQueryString() : "";
     String targetBaseUrl;
@@ -65,12 +63,13 @@ public class GatewayController {
     }
 
     byte[] bodyBytes = null;
-    if (request.getContentLengthLong() > 0 || "chunked".equalsIgnoreCase(request.getHeader("Transfer-Encoding"))) {
-        try {
-            bodyBytes = request.getInputStream().readAllBytes();
-        } catch (Exception e) {
-            log.error("Failed to read request body: {}", e.getMessage());
-        }
+    if (request.getContentLengthLong() > 0
+        || "chunked".equalsIgnoreCase(request.getHeader("Transfer-Encoding"))) {
+      try {
+        bodyBytes = request.getInputStream().readAllBytes();
+      } catch (Exception e) {
+        log.error("Failed to read request body: {}", e.getMessage());
+      }
     }
 
     HttpEntity<byte[]> entity = new HttpEntity<>(bodyBytes, headers);
@@ -84,7 +83,9 @@ public class GatewayController {
           .body(e.getResponseBodyAsByteArray());
     } catch (Exception e) {
       log.error("Proxy error: {}", e.getMessage(), e);
-      String errorJson = String.format("{\"success\":false,\"message\":\"Internal Gateway Error: %s\"}", e.getMessage());
+      String errorJson =
+          String.format(
+              "{\"success\":false,\"message\":\"Internal Gateway Error: %s\"}", e.getMessage());
       return ResponseEntity.internalServerError()
           .header("Content-Type", "application/json")
           .body(errorJson.getBytes());

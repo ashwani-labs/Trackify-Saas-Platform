@@ -14,17 +14,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IssueRequest {
-    @NotBlank(message = "Issue title is required")
-    private String title;
-    private String description;
-    
-    private IssueStatus status;
-    private IssuePriority priority;
-    
-    @NotNull(message = "Project ID is required")
-    private Long projectId;
-    
-    private Long assigneeId;
-    
-    private Long sprintId;
+  @NotBlank(message = "Issue title is required")
+  private String title;
+
+  private String description;
+
+  private IssueStatus status;
+  private IssuePriority priority;
+
+  @NotNull(message = "Project ID is required")
+  private Long projectId;
+
+  private Long assigneeId;
+
+  private Long sprintId;
 }

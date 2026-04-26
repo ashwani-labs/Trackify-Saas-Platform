@@ -8,5 +8,5 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "storage")
 public class StorageProperties {
-    private String location = "uploads/profiles";
+  private String location = "uploads/profiles";
 }

@@ -10,11 +10,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -52,13 +52,12 @@ public class LocalStorageService implements StorageService {
     try {
       if (originalFilename.contains("..")) {
         // This is a security check
-        throw AppException.badRequest("Cannot store file with relative path outside current directory " + originalFilename);
+        throw AppException.badRequest(
+            "Cannot store file with relative path outside current directory " + originalFilename);
       }
       try (InputStream inputStream = file.getInputStream()) {
         Files.copy(
-            inputStream,
-            this.rootLocation.resolve(fileKey),
-            StandardCopyOption.REPLACE_EXISTING);
+            inputStream, this.rootLocation.resolve(fileKey), StandardCopyOption.REPLACE_EXISTING);
       }
     } catch (IOException e) {
       throw AppException.internalError("Failed to store file: " + e.getMessage());

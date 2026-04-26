@@ -15,18 +15,18 @@ import com.trackify.tenant.repository.TenantRepository;
 import com.trackify.tenant.repository.UserLookupRepository;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.UUID;
 import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,14 +40,14 @@ public class TenantService {
   private final JdbcTemplate jdbcTemplate;
   private final PasswordEncoder passwordEncoder;
 
-    @Value("${tenant.app-url-pattern:http://%s.trackify.com:5174}")
-    private String appUrlPattern;
+  @Value("${tenant.app-url-pattern:http://%s.trackify.com:5174}")
+  private String appUrlPattern;
 
-    @Value("${tenant.datasource.default-host:localhost}")
-    private String defaultDbHost;
+  @Value("${tenant.datasource.default-host:localhost}")
+  private String defaultDbHost;
 
-    @Value("${services.notification-url:http://localhost:8084}")
-    private String notificationUrl;
+  @Value("${services.notification-url:http://localhost:8084}")
+  private String notificationUrl;
 
   @Transactional
   public TenantResponse createTenant(CreateTenantRequest request) {
@@ -56,7 +56,10 @@ public class TenantService {
     }
 
     if (userLookupRepository.findByEmail(request.getAdminEmail()).isPresent()) {
-      throw AppException.conflict("Admin email '" + request.getAdminEmail() + "' is already registered with another organization");
+      throw AppException.conflict(
+          "Admin email '"
+              + request.getAdminEmail()
+              + "' is already registered with another organization");
     }
 
     String dbName = "trackify_tenant_" + request.getCode();
@@ -82,36 +85,42 @@ public class TenantService {
             .primaryColor(request.getPrimaryColor() != null ? request.getPrimaryColor() : "#6366f1")
             .build();
 
-        tenant = tenantRepository.save(tenant);
-        
-        // Ensure metadata is committed before long-running provisioning
-        // This avoids holding locks and handles the implicit commit of DDL better
-        log.info("Tenant metadata saved for {}. Starting background provisioning...", request.getCode());
-        
-        try {
-            provisionTenantDatabase(dbName, dbUsername, dbPassword, request.getAdminEmail(), adminPassword);
-            
-            UserLookup userLookup =
-                UserLookup.builder().email(request.getAdminEmail()).tenantId(tenant.getId()).build();
-            userLookupRepository.save(userLookup);
-    
-            sendWelcomeEmail(request.getAdminEmail(), request.getName(), adminPassword, request.getCode());
-        } catch (Exception e) {
-            log.error("Failed to fully provision tenant {}: {}", request.getCode(), e.getMessage());
-            // Cleanup: Since DDL in provisionTenantDatabase triggered an implicit commit, 
-            // the Tenant record is now permanently in the DB. We must delete it manually
-            // if we want to allow retries with the same organization code.
-            try {
-                tenantRepository.delete(tenant);
-                log.info("Successfully cleaned up orphan tenant record for {}", request.getCode());
-            } catch (Exception cleanupEx) {
-                log.error("Critical: Failed to cleanup orphan tenant record for {}: {}", request.getCode(), cleanupEx.getMessage());
-            }
-            throw e;
-        }
+    tenant = tenantRepository.save(tenant);
 
-        return mapToResponse(tenant);
+    // Ensure metadata is committed before long-running provisioning
+    // This avoids holding locks and handles the implicit commit of DDL better
+    log.info(
+        "Tenant metadata saved for {}. Starting background provisioning...", request.getCode());
+
+    try {
+      provisionTenantDatabase(
+          dbName, dbUsername, dbPassword, request.getAdminEmail(), adminPassword);
+
+      UserLookup userLookup =
+          UserLookup.builder().email(request.getAdminEmail()).tenantId(tenant.getId()).build();
+      userLookupRepository.save(userLookup);
+
+      sendWelcomeEmail(
+          request.getAdminEmail(), request.getName(), adminPassword, request.getCode());
+    } catch (Exception e) {
+      log.error("Failed to fully provision tenant {}: {}", request.getCode(), e.getMessage());
+      // Cleanup: Since DDL in provisionTenantDatabase triggered an implicit commit,
+      // the Tenant record is now permanently in the DB. We must delete it manually
+      // if we want to allow retries with the same organization code.
+      try {
+        tenantRepository.delete(tenant);
+        log.info("Successfully cleaned up orphan tenant record for {}", request.getCode());
+      } catch (Exception cleanupEx) {
+        log.error(
+            "Critical: Failed to cleanup orphan tenant record for {}: {}",
+            request.getCode(),
+            cleanupEx.getMessage());
+      }
+      throw e;
     }
+
+    return mapToResponse(tenant);
+  }
 
   @Transactional
   public void deleteTenant(Long id) {
@@ -128,7 +137,8 @@ public class TenantService {
     try {
       jdbcTemplate.execute("DROP DATABASE IF EXISTS " + tenant.getDbName());
       jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'%%'", tenant.getDbUsername()));
-      jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'localhost'", tenant.getDbUsername()));
+      jdbcTemplate.execute(
+          String.format("DROP USER IF EXISTS '%s'@'localhost'", tenant.getDbUsername()));
       jdbcTemplate.execute("FLUSH PRIVILEGES");
     } catch (Exception e) {
       log.error("Failed to drop database or user for {}: {}", tenant.getDbName(), e.getMessage());
@@ -140,7 +150,7 @@ public class TenantService {
 
     // 3. Delete tenant record
     tenantRepository.delete(tenant);
-    
+
     log.info("Tenant {} deleted successfully", tenant.getName());
   }
 
@@ -192,11 +202,13 @@ public class TenantService {
 
     UserStatus initialStatus = UserStatus.PENDING;
     if (request.getStatus() != null) {
-        try {
-            initialStatus = UserStatus.valueOf(request.getStatus().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid status provided in registration: {}, defaulting to PENDING", request.getStatus());
-        }
+      try {
+        initialStatus = UserStatus.valueOf(request.getStatus().toUpperCase());
+      } catch (IllegalArgumentException e) {
+        log.warn(
+            "Invalid status provided in registration: {}, defaulting to PENDING",
+            request.getStatus());
+      }
     }
 
     try {
@@ -212,12 +224,13 @@ public class TenantService {
 
       Map<String, Object> userMap =
           tenantJdbc.queryForMap("SELECT * FROM users WHERE email = ?", request.getEmail());
-          
+
       // Trigger invitation email if ACTIVE (direct add by admin)
       if (initialStatus == UserStatus.ACTIVE) {
-          sendInviteEmail(request.getEmail(), tenant.getName(), request.getPassword(), tenant.getDomain());
+        sendInviteEmail(
+            request.getEmail(), tenant.getName(), request.getPassword(), tenant.getDomain());
       }
-      
+
       return mapToUserResponse(userMap, tenant.getId());
     } catch (Exception e) {
       log.error("Failed to register user in tenant DB: {}", e.getMessage());
@@ -227,25 +240,31 @@ public class TenantService {
 
   public Page<UserResponse> getPendingUsers(Long tenantId, Pageable pageable) {
     Tenant tenant =
-        tenantRepository.findById(tenantId).orElseThrow(() -> AppException.notFound("Tenant not found"));
+        tenantRepository
+            .findById(tenantId)
+            .orElseThrow(() -> AppException.notFound("Tenant not found"));
 
     JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
-    Long total = tenantJdbc.queryForObject("SELECT COUNT(*) FROM users WHERE status = 'PENDING'", Long.class);
+    Long total =
+        tenantJdbc.queryForObject(
+            "SELECT COUNT(*) FROM users WHERE status = 'PENDING'", Long.class);
 
     String sql = "SELECT * FROM users WHERE status = 'PENDING' LIMIT ? OFFSET ?";
     List<Map<String, Object>> users =
         tenantJdbc.queryForList(sql, pageable.getPageSize(), pageable.getOffset());
 
-    List<UserResponse> userResponses = users.stream()
-        .map(map -> mapToUserResponse(map, tenantId))
-        .collect(Collectors.toList());
+    List<UserResponse> userResponses =
+        users.stream().map(map -> mapToUserResponse(map, tenantId)).collect(Collectors.toList());
 
-    return new org.springframework.data.domain.PageImpl<>(userResponses, pageable, total != null ? total : 0);
+    return new org.springframework.data.domain.PageImpl<>(
+        userResponses, pageable, total != null ? total : 0);
   }
 
   public Page<UserResponse> getAllUsers(Long tenantId, Pageable pageable) {
     Tenant tenant =
-        tenantRepository.findById(tenantId).orElseThrow(() -> AppException.notFound("Tenant not found"));
+        tenantRepository
+            .findById(tenantId)
+            .orElseThrow(() -> AppException.notFound("Tenant not found"));
 
     JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
     Long total = tenantJdbc.queryForObject("SELECT COUNT(*) FROM users", Long.class);
@@ -254,31 +273,30 @@ public class TenantService {
     List<Map<String, Object>> users =
         tenantJdbc.queryForList(sql, pageable.getPageSize(), pageable.getOffset());
 
-    List<UserResponse> userResponses = users.stream()
-        .map(map -> mapToUserResponse(map, tenantId))
-        .collect(Collectors.toList());
+    List<UserResponse> userResponses =
+        users.stream().map(map -> mapToUserResponse(map, tenantId)).collect(Collectors.toList());
 
-    return new org.springframework.data.domain.PageImpl<>(userResponses, pageable, total != null ? total : 0);
+    return new org.springframework.data.domain.PageImpl<>(
+        userResponses, pageable, total != null ? total : 0);
   }
 
   @Transactional
   public UserResponse updateUserStatus(Long tenantId, Long userId, UserStatus status) {
     Tenant tenant =
-        tenantRepository.findById(tenantId).orElseThrow(() -> AppException.notFound("Tenant not found"));
+        tenantRepository
+            .findById(tenantId)
+            .orElseThrow(() -> AppException.notFound("Tenant not found"));
 
     JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
     try {
       tenantJdbc.update("UPDATE users SET status = ? WHERE id = ?", status.name(), userId);
       Map<String, Object> userMap =
           tenantJdbc.queryForMap("SELECT * FROM users WHERE id = ?", userId);
-          
+
       if (status == UserStatus.ACTIVE) {
-          sendApprovalEmail(
-              (String) userMap.get("email"), 
-              (String) userMap.get("full_name")
-          );
+        sendApprovalEmail((String) userMap.get("email"), (String) userMap.get("full_name"));
       }
-          
+
       return mapToUserResponse(userMap, tenantId);
     } catch (Exception e) {
       log.error("Failed to update user status: {}", e.getMessage());
@@ -288,43 +306,55 @@ public class TenantService {
 
   private void sendApprovalEmail(String email, String fullName) {
     try {
-      org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+      org.springframework.web.client.RestTemplate restTemplate =
+          new org.springframework.web.client.RestTemplate();
       java.util.Map<String, String> request = new java.util.HashMap<>();
       request.put("to", email);
       request.put("subject", "Account Approved");
-      request.put("body", "Hello " + fullName + ",\n\nYour account has been approved. You can now log in.\n\nBest,\nTrackify Team");
-      
-      org.springframework.http.ResponseEntity<String> response = restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
+      request.put(
+          "body",
+          "Hello "
+              + fullName
+              + ",\n\nYour account has been approved. You can now log in.\n\nBest,\nTrackify Team");
+
+      org.springframework.http.ResponseEntity<String> response =
+          restTemplate.postForEntity(
+              notificationUrl + "/api/notifications/email", request, String.class);
       log.info("Approval email response status: {}", response.getStatusCode());
     } catch (Exception e) {
-      log.error("Failed to send approval email to notification service: {} (URL: {})", e.getMessage(), notificationUrl);
+      log.error(
+          "Failed to send approval email to notification service: {} (URL: {})",
+          e.getMessage(),
+          notificationUrl);
     }
   }
 
   private void sendInviteEmail(String email, String tenantName, String password, String domain) {
     try {
-      org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+      org.springframework.web.client.RestTemplate restTemplate =
+          new org.springframework.web.client.RestTemplate();
       java.util.Map<String, String> request = new java.util.HashMap<>();
       request.put("to", email);
       request.put("subject", "You've been invited to join " + tenantName + " on Trackify");
-      
+
       String tenantUrl = String.format(appUrlPattern, domain);
-      
-      String body = String.format(
-          "Hello,\n\n" +
-          "You have been added as a team member to '%s' on Trackify.\n\n" +
-          "Login Details:\n" +
-          "App URL: %s\n" +
-          "Email: %s\n" +
-          "Temporary Password: %s\n\n" +
-          "Please log in and change your password after your first login.\n\n" +
-          "Best,\n" +
-          "The Trackify Team",
-          tenantName, tenantUrl, email, password
-      );
+
+      String body =
+          String.format(
+              "Hello,\n\n"
+                  + "You have been added as a team member to '%s' on Trackify.\n\n"
+                  + "Login Details:\n"
+                  + "App URL: %s\n"
+                  + "Email: %s\n"
+                  + "Temporary Password: %s\n\n"
+                  + "Please log in and change your password after your first login.\n\n"
+                  + "Best,\n"
+                  + "The Trackify Team",
+              tenantName, tenantUrl, email, password);
       request.put("body", body);
-      
-      restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
+
+      restTemplate.postForEntity(
+          notificationUrl + "/api/notifications/email", request, String.class);
       log.info("Invitation email sent successfully to {}", email);
     } catch (Exception e) {
       log.error("Failed to send invitation email: {}", e.getMessage());
@@ -333,34 +363,40 @@ public class TenantService {
 
   private void sendWelcomeEmail(String email, String tenantName, String password, String domain) {
     try {
-      org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+      org.springframework.web.client.RestTemplate restTemplate =
+          new org.springframework.web.client.RestTemplate();
       java.util.Map<String, String> request = new java.util.HashMap<>();
       request.put("to", email);
       request.put("subject", "Welcome to Trackify - Your Cloud Instance is Ready!");
-      
+
       String tenantUrl = String.format(appUrlPattern, domain);
-      
-      String body = String.format(
-          "Hello,\n\n" +
-          "Your Trackify instance for '%s' has been successfully provisioned.\n\n" +
-          "Login Details:\n" +
-          "Domain: %s\n" +
-          "Email: %s\n" +
-          "Password: %s\n\n" +
-          "You can access your instance at: %s\n\n" +
-          "Please change your password after your first login.\n\n" +
-          "Best Regards,\n" +
-          "The Trackify Team",
-          tenantName, domain, email, password, tenantUrl
-      );
-      
+
+      String body =
+          String.format(
+              "Hello,\n\n"
+                  + "Your Trackify instance for '%s' has been successfully provisioned.\n\n"
+                  + "Login Details:\n"
+                  + "Domain: %s\n"
+                  + "Email: %s\n"
+                  + "Password: %s\n\n"
+                  + "You can access your instance at: %s\n\n"
+                  + "Please change your password after your first login.\n\n"
+                  + "Best Regards,\n"
+                  + "The Trackify Team",
+              tenantName, domain, email, password, tenantUrl);
+
       request.put("body", body);
-      
-      org.springframework.http.ResponseEntity<String> response = restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
+
+      org.springframework.http.ResponseEntity<String> response =
+          restTemplate.postForEntity(
+              notificationUrl + "/api/notifications/email", request, String.class);
       log.info("Welcome email response status: {}", response.getStatusCode());
       log.info("Welcome email sent to: {}", email);
     } catch (Exception e) {
-      log.error("Failed to send welcome email to notification service: {} (URL: {})", e.getMessage(), notificationUrl);
+      log.error(
+          "Failed to send welcome email to notification service: {} (URL: {})",
+          e.getMessage(),
+          notificationUrl);
     }
   }
 
@@ -386,45 +422,51 @@ public class TenantService {
         .fullName((String) map.get("full_name"))
         .role(Role.valueOf((String) map.get("role")))
         .status(UserStatus.valueOf((String) map.get("status")))
-        .createdAt(map.get("created_at") instanceof Timestamp ? 
-            ((Timestamp) map.get("created_at")).toLocalDateTime() : 
-            (LocalDateTime) map.get("created_at"))
+        .createdAt(
+            map.get("created_at") instanceof Timestamp
+                ? ((Timestamp) map.get("created_at")).toLocalDateTime()
+                : (LocalDateTime) map.get("created_at"))
         .tenantId(tenantId)
         .build();
   }
 
   private void provisionTenantDatabase(
-      String dbName, String dbUsername, String dbPassword, String adminEmail, String adminPassword) {
+      String dbName,
+      String dbUsername,
+      String dbPassword,
+      String adminEmail,
+      String adminPassword) {
     try {
       log.info("Provisioning database: {}", dbName);
-      
+
       // 1. Create Database and User with root privileges
       jdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
-      
+
       // Drop and Recreate user to ensure fresh credentials and permissions for both % and localhost
       // This solves the 'stale password' issue when re-provisioning tenants
       try {
-          jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'%%'", dbUsername));
-          jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'localhost'", dbUsername));
+        jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'%%'", dbUsername));
+        jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'localhost'", dbUsername));
       } catch (Exception e) {
-          log.warn("Non-critical error dropping user during provisioning: {}", e.getMessage());
+        log.warn("Non-critical error dropping user during provisioning: {}", e.getMessage());
       }
 
       jdbcTemplate.execute(
           String.format("CREATE USER '%s'@'%%' IDENTIFIED BY '%s'", dbUsername, dbPassword));
       jdbcTemplate.execute(
           String.format("CREATE USER '%s'@'localhost' IDENTIFIED BY '%s'", dbUsername, dbPassword));
-          
+
       jdbcTemplate.execute(
           String.format("GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%'", dbName, dbUsername));
       jdbcTemplate.execute(
           String.format("GRANT ALL PRIVILEGES ON %s.* TO '%s'@'localhost'", dbName, dbUsername));
-          
+
       jdbcTemplate.execute("FLUSH PRIVILEGES");
 
       // 2. Create Schema using the same root connection (prefixed with dbName)
-      String schemaSql = String.format(
-          """
+      String schemaSql =
+          String.format(
+              """
                 CREATE TABLE IF NOT EXISTS %1$s.users (
                   id           BIGINT AUTO_INCREMENT PRIMARY KEY,
                   email        VARCHAR(255) NOT NULL UNIQUE,
@@ -490,23 +532,22 @@ public class TenantService {
                   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
                 );
             """,
-          dbName
-      );
-      
+              dbName);
+
       // Split and execute individual statements using the ROOT jdbcTemplate
       for (String sql : schemaSql.split(";")) {
-          if (!sql.trim().isEmpty()) {
-              jdbcTemplate.execute(sql.trim());
-          }
+        if (!sql.trim().isEmpty()) {
+          jdbcTemplate.execute(sql.trim());
+        }
       }
 
       // 3. Create Admin User
       String hashedPassword = passwordEncoder.encode(adminPassword);
-      String insertAdminUser = String.format(
-          "INSERT INTO %s.users (email, password, full_name, role, status) VALUES (?, ?, ?, 'ADMIN', 'ACTIVE')", 
-          dbName
-      );
-      
+      String insertAdminUser =
+          String.format(
+              "INSERT INTO %s.users (email, password, full_name, role, status) VALUES (?, ?, ?, 'ADMIN', 'ACTIVE')",
+              dbName);
+
       jdbcTemplate.update(insertAdminUser, adminEmail, hashedPassword, "Admin User");
 
       log.info("Provisioned database successfully: {}", dbName);

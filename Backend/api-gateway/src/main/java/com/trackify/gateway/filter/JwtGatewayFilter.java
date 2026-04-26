@@ -67,9 +67,9 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
     String email = jwtUtil.extractSubject(token);
     String role = jwtUtil.extractRole(token);
     if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-          email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
-      );
+      UsernamePasswordAuthenticationToken authentication =
+          new UsernamePasswordAuthenticationToken(
+              email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
       authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
       SecurityContextHolder.getContext().setAuthentication(authentication);
     }

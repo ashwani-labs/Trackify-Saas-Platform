@@ -25,11 +25,16 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers("/tenants/users/register").permitAll()
-                    .requestMatchers("/tenants/*/users/**").hasAnyRole("MASTER", "ADMIN")
-                    .requestMatchers("/tenants/**").hasRole("MASTER")
-                    .anyRequest().authenticated())
+                auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
+                    .permitAll()
+                    .requestMatchers("/tenants/users/register")
+                    .permitAll()
+                    .requestMatchers("/tenants/*/users/**")
+                    .hasAnyRole("MASTER", "ADMIN")
+                    .requestMatchers("/tenants/**")
+                    .hasRole("MASTER")
+                    .anyRequest()
+                    .authenticated())
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

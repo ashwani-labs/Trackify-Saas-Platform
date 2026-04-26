@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +52,8 @@ public class AuthService {
       if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
         throw AppException.unauthorized("Invalid email or password");
       }
-      String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name(), null, user.getId());
+      String token =
+          jwtUtil.generateToken(user.getEmail(), user.getRole().name(), null, user.getId());
       return LoginResponse.builder()
           .token(token)
           .role(user.getRole().name())
@@ -80,7 +80,7 @@ public class AuthService {
     Object idObj = userData.get("id");
     if (idObj instanceof Integer i) userId = i.longValue();
     else if (idObj instanceof Long l) userId = l;
-    
+
     String token = jwtUtil.generateToken(request.getEmail(), role, tenant.getId(), userId);
 
     return LoginResponse.builder()
@@ -97,15 +97,16 @@ public class AuthService {
 
   private Map<String, Object> checkTenantUserCredentials(
       Tenant tenant, String email, String password) {
-    
-    log.info("Authenticating user {} for tenant {} using master connection", email, tenant.getDbName());
+
+    log.info(
+        "Authenticating user {} for tenant {} using master connection", email, tenant.getDbName());
 
     try {
-      String sql = String.format(
-          "SELECT id, password, role, status, profile_photo_url FROM %s.users WHERE email = ?", 
-          tenant.getDbName()
-      );
-      
+      String sql =
+          String.format(
+              "SELECT id, password, role, status, profile_photo_url FROM %s.users WHERE email = ?",
+              tenant.getDbName());
+
       Map<String, Object> user = jdbcTemplate.queryForMap(sql, email);
 
       String status = (String) user.get("status");
@@ -123,33 +124,39 @@ public class AuthService {
       throw e;
     } catch (Exception e) {
       log.error(
-          "Error authenticating against tenant DB {}: {}. Root cause: {}", 
-          tenant.getDbName(), e.getMessage(), e.getCause() != null ? e.getCause().getMessage() : "N/A");
+          "Error authenticating against tenant DB {}: {}. Root cause: {}",
+          tenant.getDbName(),
+          e.getMessage(),
+          e.getCause() != null ? e.getCause().getMessage() : "N/A");
       throw AppException.unauthorized("Invalid email or password");
     }
   }
 
   public void forgotPassword(ForgotPasswordRequest request) {
     String email = request.getEmail();
-    
-    UserLookup lookup = userLookupRepository.findByEmail(email)
-        .orElseThrow(() -> AppException.notFound("No account found with that email address"));
 
-    Tenant tenant = tenantRepository.findById(lookup.getTenantId())
-        .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
+    UserLookup lookup =
+        userLookupRepository
+            .findByEmail(email)
+            .orElseThrow(() -> AppException.notFound("No account found with that email address"));
+
+    Tenant tenant =
+        tenantRepository
+            .findById(lookup.getTenantId())
+            .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
 
     String token = java.util.UUID.randomUUID().toString();
     java.time.LocalDateTime expiresAt = java.time.LocalDateTime.now().plusHours(1);
 
     try {
-        String sql = String.format(
-            "INSERT INTO %s.password_reset_tokens (email, token, expires_at) VALUES (?, ?, ?)",
-            tenant.getDbName()
-        );
-        jdbcTemplate.update(sql, email, token, expiresAt);
+      String sql =
+          String.format(
+              "INSERT INTO %s.password_reset_tokens (email, token, expires_at) VALUES (?, ?, ?)",
+              tenant.getDbName());
+      jdbcTemplate.update(sql, email, token, expiresAt);
     } catch (Exception e) {
-        log.error("Failed to insert reset token in tenant DB: {}", e.getMessage());
-        throw AppException.internalError("Failed to generate password reset request");
+      log.error("Failed to insert reset token in tenant DB: {}", e.getMessage());
+      throw AppException.internalError("Failed to generate password reset request");
     }
 
     sendPasswordResetEmail(email, token, tenant.getDomain());
@@ -157,21 +164,31 @@ public class AuthService {
 
   private void sendPasswordResetEmail(String email, String token, String domain) {
     try {
-      org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+      org.springframework.web.client.RestTemplate restTemplate =
+          new org.springframework.web.client.RestTemplate();
       java.util.Map<String, String> request = new java.util.HashMap<>();
       request.put("to", email);
       request.put("subject", "Trackify - Password Reset Request");
-      
-      String resetUrl = String.format(appUrlPattern, domain) + "/reset-password?token=" + token + "&email=" + email;
-      
-      String body = "Hello,\n\nWe received a request to reset your password for your Trackify account.\n\n"
-          + "Click the link below to set a new password:\n"
-          + resetUrl + "\n\n"
-          + "If you did not request this, please ignore this email.\n\nBest,\nTrackify Team";
-          
+
+      String resetUrl =
+          String.format(appUrlPattern, domain)
+              + "/reset-password?token="
+              + token
+              + "&email="
+              + email;
+
+      String body =
+          "Hello,\n\nWe received a request to reset your password for your Trackify account.\n\n"
+              + "Click the link below to set a new password:\n"
+              + resetUrl
+              + "\n\n"
+              + "If you did not request this, please ignore this email.\n\nBest,\nTrackify Team";
+
       request.put("body", body);
-      
-      org.springframework.http.ResponseEntity<String> response = restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
+
+      org.springframework.http.ResponseEntity<String> response =
+          restTemplate.postForEntity(
+              notificationUrl + "/api/notifications/email", request, String.class);
       log.info("Password reset email sent to {}", email);
     } catch (Exception e) {
       log.error("Failed to send password reset email: {}", e.getMessage());
@@ -179,84 +196,87 @@ public class AuthService {
   }
 
   public void resetPassword(ResetPasswordRequest request) {
-    UserLookup lookup = userLookupRepository.findByEmail(request.getEmail())
-        .orElseThrow(() -> AppException.notFound("Invalid reset request"));
+    UserLookup lookup =
+        userLookupRepository
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> AppException.notFound("Invalid reset request"));
 
-    Tenant tenant = tenantRepository.findById(lookup.getTenantId())
-        .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
+    Tenant tenant =
+        tenantRepository
+            .findById(lookup.getTenantId())
+            .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
 
     try {
-        // Find token
-        String sqlFind = String.format(
-            "SELECT id FROM %s.password_reset_tokens WHERE email = ? AND token = ? AND used = FALSE AND expires_at > NOW()",
-            tenant.getDbName()
-        );
-        java.util.List<Long> tokens = jdbcTemplate.query(sqlFind, 
-            (rs, rowNum) -> rs.getLong("id"), 
-            request.getEmail(), request.getToken());
-            
-        if (tokens.isEmpty()) {
-            throw AppException.badRequest("Invalid or expired password reset token");
-        }
+      // Find token
+      String sqlFind =
+          String.format(
+              "SELECT id FROM %s.password_reset_tokens WHERE email = ? AND token = ? AND used = FALSE AND expires_at > NOW()",
+              tenant.getDbName());
+      java.util.List<Long> tokens =
+          jdbcTemplate.query(
+              sqlFind, (rs, rowNum) -> rs.getLong("id"), request.getEmail(), request.getToken());
 
-        // Update password in users table
-        String newHashedPassword = passwordEncoder.encode(request.getNewPassword());
-        String sqlUpdatePass = String.format(
-            "UPDATE %s.users SET password = ? WHERE email = ?",
-            tenant.getDbName()
-        );
-        jdbcTemplate.update(sqlUpdatePass, newHashedPassword, request.getEmail());
+      if (tokens.isEmpty()) {
+        throw AppException.badRequest("Invalid or expired password reset token");
+      }
 
-        // Mark token as used
-        String sqlUpdateToken = String.format(
-            "UPDATE %s.password_reset_tokens SET used = TRUE WHERE id = ?",
-            tenant.getDbName()
-        );
-        jdbcTemplate.update(sqlUpdateToken, tokens.get(0));
+      // Update password in users table
+      String newHashedPassword = passwordEncoder.encode(request.getNewPassword());
+      String sqlUpdatePass =
+          String.format("UPDATE %s.users SET password = ? WHERE email = ?", tenant.getDbName());
+      jdbcTemplate.update(sqlUpdatePass, newHashedPassword, request.getEmail());
 
-        log.info("Password successfully reset for {}", request.getEmail());
+      // Mark token as used
+      String sqlUpdateToken =
+          String.format(
+              "UPDATE %s.password_reset_tokens SET used = TRUE WHERE id = ?", tenant.getDbName());
+      jdbcTemplate.update(sqlUpdateToken, tokens.get(0));
+
+      log.info("Password successfully reset for {}", request.getEmail());
     } catch (AppException e) {
-        throw e;
+      throw e;
     } catch (Exception e) {
-        log.error("Failed to process password reset: {}", e.getMessage());
-        throw AppException.internalError("Failed to reset password: " + e.getMessage());
+      log.error("Failed to process password reset: {}", e.getMessage());
+      throw AppException.internalError("Failed to reset password: " + e.getMessage());
     }
   }
 
   public void changePassword(ChangePasswordRequest request) {
-    UserLookup lookup = userLookupRepository.findByEmail(request.getEmail())
-        .orElseThrow(() -> AppException.notFound("User not found"));
+    UserLookup lookup =
+        userLookupRepository
+            .findByEmail(request.getEmail())
+            .orElseThrow(() -> AppException.notFound("User not found"));
 
-    Tenant tenant = tenantRepository.findById(lookup.getTenantId())
-        .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
+    Tenant tenant =
+        tenantRepository
+            .findById(lookup.getTenantId())
+            .orElseThrow(() -> AppException.internalError("Tenant mapping corrupted"));
 
     try {
-        // 1. Get current password from tenant DB
-        String sqlSelect = String.format(
-            "SELECT password FROM %s.users WHERE email = ?",
-            tenant.getDbName()
-        );
-        String currentHashedPassword = jdbcTemplate.queryForObject(sqlSelect, String.class, request.getEmail());
+      // 1. Get current password from tenant DB
+      String sqlSelect =
+          String.format("SELECT password FROM %s.users WHERE email = ?", tenant.getDbName());
+      String currentHashedPassword =
+          jdbcTemplate.queryForObject(sqlSelect, String.class, request.getEmail());
 
-        // 2. Verify current password
-        if (currentHashedPassword == null || !passwordEncoder.matches(request.getCurrentPassword(), currentHashedPassword)) {
-            throw AppException.unauthorized("Incorrect current password");
-        }
+      // 2. Verify current password
+      if (currentHashedPassword == null
+          || !passwordEncoder.matches(request.getCurrentPassword(), currentHashedPassword)) {
+        throw AppException.unauthorized("Incorrect current password");
+      }
 
-        // 3. Update to new password
-        String newHashedPassword = passwordEncoder.encode(request.getNewPassword());
-        String sqlUpdate = String.format(
-            "UPDATE %s.users SET password = ? WHERE email = ?",
-            tenant.getDbName()
-        );
-        jdbcTemplate.update(sqlUpdate, newHashedPassword, request.getEmail());
+      // 3. Update to new password
+      String newHashedPassword = passwordEncoder.encode(request.getNewPassword());
+      String sqlUpdate =
+          String.format("UPDATE %s.users SET password = ? WHERE email = ?", tenant.getDbName());
+      jdbcTemplate.update(sqlUpdate, newHashedPassword, request.getEmail());
 
-        log.info("Password successfully changed for {}", request.getEmail());
+      log.info("Password successfully changed for {}", request.getEmail());
     } catch (AppException e) {
-        throw e;
+      throw e;
     } catch (Exception e) {
-        log.error("Failed to change password: {}", e.getMessage());
-        throw AppException.internalError("Could not update password. Please try again.");
+      log.error("Failed to change password: {}", e.getMessage());
+      throw AppException.internalError("Could not update password. Please try again.");
     }
   }
 
@@ -283,7 +303,8 @@ public class AuthService {
 
     try {
       String sql =
-          String.format("UPDATE %s.users SET profile_photo_url = ? WHERE email = ?", tenant.getDbName());
+          String.format(
+              "UPDATE %s.users SET profile_photo_url = ? WHERE email = ?", tenant.getDbName());
       jdbcTemplate.update(sql, photoUrl, email);
     } catch (Exception e) {
       log.error("Failed to update profile photo: {}", e.getMessage());

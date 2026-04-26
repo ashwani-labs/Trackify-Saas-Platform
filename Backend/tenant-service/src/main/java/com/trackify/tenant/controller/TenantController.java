@@ -9,7 +9,6 @@ import com.trackify.tenant.dto.UserRegistrationRequest;
 import com.trackify.tenant.dto.UserResponse;
 import com.trackify.tenant.service.TenantService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +48,7 @@ public class TenantController {
         ApiResponse.ok(
             "Tenant status updated successfully", tenantService.updateTenantStatus(id, request)));
   }
-  
+
   @DeleteMapping("/{id}")
   public ResponseEntity<ApiResponse<Void>> deleteTenant(@PathVariable("id") Long id) {
     tenantService.deleteTenant(id);
@@ -60,16 +59,21 @@ public class TenantController {
   public ResponseEntity<ApiResponse<UserResponse>> registerUser(
       @Valid @RequestBody UserRegistrationRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponse.ok("User registered successfully. Pending approval.", tenantService.registerUser(request)));
+        .body(
+            ApiResponse.ok(
+                "User registered successfully. Pending approval.",
+                tenantService.registerUser(request)));
   }
 
   @GetMapping("/{id}/users/pending")
-  public ResponseEntity<ApiResponse<Page<UserResponse>>> getPendingUsers(@PathVariable("id") Long id, Pageable pageable) {
+  public ResponseEntity<ApiResponse<Page<UserResponse>>> getPendingUsers(
+      @PathVariable("id") Long id, Pageable pageable) {
     return ResponseEntity.ok(ApiResponse.ok(tenantService.getPendingUsers(id, pageable)));
   }
 
   @GetMapping("/{id}/users")
-  public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(@PathVariable("id") Long id, Pageable pageable) {
+  public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(
+      @PathVariable("id") Long id, Pageable pageable) {
     return ResponseEntity.ok(ApiResponse.ok(tenantService.getAllUsers(id, pageable)));
   }
 
@@ -79,6 +83,8 @@ public class TenantController {
       @PathVariable("userId") Long userId,
       @RequestParam("status") UserStatus status) {
     return ResponseEntity.ok(
-        ApiResponse.ok("User status updated successfully", tenantService.updateUserStatus(id, userId, status)));
+        ApiResponse.ok(
+            "User status updated successfully",
+            tenantService.updateUserStatus(id, userId, status)));
   }
 }

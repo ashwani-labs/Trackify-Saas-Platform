@@ -16,28 +16,28 @@ import org.hibernate.annotations.CreationTimestamp;
 @Table(name = "issue_attachments")
 public class IssueAttachment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String fileName;
+  @Column(nullable = false)
+  private String fileName;
 
-    @Column(nullable = false)
-    private String fileKey; // Relative path or S3 key
+  @Column(nullable = false)
+  private String fileKey; // Relative path or S3 key
 
-    private String contentType;
+  private String contentType;
 
-    private Long fileSize;
+  private Long fileSize;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "issue_id", nullable = false)
-    private Issue issue;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "issue_id", nullable = false)
+  private Issue issue;
 
-    @Column(name = "uploader_id")
-    private Long uploaderId;
+  @Column(name = "uploader_id")
+  private Long uploaderId;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+  @CreationTimestamp
+  @Column(name = "created_at", updatable = false)
+  private LocalDateTime createdAt;
 }

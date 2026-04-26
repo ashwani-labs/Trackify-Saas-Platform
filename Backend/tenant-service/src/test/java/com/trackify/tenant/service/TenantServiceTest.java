@@ -55,10 +55,10 @@ class TenantServiceTest {
     mockTenant.setDomain("acme");
     mockTenant.setStatus(TenantStatus.ACTIVE);
     mockTenant.setPlan(Plan.PRO);
-    
+
     when(tenantRepository.save(any(Tenant.class))).thenReturn(mockTenant);
     when(passwordEncoder.encode(anyString())).thenReturn("hashed-pw");
-    
+
     // We mock jdbcTemplate.execute to do nothing
     doNothing().when(jdbcTemplate).execute(anyString());
     when(jdbcTemplate.update(anyString(), anyString(), anyString(), anyString())).thenReturn(1);
@@ -77,7 +77,8 @@ class TenantServiceTest {
   void testCreateTenant_DomainAlreadyExists() {
     when(tenantRepository.existsByDomain("acme")).thenReturn(true);
 
-    AppException ex = assertThrows(AppException.class, () -> tenantService.createTenant(createRequest));
+    AppException ex =
+        assertThrows(AppException.class, () -> tenantService.createTenant(createRequest));
     assertEquals("Organization code 'acme' is already taken", ex.getMessage());
   }
 }

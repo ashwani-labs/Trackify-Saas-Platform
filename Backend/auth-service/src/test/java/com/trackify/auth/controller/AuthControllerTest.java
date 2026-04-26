@@ -1,7 +1,6 @@
 package com.trackify.auth.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,7 +25,7 @@ class AuthControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @MockBean private AuthService authService;
-  
+
   @MockBean private com.trackify.auth.repository.MasterUserRepository masterUserRepository;
   @MockBean private com.trackify.auth.repository.TenantRepository tenantRepository;
   @MockBean private com.trackify.auth.repository.UserLookupRepository userLookupRepository;
@@ -40,18 +39,21 @@ class AuthControllerTest {
     request.setEmail("test@trackify.com");
     request.setPassword("password123");
 
-    LoginResponse response = LoginResponse.builder()
-        .token("mock-token")
-        .role("EMPLOYEE")
-        .tenantId(1L)
-        .domain("testcorp")
-        .build();
+    LoginResponse response =
+        LoginResponse.builder()
+            .token("mock-token")
+            .role("EMPLOYEE")
+            .tenantId(1L)
+            .domain("testcorp")
+            .build();
 
     when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
-    mockMvc.perform(post("/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+    mockMvc
+        .perform(
+            post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.token").value("mock-token"))
         .andExpect(jsonPath("$.role").value("EMPLOYEE"))

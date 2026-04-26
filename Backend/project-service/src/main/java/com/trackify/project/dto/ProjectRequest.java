@@ -8,7 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectRequest {
-    @NotBlank(message = "Project name is required")
-    private String name;
-    private String description;
+  @NotBlank(message = "Project name is required")
+  private String name;
+
+  private String description;
 }

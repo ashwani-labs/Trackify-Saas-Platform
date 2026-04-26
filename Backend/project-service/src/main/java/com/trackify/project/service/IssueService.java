@@ -10,6 +10,7 @@ import com.trackify.project.entity.Issue;
 import com.trackify.project.entity.IssueAttachment;
 import com.trackify.project.entity.IssueComment;
 import com.trackify.project.entity.Project;
+import com.trackify.project.entity.Sprint;
 import com.trackify.project.enums.IssuePriority;
 import com.trackify.project.enums.IssueStatus;
 import com.trackify.project.repository.IssueAttachmentRepository;
@@ -17,256 +18,277 @@ import com.trackify.project.repository.IssueCommentRepository;
 import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
 import com.trackify.project.repository.SprintRepository;
-import com.trackify.project.entity.Sprint;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.jdbc.core.JdbcTemplate;
-import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
 public class IssueService {
 
-    private final IssueRepository issueRepository;
-    private final ProjectRepository projectRepository;
-    private final IssueCommentRepository commentRepository;
-    private final IssueAttachmentRepository attachmentRepository;
-    private final StorageService storageService;
-    private final JdbcTemplate jdbcTemplate;
-    private final SprintRepository sprintRepository;
+  private final IssueRepository issueRepository;
+  private final ProjectRepository projectRepository;
+  private final IssueCommentRepository commentRepository;
+  private final IssueAttachmentRepository attachmentRepository;
+  private final StorageService storageService;
+  private final JdbcTemplate jdbcTemplate;
+  private final SprintRepository sprintRepository;
 
-    @Value("${services.notification-url}")
-    private String notificationUrl;
+  @Value("${services.notification-url}")
+  private String notificationUrl;
 
-    public IssueService(IssueRepository issueRepository, 
-                        ProjectRepository projectRepository, 
-                        IssueCommentRepository commentRepository,
-                        IssueAttachmentRepository attachmentRepository,
-                        StorageService storageService,
-                        DataSource dataSource,
-                        SprintRepository sprintRepository) {
-        this.issueRepository = issueRepository;
-        this.projectRepository = projectRepository;
-        this.commentRepository = commentRepository;
-        this.attachmentRepository = attachmentRepository;
-        this.storageService = storageService;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.sprintRepository = sprintRepository;
+  public IssueService(
+      IssueRepository issueRepository,
+      ProjectRepository projectRepository,
+      IssueCommentRepository commentRepository,
+      IssueAttachmentRepository attachmentRepository,
+      StorageService storageService,
+      DataSource dataSource,
+      SprintRepository sprintRepository) {
+    this.issueRepository = issueRepository;
+    this.projectRepository = projectRepository;
+    this.commentRepository = commentRepository;
+    this.attachmentRepository = attachmentRepository;
+    this.storageService = storageService;
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+    this.sprintRepository = sprintRepository;
+  }
+
+  @Transactional
+  public IssueResponse createIssue(IssueRequest request, Long reporterId) {
+    Project project =
+        projectRepository
+            .findById(request.getProjectId())
+            .orElseThrow(() -> AppException.notFound("Project not found"));
+
+    Sprint sprint = null;
+    if (request.getSprintId() != null) {
+      sprint =
+          sprintRepository
+              .findById(request.getSprintId())
+              .orElseThrow(() -> AppException.notFound("Sprint not found"));
     }
 
-    @Transactional
-    public IssueResponse createIssue(IssueRequest request, Long reporterId) {
-        Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> AppException.notFound("Project not found"));
-                
-        Sprint sprint = null;
-        if (request.getSprintId() != null) {
-            sprint = sprintRepository.findById(request.getSprintId())
-                    .orElseThrow(() -> AppException.notFound("Sprint not found"));
-        }
+    Issue issue =
+        Issue.builder()
+            .title(request.getTitle())
+            .description(request.getDescription())
+            .status(request.getStatus() != null ? request.getStatus() : IssueStatus.TODO)
+            .priority(request.getPriority() != null ? request.getPriority() : IssuePriority.MEDIUM)
+            .project(project)
+            .sprint(sprint)
+            .reporterId(reporterId)
+            .assigneeId(request.getAssigneeId())
+            .build();
 
-        Issue issue = Issue.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .status(request.getStatus() != null ? request.getStatus() : IssueStatus.TODO)
-                .priority(request.getPriority() != null ? request.getPriority() : IssuePriority.MEDIUM)
-                .project(project)
-                .sprint(sprint)
-                .reporterId(reporterId)
-                .assigneeId(request.getAssigneeId())
-                .build();
+    issue = issueRepository.save(issue);
 
-        issue = issueRepository.save(issue);
-        
-        if (request.getAssigneeId() != null) {
-            sendAssignmentEmail(request.getAssigneeId(), issue.getTitle());
-        }
-        
-        return mapToResponse(issue);
+    if (request.getAssigneeId() != null) {
+      sendAssignmentEmail(request.getAssigneeId(), issue.getTitle());
     }
 
-    public List<IssueResponse> getIssuesByProject(Long projectId) {
-        return issueRepository.findAllByProjectId(projectId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    return mapToResponse(issue);
+  }
+
+  public List<IssueResponse> getIssuesByProject(Long projectId) {
+    return issueRepository.findAllByProjectId(projectId).stream()
+        .map(this::mapToResponse)
+        .collect(Collectors.toList());
+  }
+
+  public org.springframework.data.domain.Page<IssueResponse> getIssuesByProject(
+      Long projectId, org.springframework.data.domain.Pageable pageable) {
+    return issueRepository.findAllByProjectId(projectId, pageable).map(this::mapToResponse);
+  }
+
+  public IssueResponse getIssueById(Long id) {
+    Issue issue =
+        issueRepository.findById(id).orElseThrow(() -> AppException.notFound("Issue not found"));
+    return mapToResponse(issue);
+  }
+
+  @Transactional
+  public IssueResponse updateIssue(Long id, IssueRequest request) {
+    Issue issue =
+        issueRepository.findById(id).orElseThrow(() -> AppException.notFound("Issue not found"));
+
+    issue.setTitle(request.getTitle());
+    issue.setDescription(request.getDescription());
+    if (request.getStatus() != null) issue.setStatus(request.getStatus());
+    if (request.getPriority() != null) issue.setPriority(request.getPriority());
+    issue.setAssigneeId(request.getAssigneeId());
+
+    if (request.getSprintId() != null) {
+      Sprint sprint =
+          sprintRepository
+              .findById(request.getSprintId())
+              .orElseThrow(() -> AppException.notFound("Sprint not found"));
+      issue.setSprint(sprint);
+    } else {
+      issue.setSprint(null);
     }
 
-    public org.springframework.data.domain.Page<IssueResponse> getIssuesByProject(Long projectId, org.springframework.data.domain.Pageable pageable) {
-        return issueRepository.findAllByProjectId(projectId, pageable)
-                .map(this::mapToResponse);
+    issue = issueRepository.save(issue);
+
+    if (request.getAssigneeId() != null) {
+      sendAssignmentEmail(request.getAssigneeId(), issue.getTitle());
     }
 
-    public IssueResponse getIssueById(Long id) {
-        Issue issue = issueRepository.findById(id)
-                .orElseThrow(() -> AppException.notFound("Issue not found"));
-        return mapToResponse(issue);
+    return mapToResponse(issue);
+  }
+
+  @Transactional
+  public void deleteIssue(Long id) {
+    if (!issueRepository.existsById(id)) {
+      throw AppException.notFound("Issue not found");
     }
+    issueRepository.deleteById(id);
+  }
 
-    @Transactional
-    public IssueResponse updateIssue(Long id, IssueRequest request) {
-        Issue issue = issueRepository.findById(id)
-                .orElseThrow(() -> AppException.notFound("Issue not found"));
+  @Transactional
+  public CommentResponse addComment(Long issueId, CommentRequest request, Long userId) {
+    Issue issue =
+        issueRepository
+            .findById(issueId)
+            .orElseThrow(() -> AppException.notFound("Issue not found"));
 
-        issue.setTitle(request.getTitle());
-        issue.setDescription(request.getDescription());
-        if (request.getStatus() != null) issue.setStatus(request.getStatus());
-        if (request.getPriority() != null) issue.setPriority(request.getPriority());
-        issue.setAssigneeId(request.getAssigneeId());
-        
-        if (request.getSprintId() != null) {
-            Sprint sprint = sprintRepository.findById(request.getSprintId())
-                    .orElseThrow(() -> AppException.notFound("Sprint not found"));
-            issue.setSprint(sprint);
-        } else {
-            issue.setSprint(null);
-        }
+    IssueComment comment =
+        IssueComment.builder().issue(issue).userId(userId).content(request.getContent()).build();
 
-        issue = issueRepository.save(issue);
-        
-        if (request.getAssigneeId() != null) {
-            sendAssignmentEmail(request.getAssigneeId(), issue.getTitle());
-        }
-        
-        return mapToResponse(issue);
+    comment = commentRepository.save(comment);
+    return mapToCommentResponse(comment);
+  }
+
+  public List<CommentResponse> getIssueComments(Long issueId) {
+    return commentRepository.findAllByIssueIdOrderByCreatedAtDesc(issueId).stream()
+        .map(this::mapToCommentResponse)
+        .collect(Collectors.toList());
+  }
+
+  // --- Attachments ---
+
+  @Transactional
+  public IssueAttachmentResponse addAttachment(Long issueId, MultipartFile file, Long uploaderId) {
+    Issue issue =
+        issueRepository
+            .findById(issueId)
+            .orElseThrow(() -> AppException.notFound("Issue not found"));
+
+    String fileKey = storageService.store(file);
+
+    IssueAttachment attachment =
+        IssueAttachment.builder()
+            .issue(issue)
+            .fileName(file.getOriginalFilename())
+            .fileKey(fileKey)
+            .contentType(file.getContentType())
+            .fileSize(file.getSize())
+            .uploaderId(uploaderId)
+            .build();
+
+    attachment = attachmentRepository.save(attachment);
+    return mapToAttachmentResponse(attachment);
+  }
+
+  public List<IssueAttachmentResponse> getIssueAttachments(Long issueId) {
+    return attachmentRepository.findAllByIssueId(issueId).stream()
+        .map(this::mapToAttachmentResponse)
+        .collect(Collectors.toList());
+  }
+
+  public Resource downloadAttachment(Long attachmentId) {
+    IssueAttachment attachment =
+        attachmentRepository
+            .findById(attachmentId)
+            .orElseThrow(() -> AppException.notFound("Attachment not found"));
+    return storageService.loadAsResource(attachment.getFileKey());
+  }
+
+  @Transactional
+  public void deleteAttachment(Long attachmentId) {
+    IssueAttachment attachment =
+        attachmentRepository
+            .findById(attachmentId)
+            .orElseThrow(() -> AppException.notFound("Attachment not found"));
+
+    storageService.delete(attachment.getFileKey());
+    attachmentRepository.delete(attachment);
+  }
+
+  private void sendAssignmentEmail(Long assigneeId, String issueTitle) {
+    try {
+      String email =
+          jdbcTemplate.queryForObject(
+              "SELECT email FROM users WHERE id = ?", String.class, assigneeId);
+      if (email != null) {
+        org.springframework.web.client.RestTemplate restTemplate =
+            new org.springframework.web.client.RestTemplate();
+        java.util.Map<String, String> request = new java.util.HashMap<>();
+        request.put("to", email);
+        request.put("subject", "Task Assigned: " + issueTitle);
+        request.put(
+            "body",
+            "You have been assigned to: "
+                + issueTitle
+                + "\n\nLog in to your dashboard to view details.");
+
+        restTemplate.postForEntity(
+            notificationUrl + "/api/notifications/email", request, String.class);
+      }
+    } catch (Exception e) {
+      log.error("Failed to send assignment email: {}", e.getMessage());
     }
+  }
 
-    @Transactional
-    public void deleteIssue(Long id) {
-        if (!issueRepository.existsById(id)) {
-            throw AppException.notFound("Issue not found");
-        }
-        issueRepository.deleteById(id);
-    }
+  private IssueResponse mapToResponse(Issue issue) {
+    return IssueResponse.builder()
+        .id(issue.getId())
+        .title(issue.getTitle())
+        .description(issue.getDescription())
+        .status(issue.getStatus())
+        .priority(issue.getPriority())
+        .projectId(issue.getProject().getId())
+        .projectHeaderName(issue.getProject().getName())
+        .sprintId(issue.getSprint() != null ? issue.getSprint().getId() : null)
+        .reporterId(issue.getReporterId())
+        .assigneeId(issue.getAssigneeId())
+        .createdAt(issue.getCreatedAt())
+        .updatedAt(issue.getUpdatedAt())
+        .attachments(
+            issue.getAttachments() != null
+                ? issue.getAttachments().stream()
+                    .map(this::mapToAttachmentResponse)
+                    .collect(Collectors.toList())
+                : Collections.emptyList())
+        .build();
+  }
 
-    @Transactional
-    public CommentResponse addComment(Long issueId, CommentRequest request, Long userId) {
-        Issue issue = issueRepository.findById(issueId)
-                .orElseThrow(() -> AppException.notFound("Issue not found"));
+  private IssueAttachmentResponse mapToAttachmentResponse(IssueAttachment attachment) {
+    return IssueAttachmentResponse.builder()
+        .id(attachment.getId())
+        .fileName(attachment.getFileName())
+        .contentType(attachment.getContentType())
+        .fileSize(attachment.getFileSize())
+        .uploaderId(attachment.getUploaderId())
+        .createdAt(attachment.getCreatedAt())
+        .build();
+  }
 
-        IssueComment comment = IssueComment.builder()
-                .issue(issue)
-                .userId(userId)
-                .content(request.getContent())
-                .build();
-
-        comment = commentRepository.save(comment);
-        return mapToCommentResponse(comment);
-    }
-
-    public List<CommentResponse> getIssueComments(Long issueId) {
-        return commentRepository.findAllByIssueIdOrderByCreatedAtDesc(issueId).stream()
-                .map(this::mapToCommentResponse)
-                .collect(Collectors.toList());
-    }
-
-    // --- Attachments ---
-
-    @Transactional
-    public IssueAttachmentResponse addAttachment(Long issueId, MultipartFile file, Long uploaderId) {
-        Issue issue = issueRepository.findById(issueId)
-                .orElseThrow(() -> AppException.notFound("Issue not found"));
-
-        String fileKey = storageService.store(file);
-
-        IssueAttachment attachment = IssueAttachment.builder()
-                .issue(issue)
-                .fileName(file.getOriginalFilename())
-                .fileKey(fileKey)
-                .contentType(file.getContentType())
-                .fileSize(file.getSize())
-                .uploaderId(uploaderId)
-                .build();
-
-        attachment = attachmentRepository.save(attachment);
-        return mapToAttachmentResponse(attachment);
-    }
-
-    public List<IssueAttachmentResponse> getIssueAttachments(Long issueId) {
-        return attachmentRepository.findAllByIssueId(issueId).stream()
-                .map(this::mapToAttachmentResponse)
-                .collect(Collectors.toList());
-    }
-    
-    public Resource downloadAttachment(Long attachmentId) {
-        IssueAttachment attachment = attachmentRepository.findById(attachmentId)
-                .orElseThrow(() -> AppException.notFound("Attachment not found"));
-        return storageService.loadAsResource(attachment.getFileKey());
-    }
-
-    @Transactional
-    public void deleteAttachment(Long attachmentId) {
-        IssueAttachment attachment = attachmentRepository.findById(attachmentId)
-                .orElseThrow(() -> AppException.notFound("Attachment not found"));
-        
-        storageService.delete(attachment.getFileKey());
-        attachmentRepository.delete(attachment);
-    }
-
-    private void sendAssignmentEmail(Long assigneeId, String issueTitle) {
-        try {
-            String email = jdbcTemplate.queryForObject("SELECT email FROM users WHERE id = ?", String.class, assigneeId);
-            if (email != null) {
-                org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
-                java.util.Map<String, String> request = new java.util.HashMap<>();
-                request.put("to", email);
-                request.put("subject", "Task Assigned: " + issueTitle);
-                request.put("body", "You have been assigned to: " + issueTitle + "\n\nLog in to your dashboard to view details.");
-                
-                restTemplate.postForEntity(notificationUrl + "/api/notifications/email", request, String.class);
-            }
-        } catch (Exception e) {
-            log.error("Failed to send assignment email: {}", e.getMessage());
-        }
-    }
-
-    private IssueResponse mapToResponse(Issue issue) {
-        return IssueResponse.builder()
-                .id(issue.getId())
-                .title(issue.getTitle())
-                .description(issue.getDescription())
-                .status(issue.getStatus())
-                .priority(issue.getPriority())
-                .projectId(issue.getProject().getId())
-                .projectHeaderName(issue.getProject().getName())
-                .sprintId(issue.getSprint() != null ? issue.getSprint().getId() : null)
-                .reporterId(issue.getReporterId())
-                .assigneeId(issue.getAssigneeId())
-                .createdAt(issue.getCreatedAt())
-                .updatedAt(issue.getUpdatedAt())
-                .attachments(issue.getAttachments() != null ? 
-                    issue.getAttachments().stream().map(this::mapToAttachmentResponse).collect(Collectors.toList()) : 
-                    Collections.emptyList())
-                .build();
-    }
-
-    private IssueAttachmentResponse mapToAttachmentResponse(IssueAttachment attachment) {
-        return IssueAttachmentResponse.builder()
-                .id(attachment.getId())
-                .fileName(attachment.getFileName())
-                .contentType(attachment.getContentType())
-                .fileSize(attachment.getFileSize())
-                .uploaderId(attachment.getUploaderId())
-                .createdAt(attachment.getCreatedAt())
-                .build();
-    }
-
-    private CommentResponse mapToCommentResponse(IssueComment comment) {
-        return CommentResponse.builder()
-                .id(comment.getId())
-                .issueId(comment.getIssue().getId())
-                .userId(comment.getUserId())
-                .content(comment.getContent())
-                .createdAt(comment.getCreatedAt())
-                .build();
-    }
+  private CommentResponse mapToCommentResponse(IssueComment comment) {
+    return CommentResponse.builder()
+        .id(comment.getId())
+        .issueId(comment.getIssue().getId())
+        .userId(comment.getUserId())
+        .content(comment.getContent())
+        .createdAt(comment.getCreatedAt())
+        .build();
+  }
 }

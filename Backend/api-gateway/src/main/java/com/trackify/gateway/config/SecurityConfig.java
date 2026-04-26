@@ -18,25 +18,27 @@ import org.springframework.web.filter.CorsFilter;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtGatewayFilter jwtGatewayFilter;
-    private final CorsFilter corsFilter;
+  private final JwtGatewayFilter jwtGatewayFilter;
+  private final CorsFilter corsFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable)
-            .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/tenants/users/register").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .addFilterBefore(jwtGatewayFilter, UsernamePasswordAuthenticationFilter.class);
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+        .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers(HttpMethod.OPTIONS, "/**")
+                    .permitAll()
+                    .requestMatchers("/auth/**")
+                    .permitAll()
+                    .requestMatchers("/tenants/users/register")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(jwtGatewayFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+    return http.build();
+  }
 }
