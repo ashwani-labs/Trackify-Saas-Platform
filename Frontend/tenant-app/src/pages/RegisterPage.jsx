@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { registerUser } from '../features/auth/authSlice';
 import AuthLayout from '../layouts/AuthLayout';
-import { UserPlus, Mail, Lock, User, Loader2, CheckCircle2, ChevronRight } from 'lucide-react';
+import {
+  UserPlus,
+  Mail,
+  Lock,
+  User,
+  Loader2,
+  CheckCircle2,
+  ChevronRight,
+  Globe,
+} from 'lucide-react';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({

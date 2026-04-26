@@ -81,11 +81,13 @@ export const changePassword = createAsyncThunk(
 );
 
 const initialState = {
-  user: localStorage.getItem('tenantToken') ? {
-    email: localStorage.getItem('tenantUserEmail'),
-    role: localStorage.getItem('tenantUserRole'),
-    profilePhotoUrl: localStorage.getItem('tenantUserProfilePhoto'),
-  } : null,
+  user: localStorage.getItem('tenantToken')
+    ? {
+        email: localStorage.getItem('tenantUserEmail'),
+        role: localStorage.getItem('tenantUserRole'),
+        profilePhotoUrl: localStorage.getItem('tenantUserProfilePhoto'),
+      }
+    : null,
   token: localStorage.getItem('tenantToken'),
   tenantId: localStorage.getItem('tenantId'),
   tenantDomain: localStorage.getItem('tenantDomain'),

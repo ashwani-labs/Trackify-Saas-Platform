@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '../features/auth/authSlice';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 import {
   LayoutDashboard,
   LogOut,
@@ -121,7 +121,10 @@ const DashboardLayout = ({ children }) => {
             >
               <div
                 className="avatar-circle"
-                style={{ overflow: 'hidden', backgroundColor: !user?.profilePhotoUrl ? primaryColor : undefined }}
+                style={{
+                  overflow: 'hidden',
+                  backgroundColor: !user?.profilePhotoUrl ? primaryColor : undefined,
+                }}
               >
                 {user?.profilePhotoUrl ? (
                   <img

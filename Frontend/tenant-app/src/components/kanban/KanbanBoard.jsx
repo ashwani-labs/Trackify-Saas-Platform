@@ -10,7 +10,7 @@ const COLUMNS = [
   { status: 'DONE', label: 'Done' },
 ];
 
-const KanbanBoard = ({ projectId, filteredIssues, onCreateIssue }) => {
+const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
   const dispatch = useDispatch();
   const { issues: allIssues, isLoading } = useSelector((state) => state.issues);
   const issues = filteredIssues ?? allIssues;
@@ -61,7 +61,7 @@ const KanbanBoard = ({ projectId, filteredIssues, onCreateIssue }) => {
   if (isLoading && issues.length === 0) {
     return (
       <div className="kanban-board">
-        {COLUMNS.map(({ status, label }) => (
+        {COLUMNS.map(({ status }) => (
           <div key={status} className="kanban-column">
             <div className="skeleton" style={{ height: '300px', width: '100%' }}></div>
           </div>

@@ -21,6 +21,7 @@ import {
   Image as ImageIcon,
   Send,
   Loader2,
+  Plus,
 } from 'lucide-react';
 
 const formatBytes = (bytes, decimals = 2) => {
@@ -44,19 +45,17 @@ const IssueDetailPanel = () => {
 
   const [commentText, setCommentText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({});
+  const [editData, setEditData] = useState({
+    title: selectedIssue?.title || '',
+    description: selectedIssue?.description || '',
+    status: selectedIssue?.status || 'TODO',
+    priority: selectedIssue?.priority || 'MEDIUM',
+    sprintId: selectedIssue?.sprintId || '',
+  });
 
   useEffect(() => {
-    if (selectedIssue) {
+    if (selectedIssue?.id) {
       dispatch(fetchIssueComments(selectedIssue.id));
-      setIsEditing(false);
-      setEditData({
-        title: selectedIssue.title,
-        description: selectedIssue.description || '',
-        status: selectedIssue.status,
-        priority: selectedIssue.priority,
-        sprintId: selectedIssue.sprintId || '',
-      });
     }
   }, [selectedIssue?.id, dispatch]);
 
@@ -117,6 +116,7 @@ const IssueDetailPanel = () => {
 
       {/* Slide-in Panel */}
       <aside
+        key={selectedIssue.id}
         style={{
           position: 'fixed',
           right: 0,

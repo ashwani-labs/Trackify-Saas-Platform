@@ -10,7 +10,7 @@ const getAuthHeader = () => {
 
 export const fetchProjects = createAsyncThunk(
   'projects/fetchAll',
-  async ({ page = 0, size = 10, ...rest } = {}, { rejectWithValue }) => {
+  async ({ page = 0, size = 10 } = {}, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/projects?page=${page}&size=${size}`, {
         headers: getAuthHeader(),

@@ -85,13 +85,13 @@ const ProfilePage = () => {
     setIsUploading(true);
     try {
       const response = await axios.post('/auth/profile/photo', formData);
-      
+
       if (response.data.status === 'success') {
         const photoUrl = response.data.data.url;
         toast.success('Profile photo updated');
         dispatch(updateProfilePhoto(photoUrl));
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to upload photo');
     } finally {
       setIsUploading(false);
@@ -131,40 +131,62 @@ const ProfilePage = () => {
                   background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
                   color: 'white',
                   overflow: 'hidden',
-                  position: 'relative'
+                  position: 'relative',
                 }}
               >
                 {user?.profilePhotoUrl ? (
-                  <img src={user.profilePhotoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img
+                    src={user.profilePhotoUrl}
+                    alt="Profile"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
                 ) : (
                   user?.email?.charAt(0).toUpperCase()
                 )}
-                
+
                 {isUploading && (
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Loader2 size={24} style={{ animation: 'loading 2s linear infinite', color: 'white' }} />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'rgba(0,0,0,0.5)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Loader2
+                      size={24}
+                      style={{ animation: 'loading 2s linear infinite', color: 'white' }}
+                    />
                   </div>
                 )}
               </div>
-              
-              <label 
-                style={{ 
-                  position: 'absolute', 
-                  bottom: '0', 
-                  right: '0', 
-                  background: 'var(--primary)', 
-                  color: 'white', 
-                  padding: '6px', 
-                  borderRadius: '50%', 
+
+              <label
+                style={{
+                  position: 'absolute',
+                  bottom: '0',
+                  right: '0',
+                  background: 'var(--primary)',
+                  color: 'white',
+                  padding: '6px',
+                  borderRadius: '50%',
                   cursor: 'pointer',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
                 }}
               >
                 <Camera size={14} />
-                <input type="file" hidden accept="image/*" onChange={handlePhotoUpload} disabled={isUploading} />
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  disabled={isUploading}
+                />
               </label>
             </div>
             <div>
