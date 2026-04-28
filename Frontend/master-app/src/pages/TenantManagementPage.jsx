@@ -57,69 +57,76 @@ const TenantManagementPage = () => {
   };
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      <header className="hero-section">
+    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+      <nav style={{ marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        Administration / <span style={{ color: 'var(--text-main)' }}>Tenants</span>
+      </nav>
+
+      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
         <div>
-          <h1 className="hero-title">Tenant Management</h1>
-          <p style={{ color: 'var(--text-muted)' }}>
-            View and manage all active organizations on the platform.
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Tenant Management</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            Centralized control for all active organizations and infrastructure provisioning.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} /> Create Tenant
+        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ height: '32px' }}>
+          <Plus size={16} /> Create Tenant
         </button>
       </header>
 
-      <div className="stats-grid">
-        <div className="stat-card" style={{ borderLeft: '4px solid var(--primary)' }}>
+      <div className="stats-grid" style={{ marginBottom: '2rem' }}>
+        <div className="stat-card">
           <div className="stat-header">
-            <Globe size={20} color="var(--primary)" />
-            <span style={{ fontWeight: '500' }}>Total Tenants</span>
+            <span>Total Tenants</span>
+            <Globe size={16} color="var(--primary)" />
           </div>
           <div className="stat-value">{tenants.length}</div>
         </div>
-        <div className="stat-card" style={{ borderLeft: '4px solid var(--success)' }}>
+        <div className="stat-card">
           <div className="stat-header">
-            <Activity size={20} color="var(--success)" />
-            <span style={{ fontWeight: '500' }}>Active Now</span>
+            <span>Active Workspaces</span>
+            <Activity size={16} color="var(--success)" />
           </div>
           <div className="stat-value">{tenants.filter((t) => t.status === 'ACTIVE').length}</div>
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="card" style={{ padding: 0 }}>
         <div
           style={{
-            padding: '1.5rem',
+            padding: '1.25rem 1.5rem',
             borderBottom: '1px solid var(--border-main)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
-          <h2 style={{ fontSize: '1.1rem' }}>Organization List</h2>
+          <h2 style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            Organization List
+          </h2>
           <button
             className="theme-toggle"
             onClick={() => dispatch(loadTenants({ page: currentPage, size: 10 }))}
             disabled={isLoading}
+            style={{ width: '32px', height: '32px' }}
           >
             <RefreshCw
-              size={18}
+              size={16}
               style={{ animation: isLoading ? 'loading 2s linear infinite' : 'none' }}
             />
           </button>
         </div>
 
-        <div className="table-wrapper" style={{ border: 'none', marginTop: 0, borderRadius: 0 }}>
+        <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
           <table>
             <thead>
               <tr>
-                <th>Organization</th>
-                <th>Domain</th>
-                <th>Plan</th>
-                <th>Status</th>
-                <th>Joined</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th style={{ width: '25%' }}>Organization</th>
+                <th style={{ width: '25%' }}>Domain</th>
+                <th style={{ width: '15%' }}>Plan</th>
+                <th style={{ width: '15%' }}>Status</th>
+                <th style={{ width: '10%' }}>Joined</th>
+                <th style={{ width: '10%', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -129,31 +136,33 @@ const TenantManagementPage = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <div
                         style={{
-                          width: '36px',
-                          height: '36px',
-                          borderRadius: '8px',
-                          background: 'var(--bg-input)',
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '3px',
+                          background: 'var(--primary)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontWeight: 'bold',
-                          color: 'var(--primary)',
+                          fontSize: '0.7rem',
+                          fontWeight: '700',
+                          color: 'white',
                         }}
                       >
                         {tenant.name.charAt(0)}
                       </div>
-                      <span style={{ fontWeight: '600' }}>{tenant.name}</span>
+                      <span style={{ fontWeight: '500', fontSize: '0.875rem' }}>{tenant.name}</span>
                     </div>
                   </td>
                   <td>
-                    <code style={{ fontSize: '0.85rem' }}>{tenant.domain}.trackify.io</code>
+                    <code style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>{tenant.domain}.trackify.io</code>
                   </td>
                   <td>
                     <span
-                      className="badge badge-primary"
+                      className="badge"
                       style={{
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        color: 'var(--primary)',
+                        backgroundColor: '#DEEBFF',
+                        color: '#0052CC',
+                        fontSize: '0.65rem'
                       }}
                     >
                       {tenant.plan}
@@ -162,22 +171,20 @@ const TenantManagementPage = () => {
                   <td>
                     <span
                       className={`badge badge-${tenant.status === 'ACTIVE' ? 'success' : 'danger'}`}
+                      style={{ fontSize: '0.65rem' }}
                     >
-                      {tenant.status === 'ACTIVE' ? (
-                        <ShieldCheck size={14} style={{ marginRight: '4px' }} />
-                      ) : (
-                        <ShieldAlert size={14} style={{ marginRight: '4px' }} />
-                      )}
                       {tenant.status}
                     </span>
                   </td>
-                  <td>{new Date(tenant.createdAt).toLocaleDateString()}</td>
+                  <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    {new Date(tenant.createdAt).toLocaleDateString()}
+                  </td>
                   <td style={{ textAlign: 'right' }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                       <button
                         onClick={() => handleToggleStatus(tenant.id, tenant.status)}
                         className="btn btn-secondary"
-                        style={{ fontSize: '0.75rem', padding: '0.4rem 0.8rem' }}
+                        style={{ fontSize: '0.7rem', height: '24px', padding: '0 0.5rem' }}
                       >
                         {tenant.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
                       </button>
@@ -186,9 +193,9 @@ const TenantManagementPage = () => {
                         <button
                           onClick={() => handleDeleteTenant(tenant.id, tenant.name)}
                           className="theme-toggle"
-                          style={{ color: 'var(--danger)' }}
+                          style={{ color: 'var(--danger)', width: '24px', height: '24px' }}
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>
@@ -199,7 +206,7 @@ const TenantManagementPage = () => {
                 <tr>
                   <td
                     colSpan="6"
-                    style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}
+                    style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}
                   >
                     No tenants found.
                   </td>
@@ -210,7 +217,7 @@ const TenantManagementPage = () => {
         </div>
 
         {tenants.length > 0 && totalPages > 1 && (
-          <div style={{ padding: '1rem' }}>
+          <div style={{ padding: '1rem', borderTop: '1px solid var(--border-main)' }}>
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

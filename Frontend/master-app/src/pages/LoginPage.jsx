@@ -6,7 +6,7 @@ import { setCredentials } from '../features/auth/authSlice';
 import { useAuth } from '../hooks/useAuth';
 import { ROUTES } from '../constants/routes';
 import AuthLayout from '../layouts/AuthLayout';
-import { Mail, Lock, Eye, EyeOff, Shield, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Shield, Loader2 } from 'lucide-react';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -50,75 +50,43 @@ const LoginPage = () => {
   return (
     <AuthLayout>
       <div className="auth-header">
-        <div
-          style={{
-            width: '64px',
-            height: '64px',
-            background: 'var(--primary)',
-            borderRadius: 'var(--radius-lg)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1.5rem',
-            color: 'white',
-            boxShadow: '0 0 20px rgba(14, 165, 233, 0.3)',
-          }}
-        >
-          <Shield size={32} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+          <div style={{ width: '32px', height: '32px', background: 'var(--primary)', borderRadius: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+            <Shield size={20} />
+          </div>
+          <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>Trackify <span style={{ color: 'var(--text-muted)', fontWeight: '400' }}>Master</span></span>
         </div>
-        <h1 className="auth-title">Master Control</h1>
-        <p className="auth-subtitle">Sign in to manage the Trackify platform</p>
+        <h1 className="auth-title" style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem', textAlign: 'center' }}>Access Master Panel</h1>
+        <p className="auth-subtitle" style={{ fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center' }}>Sign in to manage the Trackify platform</p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
         <div className="form-group">
-          <label className="form-label">Email Address</label>
-          <div style={{ position: 'relative' }}>
-            <Mail
-              style={{
-                position: 'absolute',
-                left: '1rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={18}
-            />
-            <input
-              name="email"
-              type="email"
-              className="input-field"
-              style={{ paddingLeft: '3rem' }}
-              placeholder="admin@trackify.io"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>EMAIL ADDRESS</label>
+          <input
+            name="email"
+            type="email"
+            className="input-field"
+            placeholder="admin@trackify.io"
+            value={form.email}
+            onChange={handleChange}
+            required
+            style={{ height: '40px', fontSize: '0.875rem' }}
+          />
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Password</label>
+        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>PASSWORD</label>
           <div style={{ position: 'relative' }}>
-            <Lock
-              style={{
-                position: 'absolute',
-                left: '1rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={18}
-            />
             <input
               name="password"
               type={showPass ? 'text' : 'password'}
               className="input-field"
-              style={{ paddingLeft: '3rem', paddingRight: '3rem' }}
               placeholder="••••••••"
               value={form.password}
               onChange={handleChange}
               required
+              style={{ height: '40px', fontSize: '0.875rem' }}
             />
             <button
               type="button"
@@ -126,7 +94,7 @@ const LoginPage = () => {
               className="theme-toggle"
               style={{
                 position: 'absolute',
-                right: '0.5rem',
+                right: '0.25rem',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 width: '32px',
@@ -140,12 +108,15 @@ const LoginPage = () => {
 
         {apiError && (
           <div
-            className="badge badge-danger"
             style={{
-              width: '100%',
               padding: '0.75rem',
               marginBottom: '1.5rem',
-              justifyContent: 'center',
+              backgroundColor: '#FFEBE6',
+              color: '#BF2600',
+              borderRadius: '3px',
+              fontSize: '0.8rem',
+              textAlign: 'center',
+              border: '1px solid #FFBDAD'
             }}
           >
             {apiError}
@@ -156,17 +127,17 @@ const LoginPage = () => {
           type="submit"
           disabled={isLoading}
           className="btn btn-primary"
-          style={{ width: '100%', height: '48px', fontSize: '1rem', marginTop: '1rem' }}
+          style={{ width: '100%', height: '40px', fontSize: '0.875rem', fontWeight: '600' }}
         >
           {isLoading ? (
-            <Loader2 style={{ animation: 'loading 2s linear infinite' }} size={20} />
+            <Loader2 style={{ animation: 'loading 2s linear infinite' }} size={18} />
           ) : (
-            'Access Master Panel'
+            'Log in'
           )}
         </button>
 
-        <p className="form-footer" style={{ fontSize: '0.8rem' }}>
-          This portal is restricted to authorized platform owners only.
+        <p className="form-footer" style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-main)', paddingTop: '1.5rem' }}>
+          Authorized platform administrators only.
         </p>
       </form>
     </AuthLayout>
