@@ -85,28 +85,33 @@ const TeamPage = () => {
     : allUsers;
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      <header className="hero-section">
+    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+      <nav style={{ marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        Administration / <span style={{ color: 'var(--text-main)' }}>Team</span>
+      </nav>
+
+      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
         <div>
-          <h1 className="hero-title">Team Members</h1>
-          <p style={{ color: 'var(--text-muted)' }}>
-            {allUsersTotalElements ?? 0} members active in this workspace
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Users and Permissions</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            Manage who has access to this workspace and their respective roles.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button
-            className="btn btn-secondary"
+            className="theme-toggle"
             onClick={() => dispatch(fetchAllUsers({ tenantId, page: allUsersPage, size: 10 }))}
             disabled={isLoading}
+            style={{ width: '32px', height: '32px' }}
           >
             {isLoading ? (
-              <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} />
+              <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} />
             ) : (
-              <RefreshCw size={18} />
+              <RefreshCw size={16} />
             )}
           </button>
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-            <UserPlus size={18} /> Add Member
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ height: '32px' }}>
+            <UserPlus size={16} /> Add Member
           </button>
         </div>
       </header>
@@ -114,314 +119,227 @@ const TeamPage = () => {
       <div
         className="card"
         style={{
-          padding: '1rem 1.5rem',
+          padding: '1rem 1.25rem',
           marginBottom: '2rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '1rem',
-          borderStyle: 'dashed',
+          backgroundColor: '#EBECF0',
+          border: 'none'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div
-            className="avatar-circle"
-            style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)' }}
-          >
-            <Globe size={18} />
-          </div>
-          <div style={{ fontSize: '0.9rem' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Employee Join Link:</span>
-            <code style={{ marginLeft: '0.5rem', color: 'var(--primary)', fontWeight: '600' }}>
+          <Globe style={{ color: 'var(--primary)' }} size={20} />
+          <div style={{ fontSize: '0.875rem' }}>
+            <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Self-registration Link:</span>
+            <code style={{ marginLeft: '0.75rem', color: 'var(--primary)', fontWeight: '700' }}>
               {tenantUrl}/register
             </code>
           </div>
         </div>
         <button
           className="btn btn-secondary"
-          style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+          style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', height: '24px', backgroundColor: 'white' }}
           onClick={() => copyToClipboard(`${tenantUrl}/register`, 'Link')}
         >
-          <Copy size={14} /> Copy
+          <Copy size={12} /> Copy
         </button>
       </div>
 
-      <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-        <Search
-          style={{
-            position: 'absolute',
-            left: '1rem',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: 'var(--text-muted)',
-          }}
-          size={18}
-        />
-        <input
-          className="input-field"
-          style={{ paddingLeft: '3rem' }}
-          placeholder="Search by name or email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      {error && (
-        <div
-          className="badge badge-danger"
-          style={{ width: '100%', padding: '1rem', marginBottom: '1rem' }}
-        >
-          {error}
+      <div className="card" style={{ padding: 0 }}>
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            Members ({allUsersTotalElements ?? 0})
+          </h2>
+          <div style={{ position: 'relative', width: '240px' }}>
+            <Search
+              style={{
+                position: 'absolute',
+                left: '0.75rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-muted)',
+              }}
+              size={14}
+            />
+            <input
+              className="input-field"
+              style={{ paddingLeft: '2.25rem', height: '32px', fontSize: '0.8rem' }}
+              placeholder="Filter members..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
-      )}
 
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Member</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Joined</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading && allUsers.length === 0 ? (
-              [...Array(5)].map((_, i) => (
-                <tr key={`skel-${i}`}>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div
-                        className="skeleton"
-                        style={{ width: '40px', height: '40px', borderRadius: '50%' }}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <div
-                          className="skeleton"
-                          style={{
-                            height: '14px',
-                            width: '60%',
-                            marginBottom: '6px',
-                            borderRadius: '4px',
-                          }}
-                        />
-                        <div
-                          className="skeleton"
-                          style={{ height: '10px', width: '40%', borderRadius: '4px' }}
-                        />
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div
-                      className="skeleton"
-                      style={{ height: '24px', width: '60px', borderRadius: '12px' }}
-                    />
-                  </td>
-                  <td>
-                    <div
-                      className="skeleton"
-                      style={{ height: '24px', width: '60px', borderRadius: '12px' }}
-                    />
-                  </td>
-                  <td>
-                    <div
-                      className="skeleton"
-                      style={{ height: '14px', width: '80px', borderRadius: '4px' }}
-                    />
-                  </td>
-                  <td>
-                    <div
-                      className="skeleton"
-                      style={{
-                        height: '28px',
-                        width: '28px',
-                        borderRadius: '8px',
-                        marginLeft: 'auto',
-                      }}
-                    />
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <>
-                {filtered.map((u) => (
-                  <tr key={u.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div className="avatar-circle">
-                          {(u.fullName || u.email).charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: '600' }}>{u.fullName || '—'}</div>
+        {error && (
+          <div
+            style={{ padding: '1rem', margin: '1rem', backgroundColor: '#FFEBE6', color: '#BF2600', borderRadius: '3px', fontSize: '0.8rem' }}
+          >
+            {error}
+          </div>
+        )}
+
+        <div className="table-wrapper" style={{ border: 'none', marginTop: 0, borderRadius: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: '35%' }}>Member</th>
+                <th style={{ width: '15%' }}>Role</th>
+                <th style={{ width: '15%' }}>Status</th>
+                <th style={{ width: '20%' }}>Joined</th>
+                <th style={{ width: '15%', textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading && allUsers.length === 0 ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={`skel-${i}`}>
+                    <td colSpan={5}><div className="skeleton" style={{ height: '40px', width: '100%' }} /></td>
+                  </tr>
+                ))
+              ) : (
+                <>
+                  {filtered.map((u) => (
+                    <tr key={u.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                           <div
-                            style={{
-                              fontSize: '0.85rem',
-                              color: 'var(--text-muted)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.4rem',
-                            }}
+                             style={{ 
+                               width: '32px', 
+                               height: '32px', 
+                               borderRadius: '50%', 
+                               background: '#F4F5F7', 
+                               display: 'flex', 
+                               alignItems: 'center', 
+                               justifyContent: 'center',
+                               fontSize: '0.75rem',
+                               fontWeight: '600',
+                               color: '#42526E'
+                             }}
                           >
-                            <Mail size={12} /> {u.email}
+                            {(u.fullName || u.email).charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>{u.fullName || '—'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email}</div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="badge badge-primary">
-                        <ShieldCheck size={12} style={{ marginRight: '0.4rem' }} /> {u.role}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge badge-${STATUS_VARIANTS[u.status] || 'primary'}`}>
-                        {u.status}
-                      </span>
-                    </td>
-                    <td style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <Clock size={14} />
+                      </td>
+                      <td>
+                        <span className="badge" style={{ backgroundColor: '#DEEBFF', color: '#0052CC', fontSize: '0.65rem' }}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`badge badge-${STATUS_VARIANTS[u.status] || 'primary'}`} style={{ fontSize: '0.65rem' }}>
+                          {u.status}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                         {new Date(u.createdAt).toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                        {u.status !== 'ACTIVE' && u.role !== 'ADMIN' && (
-                          <button
-                            className="theme-toggle"
-                            onClick={() => handleStatusChange(u.id, 'ACTIVE')}
-                            title="Activate"
-                          >
-                            <UserCheck size={18} />
-                          </button>
-                        )}
-                        {u.status === 'ACTIVE' && u.role !== 'ADMIN' && (
-                          <button
-                            className="theme-toggle"
-                            onClick={() => handleStatusChange(u.id, 'INACTIVE')}
-                            title="Deactivate"
-                            style={{ color: 'var(--danger)' }}
-                          >
-                            <UserX size={18} />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filtered.length === 0 && !isLoading && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}
-                    >
-                      <Users size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                      <p>No team members found.</p>
-                    </td>
-                  </tr>
-                )}
-              </>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {allUsersTotalPages > 1 && (
-        <div style={{ marginTop: '2rem' }}>
-          <Pagination
-            currentPage={allUsersPage}
-            totalPages={allUsersTotalPages}
-            onPageChange={(page) => dispatch(fetchAllUsers({ tenantId, page, size: 10 }))}
-          />
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                          {u.status !== 'ACTIVE' && u.role !== 'ADMIN' && (
+                            <button
+                              className="btn btn-secondary"
+                              onClick={() => handleStatusChange(u.id, 'ACTIVE')}
+                              style={{ height: '24px', fontSize: '0.7rem', padding: '0 0.5rem' }}
+                            >
+                              Activate
+                            </button>
+                          )}
+                          {u.status === 'ACTIVE' && u.role !== 'ADMIN' && (
+                            <button
+                              className="btn btn-secondary"
+                              onClick={() => handleStatusChange(u.id, 'INACTIVE')}
+                              style={{ height: '24px', fontSize: '0.7rem', padding: '0 0.5rem', color: 'var(--danger)' }}
+                            >
+                              Deactivate
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && !isLoading && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}
+                      >
+                        No team members found.
+                      </td>
+                    </tr>
+                  )}
+                </>
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        {allUsersTotalPages > 1 && (
+          <div style={{ padding: '1rem', borderTop: '1px solid var(--border-main)' }}>
+            <Pagination
+              currentPage={allUsersPage}
+              totalPages={allUsersTotalPages}
+              onPageChange={(page) => dispatch(fetchAllUsers({ tenantId, page, size: 10 }))}
+            />
+          </div>
+        )}
+      </div>
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 style={{ fontSize: '1.25rem' }}>Add Team Member</h2>
+              <h2 style={{ fontSize: '1rem', fontWeight: '600' }}>Add Team Member</h2>
               <button className="theme-toggle" onClick={() => setIsModalOpen(false)}>
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
             <form onSubmit={handleAddMember}>
               <div className="modal-body">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div className="form-group">
-                    <label className="form-label">Full Name</label>
-                    <div style={{ position: 'relative' }}>
-                      <User
-                        style={{
-                          position: 'absolute',
-                          left: '1rem',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          color: 'var(--text-muted)',
-                        }}
-                        size={16}
-                      />
-                      <input
-                        className="input-field"
-                        style={{ paddingLeft: '2.5rem' }}
-                        required
-                        placeholder="e.g. John Doe"
-                        value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      />
-                    </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>FULL NAME</label>
+                    <input
+                      className="input-field"
+                      required
+                      placeholder="e.g. John Doe"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      style={{ height: '36px', fontSize: '0.875rem' }}
+                    />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Email Address</label>
-                    <div style={{ position: 'relative' }}>
-                      <Mail
-                        style={{
-                          position: 'absolute',
-                          left: '1rem',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          color: 'var(--text-muted)',
-                        }}
-                        size={16}
-                      />
-                      <input
-                        className="input-field"
-                        style={{ paddingLeft: '2.5rem' }}
-                        type="email"
-                        required
-                        placeholder="john@company.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      />
-                    </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>EMAIL ADDRESS</label>
+                    <input
+                      className="input-field"
+                      type="email"
+                      required
+                      placeholder="john@company.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      style={{ height: '36px', fontSize: '0.875rem' }}
+                    />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Temporary Password</label>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>PASSWORD</label>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <div style={{ position: 'relative', flex: 1 }}>
-                        <Lock
-                          style={{
-                            position: 'absolute',
-                            left: '1rem',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            color: 'var(--text-muted)',
-                          }}
-                          size={16}
-                        />
-                        <input
-                          className="input-field"
-                          style={{ paddingLeft: '2.5rem' }}
-                          type="text"
-                          required
-                          placeholder="Min 6 characters"
-                          value={formData.password}
-                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        />
-                      </div>
+                      <input
+                        className="input-field"
+                        type="text"
+                        required
+                        placeholder="Min 6 characters"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        style={{ height: '36px', fontSize: '0.875rem' }}
+                      />
                       <button
                         type="button"
                         className="btn btn-secondary"
@@ -431,6 +349,7 @@ const TeamPage = () => {
                             password: Math.random().toString(36).slice(-8),
                           })
                         }
+                        style={{ height: '36px', padding: '0 0.75rem', fontSize: '0.7rem' }}
                       >
                         Auto
                       </button>
@@ -444,6 +363,7 @@ const TeamPage = () => {
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   className="btn btn-secondary"
+                  style={{ height: '32px' }}
                 >
                   Cancel
                 </button>
@@ -451,12 +371,12 @@ const TeamPage = () => {
                   type="submit"
                   disabled={isAdding}
                   className="btn btn-primary"
-                  style={{ minWidth: '150px' }}
+                  style={{ height: '32px', minWidth: '120px' }}
                 >
                   {isAdding ? (
-                    <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} />
+                    <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} />
                   ) : (
-                    'Send Invitation'
+                    'Add Member'
                   )}
                 </button>
               </div>

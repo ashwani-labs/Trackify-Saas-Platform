@@ -67,13 +67,11 @@ const ProfilePage = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
     }
 
-    // Validate size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast.error('File size must be less than 2MB');
       return;
@@ -99,14 +97,16 @@ const ProfilePage = () => {
   };
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1000px', margin: '0 auto' }}>
-      <header className="hero-section" style={{ marginBottom: '3rem' }}>
-        <div>
-          <h1 className="hero-title">My Profile</h1>
-          <p style={{ color: 'var(--text-muted)' }}>
-            Manage your personal details and account security.
+    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+      <nav style={{ marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        User Profile / <span style={{ color: 'var(--text-main)' }}>Settings</span>
+      </nav>
+
+      <header style={{ marginBottom: '2.5rem' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Personal Settings</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            Manage your account details, profile picture, and security.
           </p>
-        </div>
       </header>
 
       <div
@@ -117,7 +117,7 @@ const ProfilePage = () => {
         }}
       >
         {/* Profile Details */}
-        <section className="card" style={{ height: 'fit-content' }}>
+        <section className="card" style={{ height: 'fit-content', padding: '2rem' }}>
           <div
             style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}
           >
@@ -125,13 +125,14 @@ const ProfilePage = () => {
               <div
                 className="avatar-circle"
                 style={{
-                  width: '100px',
-                  height: '100px',
-                  fontSize: '2.5rem',
-                  background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
+                  width: '80px',
+                  height: '80px',
+                  fontSize: '2rem',
+                  background: 'var(--primary)',
                   color: 'white',
                   overflow: 'hidden',
                   position: 'relative',
+                  borderRadius: '50%'
                 }}
               >
                 {user?.profilePhotoUrl ? (
@@ -156,7 +157,7 @@ const ProfilePage = () => {
                     }}
                   >
                     <Loader2
-                      size={24}
+                      size={20}
                       style={{ animation: 'loading 2s linear infinite', color: 'white' }}
                     />
                   </div>
@@ -168,18 +169,19 @@ const ProfilePage = () => {
                   position: 'absolute',
                   bottom: '0',
                   right: '0',
-                  background: 'var(--primary)',
-                  color: 'white',
-                  padding: '6px',
+                  background: 'white',
+                  color: 'var(--text-main)',
+                  padding: '5px',
                   borderRadius: '50%',
                   cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  border: '1px solid var(--border-main)'
                 }}
               >
-                <Camera size={14} />
+                <Camera size={12} />
                 <input
                   type="file"
                   hidden
@@ -190,152 +192,102 @@ const ProfilePage = () => {
               </label>
             </div>
             <div>
-              <h2 style={{ fontSize: '1.5rem' }}>{user?.email?.split('@')[0]}</h2>
-              <span className="badge badge-primary" style={{ marginTop: '0.5rem' }}>
-                <Shield size={12} style={{ marginRight: '0.4rem' }} /> {user?.role}
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{user?.email?.split('@')[0]}</h2>
+              <span className="badge" style={{ marginTop: '0.5rem', background: '#F4F5F7', color: '#42526E', fontSize: '0.7rem' }}>
+                {user?.role}
               </span>
             </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="form-group">
-              <label
-                className="form-label"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-              >
-                <Mail size={16} /> Email Address
-              </label>
-              <input className="input-field" value={user?.email} disabled />
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
-                Your email address is managed by your organization.
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>EMAIL ADDRESS</label>
+              <input className="input-field" value={user?.email} disabled style={{ height: '36px', fontSize: '0.875rem' }} />
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                Your identity is managed by your organization.
               </p>
             </div>
 
-            <div className="form-group">
-              <label
-                className="form-label"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-              >
-                <Calendar size={16} /> Workspace Domain
-              </label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>WORKSPACE DOMAIN</label>
               <div
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  color: 'var(--primary)',
+                  padding: '0.5rem 0.75rem',
+                  background: '#F4F5F7',
+                  borderRadius: '3px',
+                  fontSize: '0.875rem',
                   fontWeight: '600',
+                  color: 'var(--primary)'
                 }}
               >
-                <code>{tenantDomain}.trackify.com</code>
+                {tenantDomain}.trackify.com
               </div>
             </div>
           </div>
         </section>
 
         {/* Security Settings */}
-        <section className="card">
+        <section className="card" style={{ padding: '2rem' }}>
           <div
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}
           >
-            <Lock size={20} style={{ color: 'var(--primary)' }} />
-            <h2 style={{ fontSize: '1.25rem' }}>Account Security</h2>
+            <Lock size={18} style={{ color: 'var(--primary)' }} />
+            <h2 style={{ fontSize: '1rem', fontWeight: '600' }}>Security</h2>
           </div>
 
           <form
             onSubmit={handlePasswordChange}
             style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
           >
-            <div className="form-group">
-              <label className="form-label">Current Password</label>
-              <div style={{ position: 'relative' }}>
-                <Key
-                  style={{
-                    position: 'absolute',
-                    left: '1rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-muted)',
-                  }}
-                  size={16}
-                />
-                <input
-                  type="password"
-                  className="input-field"
-                  style={{ paddingLeft: '2.5rem' }}
-                  required
-                  placeholder="Verify your identity"
-                  value={passData.currentPassword}
-                  onChange={(e) => setPassData({ ...passData, currentPassword: e.target.value })}
-                />
-              </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>CURRENT PASSWORD</label>
+              <input
+                type="password"
+                className="input-field"
+                required
+                placeholder="Verify current password"
+                value={passData.currentPassword}
+                onChange={(e) => setPassData({ ...passData, currentPassword: e.target.value })}
+                style={{ height: '36px', fontSize: '0.875rem' }}
+              />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">New Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock
-                  style={{
-                    position: 'absolute',
-                    left: '1rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-muted)',
-                  }}
-                  size={16}
-                />
-                <input
-                  type="password"
-                  className="input-field"
-                  style={{ paddingLeft: '2.5rem' }}
-                  required
-                  placeholder="Min 6 characters"
-                  value={passData.newPassword}
-                  onChange={(e) => setPassData({ ...passData, newPassword: e.target.value })}
-                />
-              </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>NEW PASSWORD</label>
+              <input
+                type="password"
+                className="input-field"
+                required
+                placeholder="Min 6 characters"
+                value={passData.newPassword}
+                onChange={(e) => setPassData({ ...passData, newPassword: e.target.value })}
+                style={{ height: '36px', fontSize: '0.875rem' }}
+              />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Confirm New Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock
-                  style={{
-                    position: 'absolute',
-                    left: '1rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-muted)',
-                  }}
-                  size={16}
-                />
-                <input
-                  type="password"
-                  className="input-field"
-                  style={{ paddingLeft: '2.5rem' }}
-                  required
-                  placeholder="Repeat new password"
-                  value={passData.confirmPassword}
-                  onChange={(e) => setPassData({ ...passData, confirmPassword: e.target.value })}
-                />
-              </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>CONFIRM PASSWORD</label>
+              <input
+                type="password"
+                className="input-field"
+                required
+                placeholder="Repeat new password"
+                value={passData.confirmPassword}
+                onChange={(e) => setPassData({ ...passData, confirmPassword: e.target.value })}
+                style={{ height: '36px', fontSize: '0.875rem' }}
+              />
             </div>
 
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ width: '100%', marginTop: '1rem' }}
+              style={{ width: '100%', marginTop: '0.5rem', height: '36px' }}
               disabled={isChangingPass}
             >
               {isChangingPass ? (
-                <>
-                  <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} />
-                  Updating...
-                </>
+                <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} />
               ) : (
-                <>
-                  <Save size={18} /> Update Password
-                </>
+                'Change Password'
               )}
             </button>
           </form>
@@ -344,19 +296,19 @@ const ProfilePage = () => {
             style={{
               marginTop: '2rem',
               padding: '1rem',
-              background: 'rgba(99, 102, 241, 0.05)',
-              borderRadius: 'var(--radius-md)',
+              background: '#EAE6FF',
+              borderRadius: '3px',
               display: 'flex',
               gap: '0.75rem',
               alignItems: 'flex-start',
             }}
           >
             <AlertCircle
-              size={18}
-              style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }}
+              size={16}
+              style={{ color: '#6554C0', flexShrink: 0, marginTop: '2px' }}
             />
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-              Using a unique, strong password helps keep your workspace secure.
+            <p style={{ fontSize: '0.75rem', color: '#42526E', lineHeight: '1.6' }}>
+              Ensure your password is at least 6 characters long and contains a mix of letters and numbers.
             </p>
           </div>
         </section>

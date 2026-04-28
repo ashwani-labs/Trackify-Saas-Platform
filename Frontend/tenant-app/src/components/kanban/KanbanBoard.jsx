@@ -62,9 +62,7 @@ const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
     return (
       <div className="kanban-board">
         {COLUMNS.map(({ status }) => (
-          <div key={status} className="kanban-column">
-            <div className="skeleton" style={{ height: '300px', width: '100%' }}></div>
-          </div>
+          <div key={status} className="kanban-column skeleton" style={{ height: '500px' }} />
         ))}
       </div>
     );
@@ -77,48 +75,30 @@ const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
         return (
           <div
             key={status}
-            className={`kanban-column ${dragOverColumn === status ? 'drag-over' : ''}`}
-            data-status={status}
+            className="kanban-column"
             onDragOver={(e) => handleDragOver(e, status)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, status)}
             style={{
-              transition: 'all 0.2s ease',
-              transform: dragOverColumn === status ? 'scale(1.02)' : 'scale(1)',
-              borderColor: dragOverColumn === status ? 'var(--primary)' : 'var(--border-main)',
-              boxShadow: dragOverColumn === status ? '0 0 0 2px rgba(99,102,241,0.2)' : 'none',
+              backgroundColor: dragOverColumn === status ? '#EBECF0' : '#F4F5F7',
+              border: dragOverColumn === status ? '2px dashed var(--primary)' : 'none',
+              transition: 'background-color 0.2s ease'
             }}
           >
-            <div className="kanban-header">
-              <span className="column-title">{label}</span>
-              <span className="column-count">{columnIssues.length}</span>
+            <div className="column-header">
+              <span className="column-title">{label} <span style={{ marginLeft: '0.5rem', fontWeight: '400', color: '#6B778C' }}>{columnIssues.length}</span></span>
             </div>
 
-            <div className="kanban-list">
-              {columnIssues.length === 0 ? (
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '2rem',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.8rem',
-                    border: '1px dashed var(--border-main)',
-                    borderRadius: 'var(--radius-md)',
-                  }}
-                >
-                  Empty
-                </div>
-              ) : (
-                columnIssues.map((issue) => <IssueCard key={issue.id} issue={issue} />)
-              )}
-
+            <div className="kanban-list" style={{ minHeight: '100px' }}>
+              {columnIssues.map((issue) => <IssueCard key={issue.id} issue={issue} />)}
+              
               {status === 'TODO' && (
                 <button
                   className="btn btn-secondary"
-                  style={{ width: '100%', marginTop: 'auto', borderStyle: 'dashed' }}
+                  style={{ width: 'calc(100% - 1rem)', margin: '0.5rem', height: '32px', background: 'transparent', color: '#42526E', justifyContent: 'flex-start' }}
                   onClick={() => onCreateIssue()}
                 >
-                  <Plus size={16} /> Add Issue
+                  <Plus size={16} /> Create issue
                 </button>
               )}
             </div>

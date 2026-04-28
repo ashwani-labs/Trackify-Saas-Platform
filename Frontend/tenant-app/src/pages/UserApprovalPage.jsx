@@ -25,21 +25,26 @@ const UserApprovalPage = () => {
   };
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      <header className="hero-section">
+    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+      <nav style={{ marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        Administration / <span style={{ color: 'var(--text-main)' }}>User Approvals</span>
+      </nav>
+
+      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
         <div>
-          <h1 className="hero-title">User Approvals</h1>
-          <p style={{ color: 'var(--text-muted)' }}>
-            Manage pending access requests for your workspace.
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Access Requests</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            Review and manage requests from users trying to join your workspace.
           </p>
         </div>
         <button
           className="theme-toggle"
           onClick={() => dispatch(fetchPendingUsers({ tenantId, page: currentPage, size: 10 }))}
           disabled={isLoading}
+          style={{ width: '32px', height: '32px' }}
         >
           <RefreshCw
-            size={20}
+            size={16}
             style={{ animation: isLoading ? 'loading 2s linear infinite' : 'none' }}
           />
         </button>
@@ -47,65 +52,16 @@ const UserApprovalPage = () => {
 
       {error && (
         <div
-          className="badge badge-danger"
-          style={{ width: '100%', padding: '1rem', marginBottom: '2rem' }}
+          style={{ padding: '1rem', marginBottom: '2rem', backgroundColor: '#FFEBE6', color: '#BF2600', borderRadius: '3px', fontSize: '0.875rem', border: '1px solid #FFBDAD' }}
         >
           {error}
         </div>
       )}
 
-      <div style={{ display: 'grid', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gap: '1rem' }}>
         {isLoading && pendingUsers.length === 0 ? (
           [...Array(3)].map((_, i) => (
-            <div
-              key={`skel-${i}`}
-              className="card"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1.5rem',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                <div
-                  className="skeleton"
-                  style={{ width: '56px', height: '56px', borderRadius: '50%' }}
-                />
-                <div>
-                  <div
-                    className="skeleton"
-                    style={{
-                      height: '18px',
-                      width: '160px',
-                      marginBottom: '10px',
-                      borderRadius: '4px',
-                    }}
-                  />
-                  <div style={{ display: 'flex', gap: '1.5rem' }}>
-                    <div
-                      className="skeleton"
-                      style={{ height: '12px', width: '140px', borderRadius: '4px' }}
-                    />
-                    <div
-                      className="skeleton"
-                      style={{ height: '12px', width: '100px', borderRadius: '4px' }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <div
-                  className="skeleton"
-                  style={{ height: '38px', width: '90px', borderRadius: 'var(--radius-md)' }}
-                />
-                <div
-                  className="skeleton"
-                  style={{ height: '38px', width: '100px', borderRadius: 'var(--radius-md)' }}
-                />
-              </div>
-            </div>
+            <div key={`skel-${i}`} className="card skeleton" style={{ height: '100px' }} />
           ))
         ) : (
           <>
@@ -117,50 +73,50 @@ const UserApprovalPage = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '1.5rem',
+                  padding: '1.25rem 1.5rem',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                   <div
                     style={{
-                      width: '56px',
-                      height: '56px',
+                      width: '40px',
+                      height: '40px',
                       borderRadius: '50%',
-                      background: 'var(--bg-input)',
+                      background: '#F4F5F7',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'var(--primary)',
+                      color: '#42526E',
+                      fontSize: '1rem',
+                      fontWeight: '700'
                     }}
                   >
-                    <User size={28} />
+                    {user.fullName?.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{user.fullName}</h3>
-                    <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>{user.fullName}</h3>
+                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                       <span
                         style={{
-                          fontSize: '0.875rem',
+                          fontSize: '0.8rem',
                           color: 'var(--text-muted)',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.4rem',
                         }}
                       >
-                        <Mail size={14} /> {user.email}
+                        <Mail size={12} /> {user.email}
                       </span>
                       <span
                         style={{
-                          fontSize: '0.875rem',
+                          fontSize: '0.8rem',
                           color: 'var(--text-muted)',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.4rem',
                         }}
                       >
-                        <Clock size={14} /> Requested{' '}
-                        {new Date(user.createdAt).toLocaleDateString()}
+                        <Clock size={12} /> Requested {new Date(user.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -169,16 +125,17 @@ const UserApprovalPage = () => {
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                   <button
                     className="btn btn-secondary"
-                    style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                    style={{ height: '32px', fontSize: '0.875rem', color: '#BF2600' }}
                     onClick={() => handleAction(user.id, 'INACTIVE')}
                   >
-                    <UserX size={18} /> Reject
+                    Reject
                   </button>
                   <button
                     className="btn btn-primary"
+                    style={{ height: '32px', fontSize: '0.875rem' }}
                     onClick={() => handleAction(user.id, 'ACTIVE')}
                   >
-                    <UserCheck size={18} /> Approve
+                    Approve Access
                   </button>
                 </div>
               </div>
@@ -191,34 +148,35 @@ const UserApprovalPage = () => {
             className="card"
             style={{
               textAlign: 'center',
-              padding: '5rem',
+              padding: '6rem 2rem',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '1.5rem',
+              borderStyle: 'dashed'
             }}
           >
             <div
               style={{
-                background: 'var(--bg-input)',
-                padding: '2rem',
+                background: '#E3FCEF',
+                padding: '1.5rem',
                 borderRadius: '50%',
-                color: 'var(--success)',
+                color: '#36B37E',
               }}
             >
               <ShieldCheck size={48} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>All caught up!</h2>
-              <p style={{ color: 'var(--text-muted)' }}>
-                There are no pending user requests at the moment.
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>All requests handled</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', maxWidth: '400px', margin: '0 auto' }}>
+                There are no pending user requests at the moment. You'll see new sign-ups here for approval.
               </p>
             </div>
           </div>
         )}
 
         {pendingUsers.length > 0 && totalPages > 1 && (
-          <div style={{ marginTop: '2rem' }}>
+          <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-main)', paddingTop: '1rem' }}>
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

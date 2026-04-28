@@ -29,13 +29,12 @@ function App() {
           <Toaster
             position="top-right"
             toastOptions={{
-              className: 'glass-panel',
               style: {
                 background: 'var(--bg-surface)',
                 color: 'var(--text-main)',
                 border: '1px solid var(--border-main)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
+                borderRadius: '3px',
+                fontSize: '0.875rem',
                 boxShadow: 'var(--shadow-lg)',
               },
             }}

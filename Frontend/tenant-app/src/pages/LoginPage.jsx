@@ -28,37 +28,25 @@ const LoginPage = () => {
   };
 
   return (
-    <AuthLayout title="Welcome Back" subtitle="Sign in to your Trackify workspace">
-      <form onSubmit={handleSubmit}>
+    <AuthLayout title="Log in to continue" subtitle="Enter your credentials to access your workspace">
+      <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
         <div className="form-group">
-          <label className="form-label" htmlFor="email">
-            Email Address
+          <label className="form-label" htmlFor="email" style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)' }}>
+            EMAIL ADDRESS
           </label>
-          <div style={{ position: 'relative' }}>
-            <Mail
-              style={{
-                position: 'absolute',
-                left: '1rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={18}
-            />
-            <input
-              id="email"
-              type="email"
-              className="input-field"
-              style={{ paddingLeft: '3rem' }}
-              placeholder="e.g. alex@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+          <input
+            id="email"
+            type="email"
+            className="input-field"
+            placeholder="e.g. alex@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{ height: '40px', fontSize: '0.875rem' }}
+          />
         </div>
 
-        <div className="form-group">
+        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
           <div
             style={{
               display: 'flex',
@@ -67,45 +55,36 @@ const LoginPage = () => {
               marginBottom: '0.5rem',
             }}
           >
-            <label className="form-label" style={{ marginBottom: 0 }} htmlFor="password">
-              Password
+            <label className="form-label" style={{ marginBottom: 0, fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)' }} htmlFor="password">
+              PASSWORD
             </label>
-            <Link to="/forgot-password" style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>
-              Forgot password?
+            <Link to="/forgot-password" style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '600' }}>
+              Can't log in?
             </Link>
           </div>
-          <div style={{ position: 'relative' }}>
-            <Lock
-              style={{
-                position: 'absolute',
-                left: '1rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={18}
-            />
-            <input
-              id="password"
-              type="password"
-              className="input-field"
-              style={{ paddingLeft: '3rem' }}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <input
+            id="password"
+            type="password"
+            className="input-field"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{ height: '40px', fontSize: '0.875rem' }}
+          />
         </div>
 
         {error && (
           <div
-            className="badge badge-danger"
             style={{
-              width: '100%',
               padding: '0.75rem',
               marginBottom: '1.5rem',
-              justifyContent: 'center',
+              backgroundColor: '#FFEBE6',
+              color: '#BF2600',
+              borderRadius: '3px',
+              fontSize: '0.8rem',
+              textAlign: 'center',
+              border: '1px solid #FFBDAD'
             }}
           >
             {error}
@@ -116,23 +95,23 @@ const LoginPage = () => {
           type="submit"
           disabled={loading}
           className="btn btn-primary"
-          style={{ width: '100%', height: '48px', fontSize: '1rem' }}
+          style={{ width: '100%', height: '40px', fontSize: '0.875rem', fontWeight: '600' }}
         >
           {loading ? (
-            <Loader2 style={{ animation: 'loading 2s linear infinite' }} size={20} />
+            <Loader2 style={{ animation: 'loading 2s linear infinite' }} size={18} />
           ) : (
-            <>
-              Sign In <LogIn size={18} />
-            </>
+            'Log in'
           )}
         </button>
 
-        <p className="form-footer">
-          New to Trackify?{' '}
-          <Link to="/register" className="form-link">
-            Join your team
-          </Link>
-        </p>
+        <div style={{ marginTop: '2rem', textAlign: 'center', borderTop: '1px solid var(--border-main)', paddingTop: '1.5rem' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+            New to Trackify?{' '}
+            <Link to="/register" style={{ color: 'var(--primary)', fontWeight: '600' }}>
+              Create an account
+            </Link>
+          </p>
+        </div>
       </form>
     </AuthLayout>
   );

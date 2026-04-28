@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import axios from '../utils/axios';
 import AuthLayout from '../layouts/AuthLayout';
 
@@ -60,118 +60,97 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <AuthLayout title="Set New Password" subtitle="Please enter your new password below">
+    <AuthLayout title="Choose a new password" subtitle="Create a secure password for your account">
       {success ? (
-        <div style={{ textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
+        <div style={{ textAlign: 'center', animation: 'fadeIn 0.4s ease-out', marginTop: '1.5rem' }}>
           <div
             style={{
               width: '64px',
               height: '64px',
               borderRadius: '50%',
-              background: 'rgba(16, 185, 129, 0.1)',
+              background: '#E3FCEF',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 1.5rem',
-              color: 'var(--success)',
+              color: '#36B37E',
             }}
           >
             <CheckCircle2 size={32} />
           </div>
-          <p style={{ color: 'var(--text-main)', marginBottom: '2rem', lineHeight: '1.6' }}>
+          <p style={{ color: 'var(--text-main)', marginBottom: '1.5rem', lineHeight: '1.6', fontSize: '0.875rem' }}>
             Your password has been successfully reset.
           </p>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Redirecting to login in a few seconds...
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '2rem' }}>
+            Redirecting to login...
           </div>
           <Link
             to="/login"
             className="btn btn-primary"
-            style={{ width: '100%', marginTop: '1.5rem' }}
+            style={{ width: '100%', height: '40px' }}
           >
-            Go to Login <ArrowRight size={18} />
+            Log in now
           </Link>
         </div>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
           <div className="form-group">
-            <label className="form-label">New Password</label>
-            <div style={{ position: 'relative' }}>
-              <Lock
-                style={{
-                  position: 'absolute',
-                  left: '1rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)',
-                }}
-                size={18}
-              />
-              <input
-                type="password"
-                className="input-field"
-                style={{ paddingLeft: '3rem' }}
-                placeholder="••••••••"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-            </div>
+            <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>NEW PASSWORD</label>
+            <input
+              type="password"
+              className="input-field"
+              placeholder="Enter new password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              style={{ height: '40px', fontSize: '0.875rem' }}
+            />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Confirm Password</label>
-            <div style={{ position: 'relative' }}>
-              <Lock
-                style={{
-                  position: 'absolute',
-                  left: '1rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)',
-                }}
-                size={18}
-              />
-              <input
-                type="password"
-                className="input-field"
-                style={{ paddingLeft: '3rem' }}
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
+          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+            <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>CONFIRM PASSWORD</label>
+            <input
+              type="password"
+              className="input-field"
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              style={{ height: '40px', fontSize: '0.875rem' }}
+            />
           </div>
 
           {error && (
             <div
-              className="badge badge-danger"
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                marginBottom: '1.5rem',
-                justifyContent: 'center',
-              }}
-            >
-              {error}
-            </div>
+                style={{
+                  padding: '0.75rem',
+                  marginBottom: '1.5rem',
+                  backgroundColor: '#FFEBE6',
+                  color: '#BF2600',
+                  borderRadius: '3px',
+                  fontSize: '0.8rem',
+                  textAlign: 'center',
+                  border: '1px solid #FFBDAD'
+                }}
+              >
+                {error}
+              </div>
           )}
 
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%', height: '48px', marginBottom: '1.5rem' }}
+            style={{ width: '100%', height: '40px', fontSize: '0.875rem', fontWeight: '600' }}
             disabled={isLoading || !token || !email || !newPassword || !confirmPassword}
           >
-            {isLoading ? 'Resetting...' : 'Reset Password'}
+            {isLoading ? 'Resetting...' : 'Reset password'}
           </button>
 
-          <p className="form-footer">
-            <Link to="/login" className="form-link">
-              Cancel and return to login
-            </Link>
-          </p>
+          <div style={{ marginTop: '2rem', textAlign: 'center', borderTop: '1px solid var(--border-main)', paddingTop: '1.5rem' }}>
+             <Link to="/login" style={{ fontSize: '0.875rem', color: 'var(--primary)', fontWeight: '600' }}>
+               Back to login
+             </Link>
+          </div>
         </form>
       )}
     </AuthLayout>

@@ -23,25 +23,36 @@ const ProjectsPage = () => {
   }, [dispatch]);
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      <header className="hero-section">
+    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+      <nav style={{ marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        Workspaces / <span style={{ color: 'var(--text-main)' }}>Projects</span>
+      </nav>
+
+      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
         <div>
-          <h1 className="hero-title">Projects</h1>
-          <p style={{ color: 'var(--text-muted)' }}>
-            Manage and track your organization's work and development cycles.
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Projects</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            A central list of all projects and workspaces within your organization.
           </p>
         </div>
         {isAdmin && (
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-            <Plus size={18} /> Create Project
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ height: '32px' }}>
+            <Plus size={16} /> Create Project
           </button>
         )}
       </header>
 
       {error && (
         <div
-          className="badge badge-danger"
-          style={{ width: '100%', padding: '1rem', marginBottom: '2rem' }}
+          style={{
+            padding: '1rem',
+            marginBottom: '2rem',
+            backgroundColor: '#FFEBE6',
+            color: '#BF2600',
+            borderRadius: '3px',
+            fontSize: '0.875rem',
+            border: '1px solid #FFBDAD'
+          }}
         >
           {error}
         </div>
@@ -50,7 +61,7 @@ const ProjectsPage = () => {
       {isLoading && projects.length === 0 ? (
         <div className="stats-grid">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="card skeleton" style={{ height: '200px' }}></div>
+            <div key={i} className="card skeleton" style={{ height: '180px' }}></div>
           ))}
         </div>
       ) : projects.length === 0 ? (
@@ -58,20 +69,21 @@ const ProjectsPage = () => {
           className="card"
           style={{
             textAlign: 'center',
-            padding: '5rem',
+            padding: '5rem 2rem',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '1.5rem',
+            borderStyle: 'dashed'
           }}
         >
-          <div style={{ background: 'var(--bg-input)', padding: '2rem', borderRadius: '50%' }}>
-            <FolderKanban size={48} color="var(--text-muted)" />
+          <div style={{ background: '#F4F5F7', padding: '1.5rem', borderRadius: '3px' }}>
+            <FolderKanban size={40} color="#42526E" />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>No projects found</h2>
-            <p style={{ color: 'var(--text-muted)' }}>
-              Get started by creating your first project workspace.
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>No projects yet</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', maxWidth: '400px', margin: '0 auto' }}>
+              Create a project to start tracking issues, planning sprints, and collaborating with your team.
             </p>
           </div>
           {isAdmin && (
@@ -87,7 +99,7 @@ const ProjectsPage = () => {
               key={project.id}
               className="card"
               onClick={() => navigate(`/projects/${project.id}`)}
-              style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+              style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem' }}
             >
               <div
                 style={{
@@ -96,23 +108,28 @@ const ProjectsPage = () => {
                   alignItems: 'flex-start',
                 }}
               >
-                <span className="badge badge-primary">{project.key}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                   <div style={{ width: '24px', height: '24px', background: '#0052CC', borderRadius: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.7rem', fontWeight: '700' }}>
+                      {project.name.charAt(0).toUpperCase()}
+                   </div>
+                   <span style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>{project.key}</span>
+                </div>
                 <div style={{ color: 'var(--text-muted)' }}>
-                  <Layers size={18} />
+                  <Layers size={16} />
                 </div>
               </div>
 
               <div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{project.name}</h3>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{project.name}</h3>
                 <p
                   style={{
                     color: 'var(--text-muted)',
-                    fontSize: '0.9rem',
+                    fontSize: '0.8rem',
                     display: '-webkit-box',
                     WebkitLineClamp: '2',
                     WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
-                    lineHeight: '1.5',
+                    lineHeight: '1.6',
                   }}
                 >
                   {project.description || 'No description provided.'}
@@ -122,7 +139,7 @@ const ProjectsPage = () => {
               <div
                 style={{
                   marginTop: 'auto',
-                  paddingTop: '1rem',
+                  paddingTop: '0.75rem',
                   borderTop: '1px solid var(--border-main)',
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -134,14 +151,14 @@ const ProjectsPage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.4rem',
-                    fontSize: '0.75rem',
+                    fontSize: '0.7rem',
                     color: 'var(--text-muted)',
                   }}
                 >
-                  <Clock size={14} />
-                  {new Date(project.createdAt).toLocaleDateString()}
+                  <Clock size={12} />
+                  <span>Updated {new Date(project.createdAt).toLocaleDateString()}</span>
                 </div>
-                <ArrowRight size={18} color="var(--primary)" />
+                <ArrowRight size={16} color="var(--primary)" />
               </div>
             </div>
           ))}
@@ -149,7 +166,7 @@ const ProjectsPage = () => {
       )}
 
       {projects.length > 0 && totalPages > 1 && (
-        <div style={{ marginTop: '2rem' }}>
+        <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-main)', paddingTop: '1rem' }}>
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

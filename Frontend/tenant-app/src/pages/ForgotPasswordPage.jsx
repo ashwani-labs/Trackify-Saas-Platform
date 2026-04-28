@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import axios from '../utils/axios';
 import AuthLayout from '../layouts/AuthLayout';
 
@@ -30,90 +30,80 @@ const ForgotPasswordPage = () => {
 
   return (
     <AuthLayout
-      title="Forgot Password"
-      subtitle="Enter your email to receive recovery instructions"
+      title="Can't log in?"
+      subtitle="We'll send a recovery link to your email"
     >
       {success ? (
-        <div style={{ textAlign: 'center', animation: 'fadeIn 0.5s ease-out' }}>
+        <div style={{ textAlign: 'center', animation: 'fadeIn 0.4s ease-out', marginTop: '1.5rem' }}>
           <div
             style={{
               width: '64px',
               height: '64px',
               borderRadius: '50%',
-              background: 'rgba(16, 185, 129, 0.1)',
+              background: '#DEEBFF',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 1.5rem',
-              color: 'var(--success)',
+              color: 'var(--primary)',
             }}
           >
-            <CheckCircle2 size={32} />
+            <Mail size={32} />
           </div>
-          <p style={{ color: 'var(--text-main)', marginBottom: '2rem', lineHeight: '1.6' }}>
+          <p style={{ color: 'var(--text-main)', marginBottom: '2rem', lineHeight: '1.6', fontSize: '0.875rem' }}>
             If an account with <strong>{email}</strong> exists, an email has been sent with further
             instructions.
           </p>
-          <Link to="/login" className="btn btn-secondary" style={{ width: '100%' }}>
-            <ArrowLeft size={16} /> Back to Login
+          <Link to="/login" className="btn btn-secondary" style={{ width: '100%', height: '40px' }}>
+            Return to login
           </Link>
         </div>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
           <div className="form-group">
-            <label className="form-label">Email Address</label>
-            <div style={{ position: 'relative' }}>
-              <Mail
-                style={{
-                  position: 'absolute',
-                  left: '1rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-muted)',
-                }}
-                size={18}
-              />
-              <input
-                type="email"
-                className="input-field"
-                style={{ paddingLeft: '3rem' }}
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+            <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>EMAIL ADDRESS</label>
+            <input
+              type="email"
+              className="input-field"
+              placeholder="e.g. alex@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{ height: '40px', fontSize: '0.875rem' }}
+            />
           </div>
 
           {error && (
-            <div
-              className="badge badge-danger"
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                marginBottom: '1.5rem',
-                justifyContent: 'center',
-              }}
-            >
-              {error}
-            </div>
+             <div
+                style={{
+                  padding: '0.75rem',
+                  marginBottom: '1.5rem',
+                  backgroundColor: '#FFEBE6',
+                  color: '#BF2600',
+                  borderRadius: '3px',
+                  fontSize: '0.8rem',
+                  textAlign: 'center',
+                  border: '1px solid #FFBDAD'
+                }}
+              >
+                {error}
+              </div>
           )}
 
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%', height: '48px', marginBottom: '1.5rem' }}
+            style={{ width: '100%', height: '40px', fontSize: '0.875rem', fontWeight: '600', marginBottom: '1.5rem' }}
             disabled={isLoading || !email}
           >
-            {isLoading ? 'Sending...' : 'Send Reset Link'}
+            {isLoading ? 'Sending link...' : 'Send recovery link'}
           </button>
 
-          <p className="form-footer">
-            Remembered your password?{' '}
-            <Link to="/login" className="form-link">
-              Sign in
-            </Link>
-          </p>
+          <div style={{ textAlign: 'center', borderTop: '1px solid var(--border-main)', paddingTop: '1.5rem' }}>
+             <Link to="/login" style={{ fontSize: '0.875rem', color: 'var(--primary)', fontWeight: '600' }}>
+               Return to login
+             </Link>
+          </div>
         </form>
       )}
     </AuthLayout>
