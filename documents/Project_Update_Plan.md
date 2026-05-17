@@ -76,10 +76,13 @@ PHASE 5 — Scale & hardening (Ongoing)
 
 --------------------------------------------
 
-5. PHASE 0 — CRITICAL FIXES (WEEK 1)
-------------------------------------
+5. PHASE 0 — CRITICAL FIXES (WEEK 1) ✅ COMPLETED
+------------------------------------------------
 
 Priority: P0 — Blockers for any public repo or deployment
+
+Status: Implemented (see git history). Remaining manual step: rotate JWT/mail
+credentials if they were ever committed to a remote repository.
 
 TASK 0.1 — Rotate and remove committed secrets
 - Rotate Gmail app password and JWT secret used in docker-compose.yml
@@ -335,7 +338,7 @@ Update files:
 14. WEEK-BY-WEEK CHECKLIST (QUICK REFERENCE)
 --------------------------------------------
 
-Week 1  [ ] Rotate secrets  [ ] .env.example  [ ] Axios refactor  [ ] README
+Week 1  [x] Rotate secrets (remove from compose — rotate if previously exposed)  [x] .env.example  [x] Axios refactor  [x] README
 Week 2  [ ] Shared CSS/package  [ ] 401 redirect  [ ] Docker docs
 Week 3  [ ] API contract audit  [ ] Error toast consistency
 Week 4  [ ] GitHub Actions  [ ] 5+ new backend tests

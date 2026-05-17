@@ -1,142 +1,146 @@
-# 🚀 Trackify SaaS Platform
+# Trackify SaaS Platform
 
-A production-grade **multi-tenant SaaS platform** for project and issue management, inspired by tools like Jira.
-Designed with **scalable microservices architecture**, secure authentication, and clean system design principles.
-
----
-
-## 🧠 Overview
-
-Trackify is a full-stack SaaS platform that enables organizations to manage projects, track issues, and collaborate efficiently within isolated tenant environments.
-
-The system is built with a focus on:
-
-* Multi-tenancy (DB-per-tenant)
-* Scalability and modular architecture
-* Secure authentication and authorization
-* Clean and maintainable code structure
-
----̥
-
-## ✨ Core Features
-
-* 🔐 JWT-based authentication & role-based access (MASTER, ADMIN, USER)
-* 🏢 Tenant management (creation, activation, isolation)
-* 👥 User registration & approval workflow
-* 📁 Project management
-* 🐞 Issue tracking with status workflow (Kanban-style)
-* 💬 Comments and attachments (planned)
-* 🔔 Notifications (planned)
+A **multi-tenant SaaS platform** for project and issue management, inspired by tools like Jira. Built with a microservices backend, JWT authentication, and separate React apps for platform admins and tenant users.
 
 ---
 
-## 🏗️ Architecture
+## Overview
 
-This project follows a **microservices-based architecture** within a structured monorepo.
+Trackify enables organizations to manage projects, track issues, and collaborate within isolated tenant environments.
 
-### High-Level Components:
+**Focus areas:**
 
-* **Backend Services**
-
-  * Auth Service
-  * Master Service (Tenant Management)
-  * Tenant Service (Projects & Issues)
-
-* **Frontend Applications**
-
-  * Admin / Master Dashboard
-  * Tenant User Application
-
-* **Shared Library**
-
-  * Common DTOs, utilities, and enums
+- Multi-tenancy (database-per-tenant)
+- Microservices architecture with API gateway
+- Role-based access (MASTER, ADMIN, USER)
+- Kanban boards, sprints, comments, and attachments
 
 ---
 
-## 🛠️ Tech Stack
+## Core Features
 
-### Backend
-
-* Java, Spring Boot
-* Spring Security
-* MySQL
-* JWT Authentication
-
-### Frontend
-
-* React (planned)
-
-### DevOps & Tools
-
-* Docker (planned)
-* Git & GitHub
+- JWT authentication and role-based access
+- Tenant management (creation, activation, isolation)
+- User registration and approval workflow
+- Project and issue management
+- Kanban board with drag-and-drop status updates
+- Sprints and backlog
+- Issue comments and file attachments
+- Email notifications (password reset, assignments — via notification-service)
+- Master admin dashboard and tenant user application
+- Light/dark theme (tenant app)
 
 ---
 
-## 📁 Repository Structure (Planned)
+## Architecture
+
+| Layer | Components |
+|--------|------------|
+| **Backend** | api-gateway, auth-service, tenant-service, project-service, notification-service, common-lib |
+| **Frontend** | `Frontend/master-app` (platform admin), `Frontend/tenant-app` (tenant users) |
+| **Data** | MySQL master DB + per-tenant databases |
+
+See `documents/` for detailed design: `Backend_Architecture.md`, `Frontend_Architecture_Document.md`, `DB_Design_Document.md`.
+
+---
+
+## Tech Stack
+
+| Area | Stack |
+|------|--------|
+| Backend | Java 17, Spring Boot 3.3, Spring Security, MySQL, JWT |
+| Frontend | React 19, Vite 8, Redux Toolkit, React Router, Recharts |
+| DevOps | Docker Compose, nginx reverse proxy |
+
+---
+
+## Repository Structure
 
 ```
 trackify-saas-platform/
-│
-├── backend/
-│   ├── auth-service/
-│   ├── master-service/
-│   ├── tenant-service/
-│   └── shared-lib/
-│
-├── frontend/
-│   ├── master-app/
-│   └── tenant-app/
-│
-├── docs/
-└── infra/
+├── Backend/           # Spring Boot microservices (Maven monorepo)
+├── Frontend/
+│   ├── master-app/    # Platform admin UI
+│   └── tenant-app/    # Tenant user UI
+├── documents/         # Architecture, PRD, API docs, plans
+├── docker-compose.yml
+├── nginx.conf
+└── .env.example       # Copy to .env — required for Docker
 ```
 
 ---
 
-## 🔄 Development Roadmap
+## Quick Start
 
-### Phase 1
+### Prerequisites
 
-* Authentication & Tenant onboarding
+- Docker and Docker Compose
+- (Optional) Node 20+ and JDK 17 for local dev without Docker
 
-### Phase 2
+### 1. Configure environment
 
-* Project & Issue management
+```bash
+cp .env.example .env
+```
 
-### Phase 3
+Edit `.env` and set at minimum:
 
-* Kanban board & notifications
+- `JWT_SECRET` — long random string (32+ characters)
+- `MAIL_USERNAME` / `MAIL_PASSWORD` — only if you need email (optional for basic local testing)
 
-### Phase 4
+**Security:** If this repository was ever pushed with real secrets in `docker-compose.yml`, rotate your JWT secret and mail app password before deploying.
 
-* Scaling, optimization, and integrations
+### 2. Run with Docker
+
+```bash
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| API Gateway | http://localhost:8080 |
+| Master app | http://localhost:3000 |
+| Tenant app | http://localhost:3001 |
+| MySQL | localhost:3306 |
+
+### 3. Local frontend development (without Docker UI)
+
+```bash
+# Terminal 1 — start backend services (Docker or run each Spring app)
+docker compose up db api-gateway auth-service tenant-service project-service
+
+# Terminal 2 — tenant app
+cd Frontend/tenant-app
+cp .env.example .env.local   # optional
+npm install
+npm run dev
+
+# Terminal 3 — master app
+cd Frontend/master-app
+cp .env.example .env.local   # optional
+npm install
+npm run dev
+```
+
+API URL defaults to `http://localhost:8080`. Override with `VITE_API_BASE_URL` in `.env.local`.
 
 ---
 
-## 🎯 Goals
+## Improvement Roadmap
 
-* Build a scalable SaaS architecture
-* Implement strong tenant isolation
-* Follow real-world backend design practices
-* Maintain clean and modular codebase
+Active phased plan: **[documents/Project_Update_Plan.md](documents/Project_Update_Plan.md)**
 
----
-
-## 📌 Status
-
-🚧 Currently in active development
+- **Phase 0** (done): Secrets via `.env`, centralized API client, README updates
+- **Phase 1+**: Shared UI package, CI, Flyway, UI polish, notifications inbox
 
 ---
 
-## 🤝 Contribution
+## Status
 
-This is a personal learning project, but suggestions and ideas are always welcome.
+Actively developed — portfolio and learning project.
 
 ---
 
-## 📄 License
+## License
 
 MIT License
-
----
