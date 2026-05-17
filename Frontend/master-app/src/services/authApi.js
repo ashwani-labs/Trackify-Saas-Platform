@@ -1,12 +1,13 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getToken } from '../utils/tokenUtils';
+import { API_BASE_URL } from '../config/api';
 
 // Base API definition — all master app API calls go through here
 export const authApi = createApi({
   reducerPath: 'authApi',
 
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+    baseUrl: API_BASE_URL,
     prepareHeaders: (headers) => {
       const token = getToken();
       if (token) {
