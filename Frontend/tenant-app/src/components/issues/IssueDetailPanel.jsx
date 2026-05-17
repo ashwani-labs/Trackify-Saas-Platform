@@ -23,6 +23,7 @@ import {
   Loader2,
   Plus,
 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api';
 
 const formatBytes = (bytes, decimals = 2) => {
   if (!+bytes) return '0 Bytes';
@@ -383,7 +384,7 @@ const IssueDetailPanel = () => {
                       style={{ width: '28px', height: '28px' }}
                       onClick={() =>
                         window.open(
-                          `http://localhost:8080/issues/attachments/${a.id}/download`,
+                          `${API_BASE_URL}/issues/attachments/${a.id}/download`,
                           '_blank'
                         )
                       }

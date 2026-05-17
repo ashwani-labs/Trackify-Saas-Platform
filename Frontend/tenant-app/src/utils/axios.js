@@ -1,13 +1,13 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../config/api';
+import { clearTenantSession } from './session';
 
-const API_BASE_URL = 'http://localhost:8080';
-
-const axiosInstance = axios.create({
+const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-axiosInstance.interceptors.request.use(
+api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('tenantToken');
     if (token) {
@@ -15,19 +15,29 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+const isPublicAuthRequest = (url = '') =>
+  /\/auth\/(login|forgot-password|reset-password)/.test(url) ||
+  url.includes('/tenants/users/register');
+
+api.interceptors.response.use(
+  (response) => response,
   (error) => {
     if (error.response) {
+      const url = error.config?.url || '';
+
       if (error.response.status === 401) {
-        toast.error('Session expired or unauthorized. Please log in again.');
+        if (!isPublicAuthRequest(url)) {
+          clearTenantSession();
+          if (!window.location.pathname.match(/^\/(login|register|forgot-password|reset-password)/)) {
+            window.location.href = '/login';
+          }
+        }
+        if (!isPublicAuthRequest(url)) {
+          toast.error('Session expired or unauthorized. Please log in again.');
+        }
       } else if (error.response.status === 403) {
         toast.error('You do not have permission to perform this action.');
       } else if (error.response.status >= 500) {
@@ -40,4 +50,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance;
+export default api;

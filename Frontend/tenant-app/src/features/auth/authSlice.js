@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from '../../utils/axios';
-
-const API_BASE_URL = 'http://localhost:8080'; // API Gateway
+import api from '../../utils/axios';
 
 export const loginUser = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+      const response = await api.post('/auth/login', { email, password });
       const {
         token,
         role,
@@ -19,7 +17,6 @@ export const loginUser = createAsyncThunk(
         primary_color: primaryColor,
       } = response.data;
 
-      // Store in localStorage
       localStorage.setItem('tenantToken', token);
       localStorage.setItem('tenantId', tenantId);
       localStorage.setItem('tenantDomain', domain);
@@ -50,7 +47,7 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async ({ email, password, fullName, tenantId, status }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/tenants/users/register`, {
+      const response = await api.post('/tenants/users/register', {
         email,
         password,
         fullName,
@@ -68,7 +65,7 @@ export const changePassword = createAsyncThunk(
   'auth/changePassword',
   async ({ email, currentPassword, newPassword }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/change-password`, {
+      const response = await api.post('/auth/change-password', {
         email,
         currentPassword,
         newPassword,

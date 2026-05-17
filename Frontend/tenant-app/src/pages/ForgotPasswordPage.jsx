@@ -19,7 +19,7 @@ const ForgotPasswordPage = () => {
     setSuccess(false);
 
     try {
-      await axios.post('http://localhost:8080/auth/forgot-password', { email });
+      await axios.post('/auth/forgot-password', { email });
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to process request. Please try again.');

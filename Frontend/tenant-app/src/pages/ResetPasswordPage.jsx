@@ -41,7 +41,7 @@ const ResetPasswordPage = () => {
     setError(null);
 
     try {
-      await axios.post('http://localhost:8080/auth/reset-password', {
+      await axios.post('/auth/reset-password', {
         email,
         token,
         newPassword,

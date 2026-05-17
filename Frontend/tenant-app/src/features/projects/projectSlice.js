@@ -1,20 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from '../../utils/axios';
-
-const API_BASE_URL = 'http://localhost:8080'; // API Gateway
-
-const getAuthHeader = () => {
-  const token = localStorage.getItem('tenantToken');
-  return { Authorization: `Bearer ${token}` };
-};
+import api from '../../utils/axios';
 
 export const fetchProjects = createAsyncThunk(
   'projects/fetchAll',
   async ({ page = 0, size = 10 } = {}, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/projects?page=${page}&size=${size}`, {
-        headers: getAuthHeader(),
-      });
+      const response = await api.get(`/projects?page=${page}&size=${size}`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch projects');
@@ -26,10 +17,7 @@ export const createProject = createAsyncThunk(
   'projects/create',
   async (projectData, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('tenantToken');
-      const response = await axios.post(`${API_BASE_URL}/projects`, projectData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.post('/projects', projectData);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create project');
@@ -41,9 +29,7 @@ export const fetchProjectById = createAsyncThunk(
   'projects/fetchById',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/projects/${id}`, {
-        headers: getAuthHeader(),
-      });
+      const response = await api.get(`/projects/${id}`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch project details');
@@ -55,9 +41,7 @@ export const fetchProjectStats = createAsyncThunk(
   'projects/fetchStats',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/projects/stats`, {
-        headers: getAuthHeader(),
-      });
+      const response = await api.get('/projects/stats');
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch stats');
@@ -69,9 +53,7 @@ export const fetchProjectMembers = createAsyncThunk(
   'projects/fetchMembers',
   async (projectId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/projects/${projectId}/members`, {
-        headers: getAuthHeader(),
-      });
+      const response = await api.get(`/projects/${projectId}/members`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch members');
@@ -83,13 +65,7 @@ export const addProjectMember = createAsyncThunk(
   'projects/addMember',
   async ({ projectId, memberData }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/projects/${projectId}/members`,
-        memberData,
-        {
-          headers: getAuthHeader(),
-        }
-      );
+      const response = await api.post(`/projects/${projectId}/members`, memberData);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to add member');
@@ -101,9 +77,7 @@ export const removeProjectMember = createAsyncThunk(
   'projects/removeMember',
   async ({ projectId, userId }, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_BASE_URL}/projects/${projectId}/members/${userId}`, {
-        headers: getAuthHeader(),
-      });
+      await api.delete(`/projects/${projectId}/members/${userId}`);
       return userId;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to remove member');
