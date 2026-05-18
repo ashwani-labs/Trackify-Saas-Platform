@@ -4,6 +4,7 @@ import { useLoginMutation } from '../services/authApi';
 import { useAppDispatch } from '../app/hooks';
 import { setCredentials } from '../features/auth/authSlice';
 import { useAuth } from '../hooks/useAuth';
+import { getApiErrorMessage } from '@trackify/shared';
 import { ROUTES } from '../constants/routes';
 import AuthLayout from '../layouts/AuthLayout';
 import { Eye, EyeOff, Shield, Loader2 } from 'lucide-react';
@@ -43,7 +44,7 @@ const LoginPage = () => {
 
       navigate(ROUTES.DASHBOARD, { replace: true });
     } catch (err) {
-      setApiError(err?.data?.message || err?.error || 'Invalid credentials');
+      setApiError(getApiErrorMessage({ response: { data: err?.data } }, 'Invalid credentials'));
     }
   };
 

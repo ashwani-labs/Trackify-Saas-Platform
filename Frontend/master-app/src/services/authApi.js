@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { unwrapApiData } from '@trackify/shared';
 import { getToken } from '../utils/tokenUtils';
 import { API_BASE_URL } from '../config/api';
 
@@ -25,8 +26,8 @@ export const authApi = createApi({
         url: '/auth/login',
         method: 'POST',
         body: credentials,
-        // credentials: { email, password }
       }),
+      transformResponse: (response) => unwrapApiData({ data: response }),
     }),
 
     // POST /auth/logout  (future)
