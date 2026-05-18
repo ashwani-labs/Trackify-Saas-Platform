@@ -1,0 +1,15 @@
+{
+  "name": "trackify-frontend",
+  "private": true,
+  "workspaces": [
+    "packages/trackify-shared",
+    "master-app",
+    "tenant-app"
+  ],
+  "scripts": {
+    "dev:tenant": "npm run dev -w tenant-app",
+    "dev:master": "npm run dev -w master-app",
+    "build": "npm run build -w tenant-app && npm run build -w master-app",
+    "lint": "npm run lint -w tenant-app && npm run lint -w master-app"
+  }
+}
