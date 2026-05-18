@@ -88,6 +88,8 @@ services:
         condition: service_healthy
 
   notification-service:
+    profiles:
+      - full
     build:
       context: ./Backend
       dockerfile: notification-service/Dockerfile
@@ -111,8 +113,8 @@ services:
 
   master-app:
     build:
-      context: ./Frontend/master-app
-      dockerfile: Dockerfile
+      context: ./Frontend
+      dockerfile: master-app/Dockerfile
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
     ports:
@@ -122,8 +124,8 @@ services:
 
   tenant-app:
     build:
-      context: ./Frontend/tenant-app
-      dockerfile: Dockerfile
+      context: ./Frontend
+      dockerfile: tenant-app/Dockerfile
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
     ports:
