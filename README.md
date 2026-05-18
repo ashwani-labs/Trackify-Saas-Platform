@@ -92,9 +92,19 @@ Edit `.env` and set at minimum:
 
 ### 2. Run with Docker
 
+**Minimal stack** (no email service):
+
 ```bash
 docker compose up --build
 ```
+
+**Full stack** (includes notification-service for email):
+
+```bash
+docker compose --profile full up --build
+```
+
+See [documents/Docker_Dev_Guide.md](documents/Docker_Dev_Guide.md) for profiles and optional overrides.
 
 | Service | URL |
 |---------|-----|
@@ -106,21 +116,17 @@ docker compose up --build
 ### 3. Local frontend development (without Docker UI)
 
 ```bash
-# Terminal 1 — start backend services (Docker or run each Spring app)
+# Terminal 1 — backend (minimal)
 docker compose up db api-gateway auth-service tenant-service project-service
 
-# Terminal 2 — tenant app
-cd Frontend/tenant-app
-cp .env.example .env.local   # optional
+# Terminal 2 — install workspaces once, then run apps
+cd Frontend
 npm install
-npm run dev
-
-# Terminal 3 — master app
-cd Frontend/master-app
-cp .env.example .env.local   # optional
-npm install
-npm run dev
+npm run dev:tenant    # tenant app (port 5174)
+npm run dev:master    # master app (port 5173)
 ```
+
+Optional per-app env: copy `Frontend/tenant-app/.env.example` → `.env.local`.
 
 API URL defaults to `http://localhost:8080`. Override with `VITE_API_BASE_URL` in `.env.local`.
 
@@ -131,7 +137,8 @@ API URL defaults to `http://localhost:8080`. Override with `VITE_API_BASE_URL` i
 Active phased plan: **[documents/Project_Update_Plan.md](documents/Project_Update_Plan.md)**
 
 - **Phase 0** (done): Secrets via `.env`, centralized API client, README updates
-- **Phase 1+**: Shared UI package, CI, Flyway, UI polish, notifications inbox
+- **Phase 1** (done): `@trackify/shared` package, login ApiResponse, error helpers, Docker profiles
+- **Phase 2+**: CI, Flyway, UI polish, notifications inbox
 
 ---
 

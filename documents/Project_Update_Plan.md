@@ -126,8 +126,8 @@ Acceptance:
 
 --------------------------------------------
 
-6. PHASE 1 — FOUNDATION & HYGIENE (WEEKS 2–3)
----------------------------------------------
+6. PHASE 1 — FOUNDATION & HYGIENE (WEEKS 2–3) ✅ COMPLETED
+----------------------------------------------------------
 
 TASK 1.1 — Shared frontend package (optional but recommended)
 - Create packages/shared or Frontend/shared/
@@ -339,8 +339,8 @@ Update files:
 --------------------------------------------
 
 Week 1  [x] Rotate secrets (remove from compose — rotate if previously exposed)  [x] .env.example  [x] Axios refactor  [x] README
-Week 2  [ ] Shared CSS/package  [ ] 401 redirect  [ ] Docker docs
-Week 3  [ ] API contract audit  [ ] Error toast consistency
+Week 2  [x] Shared CSS/package (@trackify/shared)  [x] 401 redirect  [x] Docker docs
+Week 3  [x] API contract audit (login wrapped in ApiResponse)  [x] Error toast consistency
 Week 4  [ ] GitHub Actions  [ ] 5+ new backend tests
 Week 5  [ ] Flyway master schema  [ ] Vitest setup + 3 tests
 Week 6  [ ] OpenAPI + publish to documents/
