@@ -55,8 +55,9 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.token").value("mock-token"))
-        .andExpect(jsonPath("$.role").value("EMPLOYEE"))
-        .andExpect(jsonPath("$.domain").value("testcorp"));
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.token").value("mock-token"))
+        .andExpect(jsonPath("$.data.role").value("EMPLOYEE"))
+        .andExpect(jsonPath("$.data.domain").value("testcorp"));
   }
 }

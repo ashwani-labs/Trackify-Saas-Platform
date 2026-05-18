@@ -23,8 +23,8 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/login")
-  public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-    return ResponseEntity.ok(authService.login(request));
+  public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+    return ResponseEntity.ok(ApiResponse.ok("Login successful", authService.login(request)));
   }
 
   @PostMapping("/forgot-password")
