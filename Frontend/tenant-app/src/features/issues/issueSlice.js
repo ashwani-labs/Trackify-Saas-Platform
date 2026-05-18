@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { getApiErrorPayload } from '@trackify/shared';
 import api from '../../utils/axios';
 
 export const fetchIssuesByProject = createAsyncThunk(
@@ -8,7 +9,7 @@ export const fetchIssuesByProject = createAsyncThunk(
       const response = await api.get(`/issues/project/${projectId}`);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch issues');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch issues'));
     }
   }
 );
@@ -22,7 +23,7 @@ export const fetchBacklogIssuesPaged = createAsyncThunk(
       );
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch backlog issues');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch backlog issues'));
     }
   }
 );
@@ -34,7 +35,7 @@ export const createIssue = createAsyncThunk(
       const response = await api.post('/issues', issueData);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create issue');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to create issue'));
     }
   }
 );
@@ -46,7 +47,7 @@ export const updateIssue = createAsyncThunk(
       const response = await api.put(`/issues/${id}`, data);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update issue');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to update issue'));
     }
   }
 );
@@ -56,7 +57,7 @@ export const deleteIssue = createAsyncThunk('issues/delete', async (id, { reject
     await api.delete(`/issues/${id}`);
     return id;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Failed to delete issue');
+    return rejectWithValue(getApiErrorPayload(error, 'Failed to delete issue'));
   }
 });
 
@@ -67,7 +68,7 @@ export const fetchIssueComments = createAsyncThunk(
       const response = await api.get(`/issues/${issueId}/comments`);
       return { issueId, comments: response.data.data };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch comments');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch comments'));
     }
   }
 );
@@ -79,7 +80,7 @@ export const addComment = createAsyncThunk(
       const response = await api.post(`/issues/${issueId}/comments`, { content });
       return { issueId, comment: response.data.data };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to add comment');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to add comment'));
     }
   }
 );
@@ -91,7 +92,7 @@ export const fetchIssueAttachments = createAsyncThunk(
       const response = await api.get(`/issues/${issueId}/attachments`);
       return { issueId, attachments: response.data.data };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch attachments');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch attachments'));
     }
   }
 );
@@ -108,7 +109,7 @@ export const addAttachment = createAsyncThunk(
       });
       return { issueId, attachment: response.data.data };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to upload attachment');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to upload attachment'));
     }
   }
 );
@@ -120,7 +121,7 @@ export const deleteAttachment = createAsyncThunk(
       await api.delete(`/issues/attachments/${attachmentId}`);
       return { issueId, attachmentId };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete attachment');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to delete attachment'));
     }
   }
 );

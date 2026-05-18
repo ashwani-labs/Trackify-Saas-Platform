@@ -7,6 +7,7 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import PageLoader from './components/common/PageLoader';
+import { ROLES } from '@trackify/shared';
 import { ThemeProvider } from './context/ThemeContext';
 
 // ── Lazy-loaded pages ────────────────────────────────────────────────────────
@@ -64,7 +65,7 @@ function App() {
                 <Route
                   path="/team"
                   element={
-                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
                       <DashboardLayout>
                         <TeamPage />
                       </DashboardLayout>
@@ -76,7 +77,7 @@ function App() {
                 <Route
                   path="/pending-users"
                   element={
-                    <ProtectedRoute allowedRoles={['ADMIN']}>
+                    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
                       <DashboardLayout>
                         <UserApprovalPage />
                       </DashboardLayout>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail } from 'lucide-react';
+import { getApiErrorMessage } from '@trackify/shared';
 import axios from '../utils/axios';
 import AuthLayout from '../layouts/AuthLayout';
 
@@ -22,7 +23,7 @@ const ForgotPasswordPage = () => {
       await axios.post('/auth/forgot-password', { email });
       setSuccess(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to process request. Please try again.');
+      setError(getApiErrorMessage(err, 'Failed to process request. Please try again.'));
     } finally {
       setIsLoading(false);
     }

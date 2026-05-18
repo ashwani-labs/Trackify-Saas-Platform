@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { getApiErrorPayload, unwrapApiData } from '@trackify/shared';
 import api from '../../utils/axios';
 
 export const loginUser = createAsyncThunk(
@@ -6,6 +7,7 @@ export const loginUser = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
+      const login = unwrapApiData(response);
       const {
         token,
         role,
@@ -15,7 +17,7 @@ export const loginUser = createAsyncThunk(
         company_name: companyName,
         logo_url: logoUrl,
         primary_color: primaryColor,
-      } = response.data;
+      } = login;
 
       localStorage.setItem('tenantToken', token);
       localStorage.setItem('tenantId', tenantId);
@@ -38,7 +40,7 @@ export const loginUser = createAsyncThunk(
         primaryColor,
       };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
+      return rejectWithValue(getApiErrorPayload(error, 'Login failed'));
     }
   }
 );
@@ -54,9 +56,9 @@ export const registerUser = createAsyncThunk(
         tenantId,
         status,
       });
-      return response.data;
+      return unwrapApiData(response);
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Registration failed');
+      return rejectWithValue(getApiErrorPayload(error, 'Registration failed'));
     }
   }
 );
@@ -70,9 +72,9 @@ export const changePassword = createAsyncThunk(
         currentPassword,
         newPassword,
       });
-      return response.data;
+      return unwrapApiData(response);
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to change password');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to change password'));
     }
   }
 );

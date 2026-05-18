@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { getApiErrorPayload } from '@trackify/shared';
 import api from '../../utils/axios';
 
 export const fetchProjects = createAsyncThunk(
@@ -8,7 +9,7 @@ export const fetchProjects = createAsyncThunk(
       const response = await api.get(`/projects?page=${page}&size=${size}`);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch projects');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch projects'));
     }
   }
 );
@@ -20,7 +21,7 @@ export const createProject = createAsyncThunk(
       const response = await api.post('/projects', projectData);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create project');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to create project'));
     }
   }
 );
@@ -32,7 +33,7 @@ export const fetchProjectById = createAsyncThunk(
       const response = await api.get(`/projects/${id}`);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch project details');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch project details'));
     }
   }
 );
@@ -44,7 +45,7 @@ export const fetchProjectStats = createAsyncThunk(
       const response = await api.get('/projects/stats');
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch stats');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch stats'));
     }
   }
 );
@@ -56,7 +57,7 @@ export const fetchProjectMembers = createAsyncThunk(
       const response = await api.get(`/projects/${projectId}/members`);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch members');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch members'));
     }
   }
 );
@@ -68,7 +69,7 @@ export const addProjectMember = createAsyncThunk(
       const response = await api.post(`/projects/${projectId}/members`, memberData);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to add member');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to add member'));
     }
   }
 );
@@ -80,7 +81,7 @@ export const removeProjectMember = createAsyncThunk(
       await api.delete(`/projects/${projectId}/members/${userId}`);
       return userId;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to remove member');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to remove member'));
     }
   }
 );

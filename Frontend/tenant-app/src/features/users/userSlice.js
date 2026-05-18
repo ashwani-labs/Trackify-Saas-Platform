@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { getApiErrorPayload } from '@trackify/shared';
 import api from '../../utils/axios';
 
 export const fetchPendingUsers = createAsyncThunk(
@@ -10,7 +11,7 @@ export const fetchPendingUsers = createAsyncThunk(
       );
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch pending users');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch pending users'));
     }
   }
 );
@@ -22,7 +23,7 @@ export const fetchAllUsers = createAsyncThunk(
       const response = await api.get(`/tenants/${tenantId}/users?page=${page}&size=${size}`);
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch users');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch users'));
     }
   }
 );
@@ -37,7 +38,7 @@ export const updateUserStatus = createAsyncThunk(
       );
       return response.data.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update user status');
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to update user status'));
     }
   }
 );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
+import { getApiErrorMessage } from '@trackify/shared';
 import axios from '../utils/axios';
 import AuthLayout from '../layouts/AuthLayout';
 
@@ -51,9 +52,7 @@ const ResetPasswordPage = () => {
         navigate('/login');
       }, 3000);
     } catch (err) {
-      setError(
-        err.response?.data?.message || 'Failed to reset password. The link may have expired.'
-      );
+      setError(getApiErrorMessage(err, 'Failed to reset password. The link may have expired.'));
     } finally {
       setIsLoading(false);
     }

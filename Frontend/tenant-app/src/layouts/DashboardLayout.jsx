@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '../features/auth/authSlice';
 import { useTheme } from '../hooks/useTheme';
+import { ROLES } from '@trackify/shared';
 import {
   LayoutDashboard,
   LogOut,
@@ -45,7 +46,7 @@ const DashboardLayout = ({ children }) => {
     { name: 'Profile', path: '/profile', icon: <User size={18} /> },
   ];
 
-  const filteredMenu = menuItems.filter((item) => !item.adminOnly || user?.role === 'ADMIN');
+  const filteredMenu = menuItems.filter((item) => !item.adminOnly || user?.role === ROLES.ADMIN);
 
   return (
     <div className="layout-container" style={{ flexDirection: 'column' }}>
