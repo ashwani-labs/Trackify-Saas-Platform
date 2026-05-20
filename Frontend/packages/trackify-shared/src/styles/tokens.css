@@ -40,6 +40,11 @@
 
   --topbar-height: 56px;
   --sidebar-width: 260px;
+
+  /* Semantic aliases (no new hues — map to palette above) */
+  --overlay-scrim: rgba(9, 30, 66, 0.54);
+  --surface-raised: var(--bg-aside);
+  --surface-overlay: var(--bg-input);
 }
 
 [data-theme='dark'] {
