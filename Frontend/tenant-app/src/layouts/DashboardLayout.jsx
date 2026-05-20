@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useMatch } from 'react-router-dom';
+import CreateMenu from '../components/common/CreateMenu';
+import GlobalSearch from '../components/common/GlobalSearch';
 import { logout } from '../features/auth/authSlice';
 import { useTheme } from '../hooks/useTheme';
 import { ROLES } from '@trackify/shared';
@@ -17,13 +19,18 @@ import {
   Menu,
   X,
   User,
-  Search,
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, tenantLogo, primaryColor } = useSelector((state) => state.auth);
+  const { currentProject } = useSelector((state) => state.projects);
+  const projectMatch = useMatch('/projects/:id');
+  const activeProject =
+    projectMatch && currentProject?.id === Number(projectMatch.params.id)
+      ? currentProject
+      : null;
   const { theme, toggleTheme } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -85,37 +92,10 @@ const DashboardLayout = ({ children }) => {
           </nav>
         </div>
 
-        <div className="hide-mobile" style={{ flex: 1, maxWidth: '400px', margin: '0 2rem' }}>
-          <div style={{ position: 'relative', width: '100%' }}>
-            <Search
-              style={{
-                position: 'absolute',
-                left: '0.75rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={14}
-            />
-            <input
-              type="text"
-              className="input-field"
-              placeholder="Search..."
-              style={{ 
-                paddingLeft: '2.25rem', 
-                height: '32px', 
-                fontSize: '0.875rem',
-                backgroundColor: 'transparent',
-                border: '2px solid var(--border-main)'
-              }}
-            />
-          </div>
-        </div>
+        <GlobalSearch />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto' }}>
-          <button className="btn btn-primary hide-mobile" style={{ height: '32px', padding: '0 0.75rem' }}>
-            Create
-          </button>
+        <div className="topbar-actions">
+          <CreateMenu />
 
           <button className="theme-toggle" onClick={toggleTheme} style={{ width: '32px', height: '32px' }}>
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
@@ -159,11 +139,12 @@ const DashboardLayout = ({ children }) => {
             </button>
           </div>
 
-          {!collapsed && (
-            <div style={{ padding: '1.5rem 0.75rem 0.5rem' }}>
-              <span style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', paddingLeft: '0.75rem' }}>
-                Project Context
-              </span>
+          {!collapsed && activeProject && (
+            <div className="sidebar-context">
+              <span className="sidebar-context__label">Current project</span>
+              <p className="sidebar-context__name" title={activeProject.name}>
+                {activeProject.name}
+              </p>
             </div>
           )}
 

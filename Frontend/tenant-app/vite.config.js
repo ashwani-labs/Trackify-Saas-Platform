@@ -8,11 +8,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
+  plugins: [
+    react(),
+    babel({
+      presets: [reactCompilerPreset()],
+      include: /tenant-app[\\/]src[\\/].*\.[jt]sx?$/,
+    }),
+  ],
   resolve: {
     alias: {
       '@trackify/shared': path.resolve(__dirname, '../packages/trackify-shared/src'),
     },
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    include: ['@trackify/shared'],
   },
   server: {
     port: 5174,

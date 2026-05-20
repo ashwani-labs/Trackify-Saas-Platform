@@ -1,6 +1,7 @@
 /* Master app styles — tokens and base from @trackify/shared */
 @import '@trackify/shared/styles/tokens.css';
 @import '@trackify/shared/styles/base.css';
+@import '@trackify/shared/styles/components.css';
 
 /* Layout Utilities */
 .layout-container {

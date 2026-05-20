@@ -344,9 +344,9 @@ Week 3  [x] API contract audit (login wrapped in ApiResponse)  [x] Error toast c
 Week 4  [ ] GitHub Actions  [ ] 5+ new backend tests
 Week 5  [ ] Flyway master schema  [ ] Vitest setup + 3 tests
 Week 6  [ ] OpenAPI + publish to documents/
-Week 7  [ ] Dark theme fix  [ ] CSS variables in Kanban
-Week 8  [ ] Global search  [ ] Create button
-Week 9  [ ] Component library (Button, Modal, Input) on 3 pages
+Week 7  [x] Dark theme fix (shared tokens)  [x] CSS variables in Kanban
+Week 8  [x] Global search MVP (projects + current-project issues, / shortcut)  [x] Create button dropdown
+Week 9  [x] Component library (Button, Modal, Input) on Login + Projects  [x] ProjectDetailPage migration (tokens + shared components)
 Week 10 [ ] Notifications UI
 Week 11 [ ] Activity log
 Week 12 [ ] Issue keys
