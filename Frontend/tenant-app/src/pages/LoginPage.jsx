@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginUser, clearError } from '../features/auth/authSlice';
 import AuthLayout from '../layouts/AuthLayout';
-import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { Button, Input, Alert } from '@trackify/shared';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -29,85 +29,52 @@ const LoginPage = () => {
 
   return (
     <AuthLayout title="Log in to continue" subtitle="Enter your credentials to access your workspace">
-      <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="email" style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)' }}>
-            EMAIL ADDRESS
-          </label>
-          <input
-            id="email"
-            type="email"
-            className="input-field"
-            placeholder="e.g. alex@company.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ height: '40px', fontSize: '0.875rem' }}
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="auth-form">
+        <Input
+          id="email"
+          label="Email address"
+          type="email"
+          placeholder="e.g. alex@company.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          size="lg"
+        />
 
-        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <label className="form-label" style={{ marginBottom: 0, fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)' }} htmlFor="password">
-              PASSWORD
+        <div className="form-group">
+          <div className="form-label-row">
+            <label className="form-label" htmlFor="password">
+              Password
             </label>
-            <Link to="/forgot-password" style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '600' }}>
-              Can't log in?
+            <Link to="/forgot-password" className="auth-link">
+              Can&apos;t log in?
             </Link>
           </div>
           <input
             id="password"
             type="password"
-            className="input-field"
+            className="input input--lg"
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ height: '40px', fontSize: '0.875rem' }}
           />
         </div>
 
         {error && (
-          <div
-            style={{
-              padding: '0.75rem',
-              marginBottom: '1.5rem',
-              backgroundColor: '#FFEBE6',
-              color: '#BF2600',
-              borderRadius: '3px',
-              fontSize: '0.8rem',
-              textAlign: 'center',
-              border: '1px solid #FFBDAD'
-            }}
-          >
+          <Alert center className="auth-alert">
             {error}
-          </div>
+          </Alert>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn btn-primary"
-          style={{ width: '100%', height: '40px', fontSize: '0.875rem', fontWeight: '600' }}
-        >
-          {loading ? (
-            <Loader2 style={{ animation: 'loading 2s linear infinite' }} size={18} />
-          ) : (
-            'Log in'
-          )}
-        </button>
+        <Button type="submit" variant="primary" fullWidth size="lg" isLoading={loading}>
+          Log in
+        </Button>
 
-        <div style={{ marginTop: '2rem', textAlign: 'center', borderTop: '1px solid var(--border-main)', paddingTop: '1.5rem' }}>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+        <div className="auth-footer">
+          <p className="auth-footer__text">
             New to Trackify?{' '}
-            <Link to="/register" style={{ color: 'var(--primary)', fontWeight: '600' }}>
+            <Link to="/register" className="auth-link">
               Create an account
             </Link>
           </p>

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateIssue, optimisticStatusUpdate } from '../../features/issues/issueSlice';
 import IssueCard from './IssueCard';
 import { Plus } from 'lucide-react';
+import { Button } from '@trackify/shared';
 
 const COLUMNS = [
   { status: 'TODO', label: 'To Do' },
@@ -75,31 +76,32 @@ const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
         return (
           <div
             key={status}
-            className="kanban-column"
+            className={`kanban-column ${dragOverColumn === status ? 'kanban-column--drag-over' : ''}`}
             onDragOver={(e) => handleDragOver(e, status)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, status)}
-            style={{
-              backgroundColor: dragOverColumn === status ? '#EBECF0' : '#F4F5F7',
-              border: dragOverColumn === status ? '2px dashed var(--primary)' : 'none',
-              transition: 'background-color 0.2s ease'
-            }}
           >
             <div className="column-header">
-              <span className="column-title">{label} <span style={{ marginLeft: '0.5rem', fontWeight: '400', color: '#6B778C' }}>{columnIssues.length}</span></span>
+              <span className="column-title">
+                {label}
+                <span className="column-count">{columnIssues.length}</span>
+              </span>
             </div>
 
-            <div className="kanban-list" style={{ minHeight: '100px' }}>
-              {columnIssues.map((issue) => <IssueCard key={issue.id} issue={issue} />)}
-              
+            <div className="kanban-list">
+              {columnIssues.map((issue) => (
+                <IssueCard key={issue.id} issue={issue} />
+              ))}
+
               {status === 'TODO' && (
-                <button
-                  className="btn btn-secondary"
-                  style={{ width: 'calc(100% - 1rem)', margin: '0.5rem', height: '32px', background: 'transparent', color: '#42526E', justifyContent: 'flex-start' }}
+                <Button
+                  variant="ghost"
+                  className="kanban-add-btn"
+                  leftIcon={<Plus size={16} />}
                   onClick={() => onCreateIssue()}
                 >
-                  <Plus size={16} /> Create issue
-                </button>
+                  Create issue
+                </Button>
               )}
             </div>
           </div>
