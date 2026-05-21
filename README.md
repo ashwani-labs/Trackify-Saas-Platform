@@ -130,6 +130,13 @@ Optional per-app env: copy `Frontend/tenant-app/.env.example` → `.env.local`.
 
 API URL defaults to `http://localhost:8080`. Override with `VITE_API_BASE_URL` in `.env.local`.
 
+### CI (GitHub Actions)
+
+On push/PR to `main`, `.github/workflows/ci.yml` runs:
+
+- **Backend**: `mvn -B test` in `Backend/`
+- **Frontend**: `npm ci`, `npm run lint`, `npm run build` in `Frontend/`
+
 ---
 
 ## Improvement Roadmap
@@ -138,7 +145,9 @@ Active phased plan: **[documents/Project_Update_Plan.md](documents/Project_Updat
 
 - **Phase 0** (done): Secrets via `.env`, centralized API client, README updates
 - **Phase 1** (done): `@trackify/shared` package, login ApiResponse, error helpers, Docker profiles
-- **Phase 2+**: CI, Flyway, UI polish, notifications inbox
+- **Phase 2** (in progress): GitHub Actions CI on push/PR; Flyway, Vitest, OpenAPI next
+- **Phase 3** (mostly done): Shared UI tokens, search, Create menu, core page migrations
+- **Phase 4+**: Notifications inbox, activity log, issue keys
 
 ---
 
