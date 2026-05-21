@@ -44,7 +44,10 @@ const IssueCard = ({ issue }) => {
       <div className="issue-meta">
         <span className="issue-key">{issueKey}</span>
         <div className="issue-footer">
-          <Badge variant={PRIORITY_VARIANT[issue.priority] || 'primary'} className="badge--priority">
+          <Badge
+            variant={PRIORITY_VARIANT[issue.priority] || 'primary'}
+            className="badge--priority"
+          >
             {issue.priority}
           </Badge>
           <div className="avatar-sm">{(issue.assigneeName || 'U').charAt(0).toUpperCase()}</div>

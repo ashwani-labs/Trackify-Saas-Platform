@@ -103,10 +103,12 @@ const ProfilePage = () => {
       </nav>
 
       <header style={{ marginBottom: '2.5rem' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Personal Settings</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            Manage your account details, profile picture, and security.
-          </p>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+          Personal Settings
+        </h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+          Manage your account details, profile picture, and security.
+        </p>
       </header>
 
       <div
@@ -132,7 +134,7 @@ const ProfilePage = () => {
                   color: 'white',
                   overflow: 'hidden',
                   position: 'relative',
-                  borderRadius: '50%'
+                  borderRadius: '50%',
                 }}
               >
                 {user?.profilePhotoUrl ? (
@@ -178,7 +180,7 @@ const ProfilePage = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1px solid var(--border-main)'
+                  border: '1px solid var(--border-main)',
                 }}
               >
                 <Camera size={12} />
@@ -192,8 +194,18 @@ const ProfilePage = () => {
               </label>
             </div>
             <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{user?.email?.split('@')[0]}</h2>
-              <span className="badge" style={{ marginTop: '0.5rem', background: '#F4F5F7', color: '#42526E', fontSize: '0.7rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>
+                {user?.email?.split('@')[0]}
+              </h2>
+              <span
+                className="badge"
+                style={{
+                  marginTop: '0.5rem',
+                  background: '#F4F5F7',
+                  color: '#42526E',
+                  fontSize: '0.7rem',
+                }}
+              >
                 {user?.role}
               </span>
             </div>
@@ -201,15 +213,24 @@ const ProfilePage = () => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>EMAIL ADDRESS</label>
-              <input className="input-field" value={user?.email} disabled style={{ height: '36px', fontSize: '0.875rem' }} />
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
+                EMAIL ADDRESS
+              </label>
+              <input
+                className="input-field"
+                value={user?.email}
+                disabled
+                style={{ height: '36px', fontSize: '0.875rem' }}
+              />
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
                 Your identity is managed by your organization.
               </p>
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>WORKSPACE DOMAIN</label>
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
+                WORKSPACE DOMAIN
+              </label>
               <div
                 style={{
                   padding: '0.5rem 0.75rem',
@@ -217,7 +238,7 @@ const ProfilePage = () => {
                   borderRadius: '3px',
                   fontSize: '0.875rem',
                   fontWeight: '600',
-                  color: 'var(--primary)'
+                  color: 'var(--primary)',
                 }}
               >
                 {tenantDomain}.trackify.com
@@ -240,7 +261,9 @@ const ProfilePage = () => {
             style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
           >
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>CURRENT PASSWORD</label>
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
+                CURRENT PASSWORD
+              </label>
               <input
                 type="password"
                 className="input-field"
@@ -253,7 +276,9 @@ const ProfilePage = () => {
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>NEW PASSWORD</label>
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
+                NEW PASSWORD
+              </label>
               <input
                 type="password"
                 className="input-field"
@@ -266,7 +291,9 @@ const ProfilePage = () => {
             </div>
 
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>CONFIRM PASSWORD</label>
+              <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
+                CONFIRM PASSWORD
+              </label>
               <input
                 type="password"
                 className="input-field"
@@ -303,12 +330,10 @@ const ProfilePage = () => {
               alignItems: 'flex-start',
             }}
           >
-            <AlertCircle
-              size={16}
-              style={{ color: '#6554C0', flexShrink: 0, marginTop: '2px' }}
-            />
+            <AlertCircle size={16} style={{ color: '#6554C0', flexShrink: 0, marginTop: '2px' }} />
             <p style={{ fontSize: '0.75rem', color: '#42526E', lineHeight: '1.6' }}>
-              Ensure your password is at least 6 characters long and contains a mix of letters and numbers.
+              Ensure your password is at least 6 characters long and contains a mix of letters and
+              numbers.
             </p>
           </div>
         </section>

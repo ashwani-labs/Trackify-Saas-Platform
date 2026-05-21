@@ -28,7 +28,10 @@ const LoginPage = () => {
   };
 
   return (
-    <AuthLayout title="Log in to continue" subtitle="Enter your credentials to access your workspace">
+    <AuthLayout
+      title="Log in to continue"
+      subtitle="Enter your credentials to access your workspace"
+    >
       <form onSubmit={handleSubmit} className="auth-form">
         <Input
           id="email"

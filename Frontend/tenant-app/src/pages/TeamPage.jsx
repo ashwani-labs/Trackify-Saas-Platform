@@ -90,9 +90,18 @@ const TeamPage = () => {
         Administration / <span style={{ color: 'var(--text-main)' }}>Team</span>
       </nav>
 
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+      <header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '2rem',
+        }}
+      >
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Users and Permissions</h1>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+            Users and Permissions
+          </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
             Manage who has access to this workspace and their respective roles.
           </p>
@@ -110,7 +119,11 @@ const TeamPage = () => {
               <RefreshCw size={16} />
             )}
           </button>
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ height: '32px' }}>
+          <button
+            className="btn btn-primary"
+            onClick={() => setIsModalOpen(true)}
+            style={{ height: '32px' }}
+          >
             <UserPlus size={16} /> Add Member
           </button>
         </div>
@@ -126,13 +139,15 @@ const TeamPage = () => {
           justifyContent: 'space-between',
           gap: '1rem',
           backgroundColor: '#EBECF0',
-          border: 'none'
+          border: 'none',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Globe style={{ color: 'var(--primary)' }} size={20} />
           <div style={{ fontSize: '0.875rem' }}>
-            <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Self-registration Link:</span>
+            <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>
+              Self-registration Link:
+            </span>
             <code style={{ marginLeft: '0.75rem', color: 'var(--primary)', fontWeight: '700' }}>
               {tenantUrl}/register
             </code>
@@ -140,7 +155,12 @@ const TeamPage = () => {
         </div>
         <button
           className="btn btn-secondary"
-          style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', height: '24px', backgroundColor: 'white' }}
+          style={{
+            padding: '0.3rem 0.75rem',
+            fontSize: '0.75rem',
+            height: '24px',
+            backgroundColor: 'white',
+          }}
           onClick={() => copyToClipboard(`${tenantUrl}/register`, 'Link')}
         >
           <Copy size={12} /> Copy
@@ -148,8 +168,23 @@ const TeamPage = () => {
       </div>
 
       <div className="card" style={{ padding: 0 }}>
-        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+        <div
+          style={{
+            padding: '1.25rem 1.5rem',
+            borderBottom: '1px solid var(--border-main)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+            }}
+          >
             Members ({allUsersTotalElements ?? 0})
           </h2>
           <div style={{ position: 'relative', width: '240px' }}>
@@ -175,7 +210,14 @@ const TeamPage = () => {
 
         {error && (
           <div
-            style={{ padding: '1rem', margin: '1rem', backgroundColor: '#FFEBE6', color: '#BF2600', borderRadius: '3px', fontSize: '0.8rem' }}
+            style={{
+              padding: '1rem',
+              margin: '1rem',
+              backgroundColor: '#FFEBE6',
+              color: '#BF2600',
+              borderRadius: '3px',
+              fontSize: '0.8rem',
+            }}
           >
             {error}
           </div>
@@ -196,7 +238,9 @@ const TeamPage = () => {
               {isLoading && allUsers.length === 0 ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={`skel-${i}`}>
-                    <td colSpan={5}><div className="skeleton" style={{ height: '40px', width: '100%' }} /></td>
+                    <td colSpan={5}>
+                      <div className="skeleton" style={{ height: '40px', width: '100%' }} />
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -206,34 +250,48 @@ const TeamPage = () => {
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                           <div
-                             style={{ 
-                               width: '32px', 
-                               height: '32px', 
-                               borderRadius: '50%', 
-                               background: '#F4F5F7', 
-                               display: 'flex', 
-                               alignItems: 'center', 
-                               justifyContent: 'center',
-                               fontSize: '0.75rem',
-                               fontWeight: '600',
-                               color: '#42526E'
-                             }}
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '50%',
+                              background: '#F4F5F7',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.75rem',
+                              fontWeight: '600',
+                              color: '#42526E',
+                            }}
                           >
                             {(u.fullName || u.email).charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>{u.fullName || '—'}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email}</div>
+                            <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>
+                              {u.fullName || '—'}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              {u.email}
+                            </div>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <span className="badge" style={{ backgroundColor: '#DEEBFF', color: '#0052CC', fontSize: '0.65rem' }}>
+                        <span
+                          className="badge"
+                          style={{
+                            backgroundColor: '#DEEBFF',
+                            color: '#0052CC',
+                            fontSize: '0.65rem',
+                          }}
+                        >
                           {u.role}
                         </span>
                       </td>
                       <td>
-                        <span className={`badge badge-${STATUS_VARIANTS[u.status] || 'primary'}`} style={{ fontSize: '0.65rem' }}>
+                        <span
+                          className={`badge badge-${STATUS_VARIANTS[u.status] || 'primary'}`}
+                          style={{ fontSize: '0.65rem' }}
+                        >
                           {u.status}
                         </span>
                       </td>
@@ -255,7 +313,12 @@ const TeamPage = () => {
                             <button
                               className="btn btn-secondary"
                               onClick={() => handleStatusChange(u.id, 'INACTIVE')}
-                              style={{ height: '24px', fontSize: '0.7rem', padding: '0 0.5rem', color: 'var(--danger)' }}
+                              style={{
+                                height: '24px',
+                                fontSize: '0.7rem',
+                                padding: '0 0.5rem',
+                                color: 'var(--danger)',
+                              }}
                             >
                               Deactivate
                             </button>
@@ -268,7 +331,12 @@ const TeamPage = () => {
                     <tr>
                       <td
                         colSpan={5}
-                        style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}
+                        style={{
+                          textAlign: 'center',
+                          padding: '4rem',
+                          color: 'var(--text-muted)',
+                          fontSize: '0.875rem',
+                        }}
                       >
                         No team members found.
                       </td>
@@ -304,7 +372,9 @@ const TeamPage = () => {
               <div className="modal-body">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>FULL NAME</label>
+                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
+                      FULL NAME
+                    </label>
                     <input
                       className="input-field"
                       required
@@ -316,7 +386,9 @@ const TeamPage = () => {
                   </div>
 
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>EMAIL ADDRESS</label>
+                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
+                      EMAIL ADDRESS
+                    </label>
                     <input
                       className="input-field"
                       type="email"
@@ -329,7 +401,9 @@ const TeamPage = () => {
                   </div>
 
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>PASSWORD</label>
+                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
+                      PASSWORD
+                    </label>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <input
                         className="input-field"

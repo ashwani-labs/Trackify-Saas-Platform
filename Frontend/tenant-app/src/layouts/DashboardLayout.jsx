@@ -28,9 +28,7 @@ const DashboardLayout = ({ children }) => {
   const { currentProject } = useSelector((state) => state.projects);
   const projectMatch = useMatch('/projects/:id');
   const activeProject =
-    projectMatch && currentProject?.id === Number(projectMatch.params.id)
-      ? currentProject
-      : null;
+    projectMatch && currentProject?.id === Number(projectMatch.params.id) ? currentProject : null;
   const { theme, toggleTheme } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -64,7 +62,10 @@ const DashboardLayout = ({ children }) => {
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => navigate('/')}>
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+            onClick={() => navigate('/')}
+          >
             {tenantLogo ? (
               <img src={tenantLogo} alt="Logo" style={{ height: '24px', borderRadius: '3px' }} />
             ) : (
@@ -76,19 +77,29 @@ const DashboardLayout = ({ children }) => {
                   borderRadius: '3px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
                 }}
               >
                 <LayoutDashboard size={16} color="white" />
               </div>
             )}
-            <span style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', letterSpacing: '-0.01em' }}>
+            <span
+              style={{
+                fontSize: '1.125rem',
+                fontWeight: '700',
+                color: 'var(--text-main)',
+                letterSpacing: '-0.01em',
+              }}
+            >
               Trackify
             </span>
           </div>
 
-          <nav className="hide-mobile" style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}>
-             {/* Global navigation items could go here */}
+          <nav
+            className="hide-mobile"
+            style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}
+          >
+            {/* Global navigation items could go here */}
           </nav>
         </div>
 
@@ -97,7 +108,11 @@ const DashboardLayout = ({ children }) => {
         <div className="topbar-actions">
           <CreateMenu />
 
-          <button className="theme-toggle" onClick={toggleTheme} style={{ width: '32px', height: '32px' }}>
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            style={{ width: '32px', height: '32px' }}
+          >
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </button>
 
@@ -108,8 +123,10 @@ const DashboardLayout = ({ children }) => {
               height: '28px',
               fontSize: '0.75rem',
               overflow: 'hidden',
-              backgroundColor: !user?.profilePhotoUrl ? (primaryColor || 'var(--primary)') : undefined,
-              cursor: 'pointer'
+              backgroundColor: !user?.profilePhotoUrl
+                ? primaryColor || 'var(--primary)'
+                : undefined,
+              cursor: 'pointer',
             }}
           >
             {user?.profilePhotoUrl ? (
@@ -127,7 +144,7 @@ const DashboardLayout = ({ children }) => {
 
       <div style={{ display: 'flex', flex: 1 }}>
         {/* Sidebar */}
-        <aside 
+        <aside
           className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'open' : ''}`}
           onMouseEnter={() => setCollapsed(false)}
           onMouseLeave={() => setCollapsed(true)}
@@ -162,13 +179,24 @@ const DashboardLayout = ({ children }) => {
             ))}
           </nav>
 
-          <div className="sidebar-footer" style={{ marginTop: 'auto', borderTop: '1px solid var(--border-main)' }}>
+          <div
+            className="sidebar-footer"
+            style={{ marginTop: 'auto', borderTop: '1px solid var(--border-main)' }}
+          >
             <button
               className="nav-item"
               onClick={handleLogout}
-              style={{ width: 'calc(100% - 1rem)', background: 'none', border: 'none', cursor: 'pointer', margin: '0.5rem' }}
+              style={{
+                width: 'calc(100% - 1rem)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                margin: '0.5rem',
+              }}
             >
-              <span><LogOut size={18} /></span>
+              <span>
+                <LogOut size={18} />
+              </span>
               {!collapsed && <span>Logout</span>}
             </button>
           </div>
@@ -176,7 +204,15 @@ const DashboardLayout = ({ children }) => {
 
         {/* Main Content */}
         <main className="main-content" style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-          <div className="page-body" style={{ width: '100%', maxWidth: '100%', overflowY: 'auto', height: 'calc(100vh - var(--topbar-height))' }}>
+          <div
+            className="page-body"
+            style={{
+              width: '100%',
+              maxWidth: '100%',
+              overflowY: 'auto',
+              height: 'calc(100vh - var(--topbar-height))',
+            }}
+          >
             {children}
           </div>
         </main>

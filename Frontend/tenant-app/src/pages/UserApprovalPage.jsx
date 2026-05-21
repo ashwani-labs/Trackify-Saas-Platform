@@ -30,9 +30,18 @@ const UserApprovalPage = () => {
         Administration / <span style={{ color: 'var(--text-main)' }}>User Approvals</span>
       </nav>
 
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
+      <header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '2.5rem',
+        }}
+      >
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Access Requests</h1>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+            Access Requests
+          </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
             Review and manage requests from users trying to join your workspace.
           </p>
@@ -52,7 +61,15 @@ const UserApprovalPage = () => {
 
       {error && (
         <div
-          style={{ padding: '1rem', marginBottom: '2rem', backgroundColor: '#FFEBE6', color: '#BF2600', borderRadius: '3px', fontSize: '0.875rem', border: '1px solid #FFBDAD' }}
+          style={{
+            padding: '1rem',
+            marginBottom: '2rem',
+            backgroundColor: '#FFEBE6',
+            color: '#BF2600',
+            borderRadius: '3px',
+            fontSize: '0.875rem',
+            border: '1px solid #FFBDAD',
+          }}
         >
           {error}
         </div>
@@ -88,13 +105,15 @@ const UserApprovalPage = () => {
                       justifyContent: 'center',
                       color: '#42526E',
                       fontSize: '1rem',
-                      fontWeight: '700'
+                      fontWeight: '700',
                     }}
                   >
                     {user.fullName?.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>{user.fullName}</h3>
+                    <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+                      {user.fullName}
+                    </h3>
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                       <span
                         style={{
@@ -116,7 +135,8 @@ const UserApprovalPage = () => {
                           gap: '0.4rem',
                         }}
                       >
-                        <Clock size={12} /> Requested {new Date(user.createdAt).toLocaleDateString()}
+                        <Clock size={12} /> Requested{' '}
+                        {new Date(user.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -153,7 +173,7 @@ const UserApprovalPage = () => {
               flexDirection: 'column',
               alignItems: 'center',
               gap: '1.5rem',
-              borderStyle: 'dashed'
+              borderStyle: 'dashed',
             }}
           >
             <div
@@ -167,16 +187,32 @@ const UserApprovalPage = () => {
               <ShieldCheck size={48} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>All requests handled</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', maxWidth: '400px', margin: '0 auto' }}>
-                There are no pending user requests at the moment. You'll see new sign-ups here for approval.
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                All requests handled
+              </h2>
+              <p
+                style={{
+                  color: 'var(--text-muted)',
+                  fontSize: '0.875rem',
+                  maxWidth: '400px',
+                  margin: '0 auto',
+                }}
+              >
+                There are no pending user requests at the moment. You'll see new sign-ups here for
+                approval.
               </p>
             </div>
           </div>
         )}
 
         {pendingUsers.length > 0 && totalPages > 1 && (
-          <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-main)', paddingTop: '1rem' }}>
+          <div
+            style={{
+              marginTop: '2rem',
+              borderTop: '1px solid var(--border-main)',
+              paddingTop: '1rem',
+            }}
+          >
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

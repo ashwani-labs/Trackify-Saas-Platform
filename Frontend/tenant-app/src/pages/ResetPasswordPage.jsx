@@ -61,7 +61,9 @@ const ResetPasswordPage = () => {
   return (
     <AuthLayout title="Choose a new password" subtitle="Create a secure password for your account">
       {success ? (
-        <div style={{ textAlign: 'center', animation: 'fadeIn 0.4s ease-out', marginTop: '1.5rem' }}>
+        <div
+          style={{ textAlign: 'center', animation: 'fadeIn 0.4s ease-out', marginTop: '1.5rem' }}
+        >
           <div
             style={{
               width: '64px',
@@ -77,24 +79,32 @@ const ResetPasswordPage = () => {
           >
             <CheckCircle2 size={32} />
           </div>
-          <p style={{ color: 'var(--text-main)', marginBottom: '1.5rem', lineHeight: '1.6', fontSize: '0.875rem' }}>
+          <p
+            style={{
+              color: 'var(--text-main)',
+              marginBottom: '1.5rem',
+              lineHeight: '1.6',
+              fontSize: '0.875rem',
+            }}
+          >
             Your password has been successfully reset.
           </p>
           <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '2rem' }}>
             Redirecting to login...
           </div>
-          <Link
-            to="/login"
-            className="btn btn-primary"
-            style={{ width: '100%', height: '40px' }}
-          >
+          <Link to="/login" className="btn btn-primary" style={{ width: '100%', height: '40px' }}>
             Log in now
           </Link>
         </div>
       ) : (
         <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
           <div className="form-group">
-            <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>NEW PASSWORD</label>
+            <label
+              className="form-label"
+              style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
+            >
+              NEW PASSWORD
+            </label>
             <input
               type="password"
               className="input-field"
@@ -107,7 +117,12 @@ const ResetPasswordPage = () => {
           </div>
 
           <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-            <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>CONFIRM PASSWORD</label>
+            <label
+              className="form-label"
+              style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
+            >
+              CONFIRM PASSWORD
+            </label>
             <input
               type="password"
               className="input-field"
@@ -121,19 +136,19 @@ const ResetPasswordPage = () => {
 
           {error && (
             <div
-                style={{
-                  padding: '0.75rem',
-                  marginBottom: '1.5rem',
-                  backgroundColor: '#FFEBE6',
-                  color: '#BF2600',
-                  borderRadius: '3px',
-                  fontSize: '0.8rem',
-                  textAlign: 'center',
-                  border: '1px solid #FFBDAD'
-                }}
-              >
-                {error}
-              </div>
+              style={{
+                padding: '0.75rem',
+                marginBottom: '1.5rem',
+                backgroundColor: '#FFEBE6',
+                color: '#BF2600',
+                borderRadius: '3px',
+                fontSize: '0.8rem',
+                textAlign: 'center',
+                border: '1px solid #FFBDAD',
+              }}
+            >
+              {error}
+            </div>
           )}
 
           <button
@@ -145,10 +160,20 @@ const ResetPasswordPage = () => {
             {isLoading ? 'Resetting...' : 'Reset password'}
           </button>
 
-          <div style={{ marginTop: '2rem', textAlign: 'center', borderTop: '1px solid var(--border-main)', paddingTop: '1.5rem' }}>
-             <Link to="/login" style={{ fontSize: '0.875rem', color: 'var(--primary)', fontWeight: '600' }}>
-               Back to login
-             </Link>
+          <div
+            style={{
+              marginTop: '2rem',
+              textAlign: 'center',
+              borderTop: '1px solid var(--border-main)',
+              paddingTop: '1.5rem',
+            }}
+          >
+            <Link
+              to="/login"
+              style={{ fontSize: '0.875rem', color: 'var(--primary)', fontWeight: '600' }}
+            >
+              Back to login
+            </Link>
           </div>
         </form>
       )}

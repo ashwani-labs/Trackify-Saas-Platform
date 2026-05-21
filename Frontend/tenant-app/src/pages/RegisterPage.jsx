@@ -41,7 +41,9 @@ const RegisterPage = () => {
   if (isSuccess) {
     return (
       <AuthLayout title="Check your email" subtitle="We've received your request">
-        <div style={{ textAlign: 'center', animation: 'fadeIn 0.4s ease-out', marginTop: '1.5rem' }}>
+        <div
+          style={{ textAlign: 'center', animation: 'fadeIn 0.4s ease-out', marginTop: '1.5rem' }}
+        >
           <div
             style={{
               width: '64px',
@@ -57,11 +59,28 @@ const RegisterPage = () => {
           >
             <CheckCircle2 size={32} />
           </div>
-          <p style={{ color: 'var(--text-main)', marginBottom: '2rem', lineHeight: '1.6', fontSize: '0.875rem' }}>
+          <p
+            style={{
+              color: 'var(--text-main)',
+              marginBottom: '2rem',
+              lineHeight: '1.6',
+              fontSize: '0.875rem',
+            }}
+          >
             Your registration is pending approval by your workspace administrator. You'll receive an
             email once your account is active.
           </p>
-          <Link to="/login" className="btn btn-primary" style={{ width: '100%', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Link
+            to="/login"
+            className="btn btn-primary"
+            style={{
+              width: '100%',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             Back to Login
           </Link>
         </div>
@@ -73,7 +92,12 @@ const RegisterPage = () => {
     <AuthLayout title="Sign up for an account" subtitle="Join your team and start collaborating">
       <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
         <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>FULL NAME</label>
+          <label
+            className="form-label"
+            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
+          >
+            FULL NAME
+          </label>
           <input
             name="fullName"
             className="input-field"
@@ -87,7 +111,12 @@ const RegisterPage = () => {
         </div>
 
         <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>EMAIL ADDRESS</label>
+          <label
+            className="form-label"
+            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
+          >
+            EMAIL ADDRESS
+          </label>
           <input
             name="email"
             className="input-field"
@@ -101,7 +130,12 @@ const RegisterPage = () => {
         </div>
 
         <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>WORKSPACE ID</label>
+          <label
+            className="form-label"
+            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
+          >
+            WORKSPACE ID
+          </label>
           <input
             name="tenantId"
             className="input-field"
@@ -115,7 +149,12 @@ const RegisterPage = () => {
         </div>
 
         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-          <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>PASSWORD</label>
+          <label
+            className="form-label"
+            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
+          >
+            PASSWORD
+          </label>
           <input
             name="password"
             className="input-field"
@@ -138,7 +177,7 @@ const RegisterPage = () => {
               borderRadius: '3px',
               fontSize: '0.8rem',
               textAlign: 'center',
-              border: '1px solid #FFBDAD'
+              border: '1px solid #FFBDAD',
             }}
           >
             {error}
@@ -158,7 +197,14 @@ const RegisterPage = () => {
           )}
         </button>
 
-        <div style={{ marginTop: '2rem', textAlign: 'center', borderTop: '1px solid var(--border-main)', paddingTop: '1.5rem' }}>
+        <div
+          style={{
+            marginTop: '2rem',
+            textAlign: 'center',
+            borderTop: '1px solid var(--border-main)',
+            paddingTop: '1.5rem',
+          }}
+        >
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Already have an account?{' '}
             <Link to="/login" style={{ color: 'var(--primary)', fontWeight: '600' }}>

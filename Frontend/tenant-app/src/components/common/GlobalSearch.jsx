@@ -64,9 +64,7 @@ const GlobalSearch = () => {
 
   const issueResults = useMemo(() => {
     if (!q || issues.length === 0) return [];
-    return issues
-      .filter((i) => i.title?.toLowerCase().includes(q))
-      .slice(0, 8);
+    return issues.filter((i) => i.title?.toLowerCase().includes(q)).slice(0, 8);
   }, [issues, q]);
 
   const hasResults = projectResults.length > 0 || issueResults.length > 0;

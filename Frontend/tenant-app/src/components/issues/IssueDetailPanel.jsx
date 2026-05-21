@@ -383,10 +383,7 @@ const IssueDetailPanel = () => {
                       className="theme-toggle"
                       style={{ width: '28px', height: '28px' }}
                       onClick={() =>
-                        window.open(
-                          `${API_BASE_URL}/issues/attachments/${a.id}/download`,
-                          '_blank'
-                        )
+                        window.open(`${API_BASE_URL}/issues/attachments/${a.id}/download`, '_blank')
                       }
                     >
                       <Download size={14} />
