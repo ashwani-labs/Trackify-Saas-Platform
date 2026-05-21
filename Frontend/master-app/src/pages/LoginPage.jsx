@@ -51,19 +51,60 @@ const LoginPage = () => {
   return (
     <AuthLayout>
       <div className="auth-header">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-          <div style={{ width: '32px', height: '32px', background: 'var(--primary)', borderRadius: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.75rem',
+            marginBottom: '2rem',
+          }}
+        >
+          <div
+            style={{
+              width: '32px',
+              height: '32px',
+              background: 'var(--primary)',
+              borderRadius: '3px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+            }}
+          >
             <Shield size={20} />
           </div>
-          <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>Trackify <span style={{ color: 'var(--text-muted)', fontWeight: '400' }}>Master</span></span>
+          <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>
+            Trackify <span style={{ color: 'var(--text-muted)', fontWeight: '400' }}>Master</span>
+          </span>
         </div>
-        <h1 className="auth-title" style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem', textAlign: 'center' }}>Access Master Panel</h1>
-        <p className="auth-subtitle" style={{ fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center' }}>Sign in to manage the Trackify platform</p>
+        <h1
+          className="auth-title"
+          style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            marginBottom: '0.5rem',
+            textAlign: 'center',
+          }}
+        >
+          Access Master Panel
+        </h1>
+        <p
+          className="auth-subtitle"
+          style={{ fontSize: '0.875rem', color: 'var(--text-muted)', textAlign: 'center' }}
+        >
+          Sign in to manage the Trackify platform
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
         <div className="form-group">
-          <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>EMAIL ADDRESS</label>
+          <label
+            className="form-label"
+            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
+          >
+            EMAIL ADDRESS
+          </label>
           <input
             name="email"
             type="email"
@@ -77,7 +118,12 @@ const LoginPage = () => {
         </div>
 
         <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-          <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}>PASSWORD</label>
+          <label
+            className="form-label"
+            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
+          >
+            PASSWORD
+          </label>
           <div style={{ position: 'relative' }}>
             <input
               name="password"
@@ -117,7 +163,7 @@ const LoginPage = () => {
               borderRadius: '3px',
               fontSize: '0.8rem',
               textAlign: 'center',
-              border: '1px solid #FFBDAD'
+              border: '1px solid #FFBDAD',
             }}
           >
             {apiError}
@@ -137,7 +183,17 @@ const LoginPage = () => {
           )}
         </button>
 
-        <p className="form-footer" style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-main)', paddingTop: '1.5rem' }}>
+        <p
+          className="form-footer"
+          style={{
+            marginTop: '2rem',
+            textAlign: 'center',
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            borderTop: '1px solid var(--border-main)',
+            paddingTop: '1.5rem',
+          }}
+        >
           Authorized platform administrators only.
         </p>
       </form>

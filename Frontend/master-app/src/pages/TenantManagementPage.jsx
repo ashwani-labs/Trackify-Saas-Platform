@@ -62,14 +62,27 @@ const TenantManagementPage = () => {
         Administration / <span style={{ color: 'var(--text-main)' }}>Tenants</span>
       </nav>
 
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+      <header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '2rem',
+        }}
+      >
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Tenant Management</h1>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+            Tenant Management
+          </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
             Centralized control for all active organizations and infrastructure provisioning.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ height: '32px' }}>
+        <button
+          className="btn btn-primary"
+          onClick={() => setIsModalOpen(true)}
+          style={{ height: '32px' }}
+        >
           <Plus size={16} /> Create Tenant
         </button>
       </header>
@@ -101,7 +114,14 @@ const TenantManagementPage = () => {
             justifyContent: 'space-between',
           }}
         >
-          <h2 style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+          <h2
+            style={{
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+            }}
+          >
             Organization List
           </h2>
           <button
@@ -154,7 +174,9 @@ const TenantManagementPage = () => {
                     </div>
                   </td>
                   <td>
-                    <code style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>{tenant.domain}.trackify.io</code>
+                    <code style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>
+                      {tenant.domain}.trackify.io
+                    </code>
                   </td>
                   <td>
                     <span
@@ -162,7 +184,7 @@ const TenantManagementPage = () => {
                       style={{
                         backgroundColor: '#DEEBFF',
                         color: '#0052CC',
-                        fontSize: '0.65rem'
+                        fontSize: '0.65rem',
                       }}
                     >
                       {tenant.plan}
@@ -206,7 +228,12 @@ const TenantManagementPage = () => {
                 <tr>
                   <td
                     colSpan="6"
-                    style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}
+                    style={{
+                      textAlign: 'center',
+                      padding: '4rem',
+                      color: 'var(--text-muted)',
+                      fontSize: '0.875rem',
+                    }}
                   >
                     No tenants found.
                   </td>

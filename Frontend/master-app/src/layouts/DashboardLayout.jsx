@@ -31,7 +31,10 @@ const DashboardLayout = ({ children }) => {
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => navigate(ROUTES.DASHBOARD)}>
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+            onClick={() => navigate(ROUTES.DASHBOARD)}
+          >
             <div
               style={{
                 padding: '0.4rem',
@@ -39,18 +42,28 @@ const DashboardLayout = ({ children }) => {
                 borderRadius: '3px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
               }}
             >
               <Layout size={18} color="white" />
             </div>
-            <span style={{ fontSize: '1.125rem', fontWeight: '700', color: 'var(--text-main)', letterSpacing: '-0.01em' }}>
+            <span
+              style={{
+                fontSize: '1.125rem',
+                fontWeight: '700',
+                color: 'var(--text-main)',
+                letterSpacing: '-0.01em',
+              }}
+            >
               Trackify <span style={{ color: 'var(--text-muted)', fontWeight: '400' }}>Master</span>
             </span>
           </div>
 
-          <nav className="hide-mobile" style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}>
-             {/* Global Nav Links can go here in Jira, but we'll keep them in sidebar for now or move some here */}
+          <nav
+            className="hide-mobile"
+            style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}
+          >
+            {/* Global Nav Links can go here in Jira, but we'll keep them in sidebar for now or move some here */}
           </nav>
         </div>
 
@@ -70,34 +83,41 @@ const DashboardLayout = ({ children }) => {
               type="text"
               className="input-field"
               placeholder="Search..."
-              style={{ 
-                paddingLeft: '2.25rem', 
-                height: '32px', 
+              style={{
+                paddingLeft: '2.25rem',
+                height: '32px',
                 fontSize: '0.875rem',
                 backgroundColor: 'transparent',
-                border: '2px solid var(--border-main)'
+                border: '2px solid var(--border-main)',
               }}
             />
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto' }}>
-          <button className="btn btn-primary hide-mobile" style={{ height: '32px', padding: '0 0.75rem' }}>
+          <button
+            className="btn btn-primary hide-mobile"
+            style={{ height: '32px', padding: '0 0.75rem' }}
+          >
             Create
           </button>
-          
-          <button className="theme-toggle" onClick={toggleTheme} style={{ width: '32px', height: '32px' }}>
+
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            style={{ width: '32px', height: '32px' }}
+          >
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </button>
 
-          <div 
-            className="avatar-circle" 
-            style={{ 
-              width: '28px', 
-              height: '28px', 
+          <div
+            className="avatar-circle"
+            style={{
+              width: '28px',
+              height: '28px',
               fontSize: '0.75rem',
               cursor: 'pointer',
-              border: '2px solid transparent'
+              border: '2px solid transparent',
             }}
           >
             M
@@ -109,14 +129,22 @@ const DashboardLayout = ({ children }) => {
         {/* Sidebar */}
         <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
           <div className="sidebar-header show-mobile">
-             <span className="logo-text">Trackify</span>
-             <button className="theme-toggle" onClick={() => setMobileOpen(false)}>
-               <X size={20} />
-             </button>
+            <span className="logo-text">Trackify</span>
+            <button className="theme-toggle" onClick={() => setMobileOpen(false)}>
+              <X size={20} />
+            </button>
           </div>
 
           <div style={{ padding: '1.5rem 0.75rem 0.5rem' }}>
-            <span style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', paddingLeft: '0.75rem' }}>
+            <span
+              style={{
+                fontSize: '0.7rem',
+                fontWeight: '700',
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                paddingLeft: '0.75rem',
+              }}
+            >
               Administration
             </span>
           </div>

@@ -21,7 +21,7 @@ import {
 
 const DashboardPage = () => {
   const dispatch = useDispatch();
-  const { role } = useAuth({ requireAuth: true });
+  useAuth({ requireAuth: true });
   const tenants = useSelector(selectAllTenants);
   const isLoading = useSelector(selectTenantLoading);
 
@@ -72,7 +72,9 @@ const DashboardPage = () => {
       </nav>
 
       <section style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>Platform Overview</h1>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+          Platform Overview
+        </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
           Real-time insights into global platform health and organizational metrics.
         </p>
@@ -80,10 +82,7 @@ const DashboardPage = () => {
 
       <section className="stats-grid">
         {statCards.map((card) => (
-          <div
-            key={card.label}
-            className="stat-card"
-          >
+          <div key={card.label} className="stat-card">
             <div className="stat-header">
               <span>{card.label}</span>
               <span style={{ color: card.color }}>{card.icon}</span>
@@ -108,7 +107,15 @@ const DashboardPage = () => {
         }}
       >
         <div className="card">
-          <h3 style={{ marginBottom: '1.25rem', fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+          <h3
+            style={{
+              marginBottom: '1.25rem',
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+            }}
+          >
             Workspace Distribution
           </h3>
           <div style={{ height: '240px', minWidth: 0 }}>
@@ -131,7 +138,7 @@ const DashboardPage = () => {
                     border: '1px solid var(--border-main)',
                     borderRadius: '3px',
                     boxShadow: 'var(--shadow-md)',
-                    fontSize: '0.75rem'
+                    fontSize: '0.75rem',
                   }}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '0.75rem' }} />
@@ -141,7 +148,15 @@ const DashboardPage = () => {
         </div>
 
         <div className="card">
-          <h3 style={{ marginBottom: '1.25rem', fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+          <h3
+            style={{
+              marginBottom: '1.25rem',
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+            }}
+          >
             Provisioning Growth
           </h3>
           <div style={{ height: '240px', minWidth: 0 }}>
@@ -161,7 +176,7 @@ const DashboardPage = () => {
                     border: '1px solid var(--border-main)',
                     borderRadius: '3px',
                     boxShadow: 'var(--shadow-md)',
-                    fontSize: '0.75rem'
+                    fontSize: '0.75rem',
                   }}
                 />
                 <Bar dataKey="count" fill="var(--primary)" radius={[2, 2, 0, 0]} barSize={32} />
@@ -172,17 +187,39 @@ const DashboardPage = () => {
       </section>
 
       <section>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             Recent Organizations
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1rem',
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '1rem',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            Recent Organizations
           </h2>
-          <button className="btn btn-secondary" style={{ height: '32px', fontSize: '0.75rem' }}>View all tenants</button>
+          <button className="btn btn-secondary" style={{ height: '32px', fontSize: '0.75rem' }}>
+            View all tenants
+          </button>
         </div>
-        
+
         {tenants.length === 0 ? (
           <div
             className="card"
-            style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}
+            style={{
+              textAlign: 'center',
+              padding: '3rem',
+              color: 'var(--text-muted)',
+              fontSize: '0.875rem',
+            }}
           >
             No tenants provisioned yet.
           </div>
@@ -218,11 +255,15 @@ const DashboardPage = () => {
                         >
                           {tenant.name.charAt(0)}
                         </div>
-                        <span style={{ fontWeight: '500', fontSize: '0.875rem' }}>{tenant.name}</span>
+                        <span style={{ fontWeight: '500', fontSize: '0.875rem' }}>
+                          {tenant.name}
+                        </span>
                       </div>
                     </td>
                     <td>
-                      <code style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>{tenant.domain}.trackify.io</code>
+                      <code style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>
+                        {tenant.domain}.trackify.io
+                      </code>
                     </td>
                     <td>
                       <span
