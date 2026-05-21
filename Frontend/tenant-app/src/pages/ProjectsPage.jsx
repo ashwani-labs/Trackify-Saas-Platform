@@ -15,9 +15,10 @@ const ProjectsPage = () => {
     (state) => state.projects
   );
   const { user } = useSelector((state) => state.auth);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const isAdmin = user?.role === ROLES.ADMIN;
+  const [isModalOpen, setIsModalOpen] = useState(() =>
+    Boolean(location.state?.openCreate && isAdmin)
+  );
 
   useEffect(() => {
     dispatch(fetchProjects({ page: 0, size: 10 }));
@@ -25,11 +26,10 @@ const ProjectsPage = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (location.state?.openCreate && isAdmin) {
-      setIsModalOpen(true);
+    if (location.state?.openCreate) {
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state, isAdmin, navigate, location.pathname]);
+  }, [location.state?.openCreate, navigate, location.pathname]);
 
   return (
     <div className="page">
@@ -43,7 +43,11 @@ const ProjectsPage = () => {
         subtitle="A central list of all projects and workspaces within your organization."
         actions={
           isAdmin && (
-            <Button variant="primary" leftIcon={<Plus size={16} />} onClick={() => setIsModalOpen(true)}>
+            <Button
+              variant="primary"
+              leftIcon={<Plus size={16} />}
+              onClick={() => setIsModalOpen(true)}
+            >
               Create Project
             </Button>
           )

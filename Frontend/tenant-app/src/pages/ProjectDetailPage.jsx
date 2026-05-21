@@ -30,7 +30,9 @@ const ProjectDetailPage = () => {
   const { list: sprints } = useSelector((s) => s.sprints);
 
   const [viewMode, setViewMode] = useState('BOARD');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(
+    () => searchParams.get('createIssue') === '1'
+  );
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [isSprintModalOpen, setIsSprintModalOpen] = useState(false);
 
@@ -46,7 +48,6 @@ const ProjectDetailPage = () => {
 
   useEffect(() => {
     if (searchParams.get('createIssue') === '1') {
-      setIsCreateModalOpen(true);
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -86,9 +87,7 @@ const ProjectDetailPage = () => {
         }
         title={
           <div className="project-header__meta">
-            <div className="project-avatar">
-              {currentProject?.name?.charAt(0).toUpperCase()}
-            </div>
+            <div className="project-avatar">{currentProject?.name?.charAt(0).toUpperCase()}</div>
             <div>
               <span className="page-title">{currentProject?.name}</span>
               <p className="page-subtitle">Software project</p>
@@ -97,10 +96,18 @@ const ProjectDetailPage = () => {
         }
         actions={
           <>
-            <Button variant="secondary" leftIcon={<Users size={16} />} onClick={() => setIsMembersModalOpen(true)}>
+            <Button
+              variant="secondary"
+              leftIcon={<Users size={16} />}
+              onClick={() => setIsMembersModalOpen(true)}
+            >
               Team
             </Button>
-            <Button variant="primary" leftIcon={<Plus size={16} />} onClick={() => setIsCreateModalOpen(true)}>
+            <Button
+              variant="primary"
+              leftIcon={<Plus size={16} />}
+              onClick={() => setIsCreateModalOpen(true)}
+            >
               Create Issue
             </Button>
           </>
