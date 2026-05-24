@@ -40,7 +40,7 @@ Trackify enables organizations to manage projects, track issues, and collaborate
 | **Frontend** | `Frontend/master-app` (platform admin), `Frontend/tenant-app` (tenant users) |
 | **Data** | MySQL master DB + per-tenant databases |
 
-See `documents/` for detailed design: [Architecture.md](documents/Architecture.md), [DB_Design_Document.md](documents/DB_Design_Document.md), [PRD.md](documents/PRD.md).
+All project documentation lives in **[documents/README.md](documents/README.md)** (product, architecture, roadmap).
 
 ---
 
@@ -62,7 +62,7 @@ trackify-saas-platform/
 ├── Frontend/
 │   ├── master-app/    # Platform admin UI
 │   └── tenant-app/    # Tenant user UI
-├── documents/         # Architecture, PRD, API docs, plans
+├── documents/         # Single project doc (README.md)
 ├── docker-compose.yml
 ├── nginx.conf
 └── .env.example       # Copy to .env — required for Docker
@@ -104,7 +104,7 @@ docker compose up --build
 docker compose --profile full up --build
 ```
 
-See [documents/Docker_Dev_Guide.md](documents/Docker_Dev_Guide.md) for profiles and optional overrides.
+Optional: copy `docker-compose.override.yml.example` → `docker-compose.override.yml` for custom mail settings.
 
 | Service | URL |
 |---------|-----|
@@ -130,6 +130,8 @@ Optional per-app env: copy `Frontend/tenant-app/.env.example` → `.env.local`.
 
 API URL defaults to `http://localhost:8080`. Override with `VITE_API_BASE_URL` in `.env.local`.
 
+**Troubleshooting:** Same `JWT_SECRET` in `.env` for all Java services. Mail requires `--profile full` and valid SMTP credentials. Rebuild frontend after changing `VITE_API_BASE_URL`.
+
 ### CI (GitHub Actions)
 
 On push/PR to `main`, `.github/workflows/ci.yml` runs:
@@ -139,15 +141,9 @@ On push/PR to `main`, `.github/workflows/ci.yml` runs:
 
 ---
 
-## Improvement Roadmap
+## Documentation
 
-Active phased plan: **[documents/Project_Update_Plan.md](documents/Project_Update_Plan.md)**
-
-- **Phase 0** (done): Secrets via `.env`, centralized API client, README updates
-- **Phase 1** (done): `@trackify/shared` package, login ApiResponse, error helpers, Docker profiles
-- **Phase 2** (in progress): GitHub Actions CI on push/PR; Flyway, Vitest, OpenAPI next
-- **Phase 3** (mostly done): Shared UI tokens, search, Create menu, core page migrations
-- **Phase 4+**: Notifications inbox, activity log, issue keys
+Product scope, architecture, and roadmap: **[documents/README.md](documents/README.md)**
 
 ---
 
