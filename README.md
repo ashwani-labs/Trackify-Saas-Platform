@@ -40,7 +40,7 @@ Trackify enables organizations to manage projects, track issues, and collaborate
 | **Frontend** | `Frontend/master-app` (platform admin), `Frontend/tenant-app` (tenant users) |
 | **Data** | MySQL master DB + per-tenant databases |
 
-See `documents/` for detailed design: `Backend_Architecture.md`, `Frontend_Architecture_Document.md`, `DB_Design_Document.md`.
+See `documents/` for detailed design: [Architecture.md](documents/Architecture.md), [DB_Design_Document.md](documents/DB_Design_Document.md), [PRD.md](documents/PRD.md).
 
 ---
 

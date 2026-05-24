@@ -5,7 +5,7 @@ TRACKIFY — PROJECT UPDATE PLAN
 Document Version: 1.0  
 Created: May 2026  
 Status: Proposed  
-Related Docs: PRD.md, Backend_Architecture.md, Frontend_Architecture_Document.md, Docker_Dev_Guide.md, Api_Contract_Document.md
+Related Docs: PRD.md, Architecture.md, DB_Design_Document.md, Docker_Dev_Guide.md, Api_Contract_Document.md
 
 --------------------------------------------
 
