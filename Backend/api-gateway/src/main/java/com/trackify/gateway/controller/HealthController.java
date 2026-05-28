@@ -1,4 +1,4 @@
-package com.trackify.apigateway.controller;
+package com.trackify.gateway.controller;
 
 import com.trackify.common.dto.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
