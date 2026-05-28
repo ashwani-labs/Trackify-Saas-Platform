@@ -1,0 +1,40 @@
+CREATE TABLE IF NOT EXISTS tenants (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    domain VARCHAR(100) NOT NULL UNIQUE,
+    plan ENUM('FREE', 'BASIC', 'PRO', 'ENTERPRISE') NOT NULL DEFAULT 'FREE',
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    db_name VARCHAR(150) NOT NULL UNIQUE,
+    db_host VARCHAR(150) DEFAULT 'localhost',
+    db_port INT DEFAULT 3306,
+    db_username VARCHAR(150) NOT NULL,
+    db_password VARCHAR(255) NOT NULL,
+    logo_url VARCHAR(255),
+    company_name VARCHAR(255),
+    primary_color VARCHAR(50) DEFAULT '#6366f1',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_tenants_status (status)
+);
+
+CREATE TABLE IF NOT EXISTS user_lookup (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    tenant_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_email_tenant (email, tenant_id),
+    INDEX idx_user_lookup_email (email),
+    CONSTRAINT fk_user_lookup_tenant
+        FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS master_users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('MASTER', 'ADMIN', 'USER') NOT NULL DEFAULT 'MASTER',
+    is_active BOOLEAN DEFAULT TRUE,
+    profile_photo_url VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

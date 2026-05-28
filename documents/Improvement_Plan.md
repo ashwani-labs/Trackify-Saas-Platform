@@ -52,7 +52,7 @@ Trackify is a multi-tenant project management SaaS with:
 ### Phase 1: Stabilize Foundations
 
 - [x] Remove fallback JWT secrets from every service config.
-- [ ] Add Flyway to `auth-service` or a shared migration strategy for `trackify_master`.
+- [x] Add Flyway to `auth-service` or a shared migration strategy for `trackify_master`.
 - [ ] Extract tenant schema creation from inline Java SQL into a versioned tenant schema script.
 - [ ] Delete duplicate `api-gateway` application package and keep a single `com.trackify.gateway` entrypoint.
 - [ ] Add backend tests for:
