@@ -53,7 +53,7 @@ Trackify is a multi-tenant project management SaaS with:
 
 - [x] Remove fallback JWT secrets from every service config.
 - [x] Add Flyway to `auth-service` or a shared migration strategy for `trackify_master`.
-- [ ] Extract tenant schema creation from inline Java SQL into a versioned tenant schema script.
+- [x] Extract tenant schema creation from inline Java SQL into a versioned tenant schema script.
 - [ ] Delete duplicate `api-gateway` application package and keep a single `com.trackify.gateway` entrypoint.
 - [ ] Add backend tests for:
   - [ ] `IssueService` create/update/delete and sprint assignment

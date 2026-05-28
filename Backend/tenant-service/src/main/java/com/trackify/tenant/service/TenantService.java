@@ -13,6 +13,8 @@ import com.trackify.tenant.entity.Tenant;
 import com.trackify.tenant.entity.UserLookup;
 import com.trackify.tenant.repository.TenantRepository;
 import com.trackify.tenant.repository.UserLookupRepository;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,11 +26,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StreamUtils;
 
 @Slf4j
 @Service
@@ -463,83 +467,9 @@ public class TenantService {
 
       jdbcTemplate.execute("FLUSH PRIVILEGES");
 
-      // 2. Create Schema using the same root connection (prefixed with dbName)
-      String schemaSql =
-          String.format(
-              """
-                CREATE TABLE IF NOT EXISTS %1$s.users (
-                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-                  email        VARCHAR(255) NOT NULL UNIQUE,
-                  password     VARCHAR(255) NOT NULL,
-                  full_name    VARCHAR(255),
-                  role         ENUM('ADMIN','USER') NOT NULL DEFAULT 'USER',
-                  status       ENUM('PENDING','ACTIVE','INACTIVE') DEFAULT 'PENDING',
-                  profile_photo_url VARCHAR(255),
-                  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                );
-
-                CREATE TABLE IF NOT EXISTS %1$s.projects (
-                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-                  name         VARCHAR(255) NOT NULL,
-                  description  TEXT,
-                  owner_id     BIGINT,
-                  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                );
-
-                CREATE TABLE IF NOT EXISTS %1$s.issues (
-                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-                  title        VARCHAR(255) NOT NULL,
-                  description  TEXT,
-                  status       ENUM('TODO', 'IN_PROGRESS', 'DONE', 'CANCELLED') DEFAULT 'TODO',
-                  priority     ENUM('LOW', 'MEDIUM', 'HIGH', 'URGENT') DEFAULT 'MEDIUM',
-                  project_id   BIGINT NOT NULL,
-                  reporter_id  BIGINT,
-                  assignee_id  BIGINT,
-                  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                  FOREIGN KEY (project_id) REFERENCES %1$s.projects(id)
-                );
-
-                CREATE TABLE IF NOT EXISTS %1$s.issue_comments (
-                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-                  issue_id     BIGINT NOT NULL,
-                  user_id      BIGINT,
-                  content      TEXT NOT NULL,
-                  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  FOREIGN KEY (issue_id) REFERENCES %1$s.issues(id)
-                );
-
-                CREATE TABLE IF NOT EXISTS %1$s.project_members (
-                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-                  project_id   BIGINT NOT NULL,
-                  user_id      BIGINT NOT NULL,
-                  user_email   VARCHAR(255),
-                  user_name    VARCHAR(255),
-                  user_role    VARCHAR(50) DEFAULT 'USER',
-                  added_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  UNIQUE KEY uq_project_user (project_id, user_id),
-                  FOREIGN KEY (project_id) REFERENCES %1$s.projects(id)
-                );
-
-                CREATE TABLE IF NOT EXISTS %1$s.password_reset_tokens (
-                  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-                  email        VARCHAR(255) NOT NULL,
-                  token        VARCHAR(255) NOT NULL UNIQUE,
-                  expires_at   DATETIME NOT NULL,
-                  used         BOOLEAN DEFAULT FALSE,
-                  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
-                );
-            """,
-              dbName);
-
-      // Split and execute individual statements using the ROOT jdbcTemplate
-      for (String sql : schemaSql.split(";")) {
-        if (!sql.trim().isEmpty()) {
-          jdbcTemplate.execute(sql.trim());
-        }
-      }
+      // 2. Create schema from versioned SQL template
+      String schemaSql = loadSqlTemplate("db/tenant/V1__tenant_schema.sql", dbName);
+      executeSqlStatements(schemaSql);
 
       // 3. Create Admin User
       String hashedPassword = passwordEncoder.encode(adminPassword);
@@ -570,5 +500,25 @@ public class TenantService {
         .logoUrl(tenant.getLogoUrl())
         .primaryColor(tenant.getPrimaryColor())
         .build();
+  }
+
+  private String loadSqlTemplate(String classpathLocation, String dbName) {
+    try {
+      ClassPathResource resource = new ClassPathResource(classpathLocation);
+      String rawSql =
+          StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+      return rawSql.replace("{{DB_NAME}}", dbName);
+    } catch (IOException e) {
+      throw AppException.internalError(
+          "Failed to load tenant schema template: " + classpathLocation);
+    }
+  }
+
+  private void executeSqlStatements(String sqlScript) {
+    for (String sql : sqlScript.split(";")) {
+      if (!sql.trim().isEmpty()) {
+        jdbcTemplate.execute(sql.trim());
+      }
+    }
   }
 }
