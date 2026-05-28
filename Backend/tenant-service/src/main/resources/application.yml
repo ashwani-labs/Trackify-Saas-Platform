@@ -23,5 +23,5 @@ tenant:
   app-url-pattern: http://%s.lvh.me:5174
 
 jwt:
-  secret: ${JWT_SECRET:8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=}
+  secret: ${JWT_SECRET}
   expiration: 86400000

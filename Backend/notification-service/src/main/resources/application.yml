@@ -7,13 +7,13 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:ashwanitechnohunk@gmail.com}
-    password: ${MAIL_PASSWORD:sbbt wmzi gwaj eibr}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
       mail.smtp.starttls.required: true
 
 jwt:
-  secret: ${JWT_SECRET:8R6Hw7jW+fU3XzLmK2NpB5vC9aE4qG1tV0yA3xD7oZc=}
+  secret: ${JWT_SECRET}
   expiration: 86400000
