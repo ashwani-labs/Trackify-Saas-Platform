@@ -7,11 +7,13 @@ import static org.mockito.Mockito.*;
 
 import com.trackify.auth.dto.LoginRequest;
 import com.trackify.auth.dto.LoginResponse;
+import com.trackify.auth.entity.MasterUser;
 import com.trackify.auth.entity.Tenant;
 import com.trackify.auth.entity.UserLookup;
 import com.trackify.auth.repository.MasterUserRepository;
 import com.trackify.auth.repository.TenantRepository;
 import com.trackify.auth.repository.UserLookupRepository;
+import com.trackify.common.enums.Role;
 import com.trackify.common.exception.AppException;
 import com.trackify.common.security.JwtUtil;
 import java.util.Map;
@@ -141,5 +143,34 @@ class AuthServiceTest {
     AppException exception =
         assertThrows(AppException.class, () -> authService.login(loginRequest));
     assertEquals("Your account is inactive", exception.getMessage());
+  }
+
+  @Test
+  void testLogin_MasterUser_InvalidPassword() {
+    MasterUser masterUser = MasterUser.builder().id(1L).email("test@trackify.com").build();
+    masterUser.setActive(true);
+    masterUser.setPassword("hashed_password");
+    masterUser.setRole(Role.MASTER);
+
+    when(masterUserRepository.findByEmail("test@trackify.com")).thenReturn(Optional.of(masterUser));
+    when(passwordEncoder.matches("password123", "hashed_password")).thenReturn(false);
+
+    AppException exception =
+        assertThrows(AppException.class, () -> authService.login(loginRequest));
+    assertEquals("Invalid email or password", exception.getMessage());
+  }
+
+  @Test
+  void testLogin_MasterUser_InactiveAccount() {
+    MasterUser masterUser = MasterUser.builder().id(1L).email("test@trackify.com").build();
+    masterUser.setActive(false);
+    masterUser.setPassword("hashed_password");
+    masterUser.setRole(Role.MASTER);
+
+    when(masterUserRepository.findByEmail("test@trackify.com")).thenReturn(Optional.of(masterUser));
+
+    AppException exception =
+        assertThrows(AppException.class, () -> authService.login(loginRequest));
+    assertEquals("Your account has been deactivated", exception.getMessage());
   }
 }

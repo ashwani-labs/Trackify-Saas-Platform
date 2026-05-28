@@ -81,4 +81,56 @@ class TenantServiceTest {
         assertThrows(AppException.class, () -> tenantService.createTenant(createRequest));
     assertEquals("Organization code 'acme' is already taken", ex.getMessage());
   }
+
+  @Test
+  void testCreateTenant_ProvisioningFailure_DeletesOrphanTenantAndRethrows() {
+    when(tenantRepository.existsByDomain("acme")).thenReturn(false);
+    when(userLookupRepository.findByEmail("admin@acme.com")).thenReturn(Optional.empty());
+
+    Tenant savedTenant = new Tenant();
+    savedTenant.setId(10L);
+    savedTenant.setName("Acme Corp");
+    savedTenant.setDomain("acme");
+    savedTenant.setStatus(TenantStatus.ACTIVE);
+    savedTenant.setPlan(Plan.PRO);
+    savedTenant.setDbName("trackify_tenant_acme");
+    savedTenant.setDbUsername("acme_admin");
+    when(tenantRepository.save(any(Tenant.class))).thenReturn(savedTenant);
+
+    doThrow(new RuntimeException("db provisioning failed")).when(jdbcTemplate).execute(anyString());
+
+    RuntimeException ex =
+        assertThrows(RuntimeException.class, () -> tenantService.createTenant(createRequest));
+
+    assertEquals("db provisioning failed", ex.getMessage());
+    verify(tenantRepository).delete(savedTenant);
+    verify(userLookupRepository, never()).save(any());
+  }
+
+  @Test
+  void testCreateTenant_ProvisioningFailure_CleanupFailureStillRethrowsOriginal() {
+    when(tenantRepository.existsByDomain("acme")).thenReturn(false);
+    when(userLookupRepository.findByEmail("admin@acme.com")).thenReturn(Optional.empty());
+
+    Tenant savedTenant = new Tenant();
+    savedTenant.setId(11L);
+    savedTenant.setName("Acme Corp");
+    savedTenant.setDomain("acme");
+    savedTenant.setStatus(TenantStatus.ACTIVE);
+    savedTenant.setPlan(Plan.PRO);
+    savedTenant.setDbName("trackify_tenant_acme");
+    savedTenant.setDbUsername("acme_admin");
+    when(tenantRepository.save(any(Tenant.class))).thenReturn(savedTenant);
+
+    doThrow(new RuntimeException("provisioning exploded")).when(jdbcTemplate).execute(anyString());
+    doThrow(new RuntimeException("cleanup exploded")).when(tenantRepository).delete(savedTenant);
+
+    RuntimeException ex =
+        assertThrows(RuntimeException.class, () -> tenantService.createTenant(createRequest));
+
+    // Service should propagate the original provisioning exception even if cleanup also fails.
+    assertEquals("provisioning exploded", ex.getMessage());
+    verify(tenantRepository).delete(savedTenant);
+    verify(userLookupRepository, never()).save(any());
+  }
 }
