@@ -131,4 +131,48 @@ class IssueServiceTest {
 
     verify(issueRepository, never()).deleteById(any(Long.class));
   }
+
+  @Test
+  void updateIssue_changesStatusTransition_whenProvided() {
+    Issue existing =
+        Issue.builder()
+            .id(301L)
+            .title("Transition issue")
+            .status(IssueStatus.TODO)
+            .project(project)
+            .build();
+    IssueRequest updateRequest =
+        IssueRequest.builder()
+            .title("Transition issue")
+            .projectId(10L)
+            .status(IssueStatus.DONE)
+            .build();
+
+    when(issueRepository.findById(301L)).thenReturn(Optional.of(existing));
+    when(issueRepository.save(any(Issue.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    IssueResponse response = issueService.updateIssue(301L, updateRequest);
+
+    assertEquals(IssueStatus.DONE, response.getStatus());
+    verify(issueRepository).save(existing);
+  }
+
+  @Test
+  void updateIssue_updatesAssignee_whenProvided() {
+    Issue existing = Issue.builder().id(302L).title("Assignee issue").project(project).build();
+    IssueRequest updateRequest =
+        IssueRequest.builder()
+            .title("Assignee issue")
+            .projectId(10L)
+            .assigneeId(77L)
+            .build();
+
+    when(issueRepository.findById(302L)).thenReturn(Optional.of(existing));
+    when(issueRepository.save(any(Issue.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    IssueResponse response = issueService.updateIssue(302L, updateRequest);
+
+    assertEquals(77L, response.getAssigneeId());
+    verify(issueRepository).save(existing);
+  }
 }

@@ -57,7 +57,7 @@ Trackify is a multi-tenant project management SaaS with:
 - [x] Delete duplicate `api-gateway` application package and keep a single `com.trackify.gateway` entrypoint.
 - [ ] Add backend tests for:
   - [x] `IssueService` create/update/delete and sprint assignment
-  - [ ] status transitions and assignee changes
+  - [x] status transitions and assignee changes
   - [ ] `TenantService` provisioning failure cleanup
   - [ ] `AuthService` invalid credentials and inactive users
   - [ ] gateway unauthorized/authorized routes
