@@ -30,9 +30,9 @@ Trackify is a multi-tenant project management SaaS with:
 | P1 | ~~Global search is client-only~~ | `GET /search` in `project-service`, `GlobalSearch.jsx` calls API | Add issue keys to search results when Jira-style keys ship |
 | P1 | Master dashboard growth chart is derived fake history | `DashboardPage.jsx` uses Jan/Feb/Mar from current tenant count | Add tenant growth API or remove historical chart |
 | P1 | Attachments use local storage | `LocalStorageService` | Add S3-compatible storage provider and file validation |
-| P2 | ~~In-app notifications missing~~ | Tenant `notifications` table + `GET /notifications` in `project-service` | Wire user-approval events from `tenant-service` |
-| P2 | Activity/audit log is missing | No activity timeline endpoints | Add issue/project activity events and surface them in UI |
-| P2 | Issue keys are missing | Issues use numeric IDs only | Add Jira-style keys like `PROJ-123` and expose in URLs/cards |
+| P2 | ~~In-app notifications missing~~ | Full inbox + user-approval admin alerts | Add more notification event types |
+| P2 | ~~Activity/audit log is missing~~ | `GET /issues/{id}/activity` + issue detail timeline | Add project-level activity feed |
+| P2 | ~~Issue keys are missing~~ | `project_key`, `issue_key`, deep link routes | Backfill keys for legacy tenants |
 | P2 | OpenAPI is missing | No generated OpenAPI spec | Add `springdoc-openapi` and publish generated API spec |
 
 ### UI and UX
@@ -72,16 +72,16 @@ Trackify is a multi-tenant project management SaaS with:
   - [x] notification entity/table
   - [x] list unread/read notifications
   - [x] mark read/unread
-  - [x] link to issue/project/user approval (issue assignment wired; user-approval events pending)
-- [ ] Add activity log:
-  - [ ] issue status changed
-  - [ ] assignee changed
-  - [ ] comment added
-  - [ ] sprint started/completed
-- [ ] Add Jira-style issue keys:
-  - [ ] project key + sequence
-  - [ ] display key on cards and detail panel
-  - [ ] route support for issue key deep links
+  - [x] link to issue/project/user approval
+- [x] Add activity log:
+  - [x] issue status changed
+  - [x] assignee changed
+  - [x] comment added
+  - [x] sprint started/completed
+- [x] Add Jira-style issue keys:
+  - [x] project key + sequence
+  - [x] display key on cards and detail panel
+  - [x] route support for issue key deep links
 - [ ] Replace master dashboard fake growth chart with real tenant growth data.
 
 ### Phase 3: Operational Readiness

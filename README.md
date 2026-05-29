@@ -245,13 +245,11 @@ documents/Improvement_Plan.md
 
 High-priority next work:
 
-- Remove fallback JWT secrets from backend service configs
-- Add Flyway migrations for master and tenant schemas
-- Add backend tests for issues, tenants, auth, and gateway
-- Add Vitest/React Testing Library frontend smoke tests
-- Remove duplicate gateway package/classes
+- Replace master dashboard fake growth chart with real tenant growth data
+- Remove duplicate gateway package/classes (done — keep docs in sync)
 - Replace remaining inline UI styles with shared tokens/components
-- Wire user-approval in-app notifications from `tenant-service` (inbox via `GET /notifications`)
+- Set `INTERNAL_API_KEY` on `tenant-service` and `project-service` for admin approval notifications
+- Run tenant SQL migrations `V3__activity_events.sql` and `V4__issue_keys.sql` on existing tenant databases
 
 ## Troubleshooting
 
