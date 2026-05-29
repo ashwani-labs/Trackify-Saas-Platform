@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: notification-service
+  config:
+    import: optional:classpath:trackify-management.yml
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}

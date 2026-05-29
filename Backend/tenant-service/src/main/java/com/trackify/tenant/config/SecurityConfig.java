@@ -27,6 +27,8 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                     .permitAll()
+                    .requestMatchers("/health", "/actuator/**")
+                    .permitAll()
                     .requestMatchers("/tenants/users/register")
                     .permitAll()
                     .requestMatchers("/tenants/*/users/**")

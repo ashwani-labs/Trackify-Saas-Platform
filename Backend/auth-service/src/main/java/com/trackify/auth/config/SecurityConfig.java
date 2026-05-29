@@ -32,7 +32,7 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                     .permitAll()
-                    .requestMatchers("/auth/**")
+                    .requestMatchers("/auth/**", "/health", "/actuator/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
