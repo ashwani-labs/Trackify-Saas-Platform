@@ -1,0 +1,92 @@
+package com.trackify.project.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.trackify.project.dto.NotificationResponse;
+import com.trackify.project.entity.Issue;
+import com.trackify.project.entity.Notification;
+import com.trackify.project.entity.Project;
+import com.trackify.project.enums.NotificationReferenceType;
+import com.trackify.project.enums.NotificationType;
+import com.trackify.project.repository.NotificationRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
+@ExtendWith(MockitoExtension.class)
+class NotificationServiceTest {
+
+  @Mock private NotificationRepository notificationRepository;
+
+  @InjectMocks private NotificationService notificationService;
+
+  @Test
+  void notifyIssueAssigned_persistsNotification() {
+    Project project = Project.builder().id(3L).name("Alpha").build();
+    Issue issue = Issue.builder().id(9L).title("Fix login").project(project).build();
+
+    notificationService.notifyIssueAssigned(7L, issue);
+
+    ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+    verify(notificationRepository).save(captor.capture());
+    Notification saved = captor.getValue();
+    assertEquals(7L, saved.getUserId());
+    assertEquals(NotificationType.ISSUE_ASSIGNED, saved.getType());
+    assertEquals(NotificationReferenceType.ISSUE, saved.getReferenceType());
+    assertEquals(9L, saved.getReferenceId());
+    assertEquals(3L, saved.getProjectId());
+  }
+
+  @Test
+  void markAsRead_setsReadAt() {
+    Notification notification =
+        Notification.builder().id(1L).userId(5L).title("Test").readAt(null).build();
+    when(notificationRepository.findByIdAndUserId(1L, 5L)).thenReturn(Optional.of(notification));
+    when(notificationRepository.save(any(Notification.class))).thenAnswer(i -> i.getArgument(0));
+
+    NotificationResponse response = notificationService.markAsRead(1L, 5L);
+
+    assertTrue(response.isRead());
+    verify(notificationRepository).save(notification);
+    assertTrue(notification.getReadAt() != null);
+  }
+
+  @Test
+  void getUnreadCount_returnsRepositoryCount() {
+    when(notificationRepository.countByUserIdAndReadAtIsNull(5L)).thenReturn(3L);
+    assertEquals(3L, notificationService.getUnreadCount(5L));
+  }
+
+  @Test
+  void listForUser_unreadOnly_usesUnreadQuery() {
+    Notification unread =
+        Notification.builder()
+            .id(1L)
+            .userId(2L)
+            .title("Unread")
+            .type(NotificationType.ISSUE_ASSIGNED)
+            .createdAt(LocalDateTime.now())
+            .build();
+    when(notificationRepository.findAllByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
+            2L, PageRequest.of(0, 10)))
+        .thenReturn(new PageImpl<>(List.of(unread)));
+
+    var page = notificationService.listForUser(2L, true, PageRequest.of(0, 10));
+
+    assertEquals(1, page.getTotalElements());
+    assertFalse(page.getContent().get(0).isRead());
+  }
+}

@@ -470,6 +470,8 @@ public class TenantService {
       // 2. Create schema from versioned SQL template
       String schemaSql = loadSqlTemplate("db/tenant/V1__tenant_schema.sql", dbName);
       executeSqlStatements(schemaSql);
+      String notificationsSql = loadSqlTemplate("db/tenant/V2__notifications.sql", dbName);
+      executeSqlStatements(notificationsSql);
 
       // 3. Create Admin User
       String hashedPassword = passwordEncoder.encode(adminPassword);

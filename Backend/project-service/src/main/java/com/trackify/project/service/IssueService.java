@@ -41,6 +41,7 @@ public class IssueService {
   private final StorageService storageService;
   private final JdbcTemplate jdbcTemplate;
   private final SprintRepository sprintRepository;
+  private final NotificationService notificationService;
 
   @Value("${services.notification-url}")
   private String notificationUrl;
@@ -52,7 +53,8 @@ public class IssueService {
       IssueAttachmentRepository attachmentRepository,
       StorageService storageService,
       DataSource dataSource,
-      SprintRepository sprintRepository) {
+      SprintRepository sprintRepository,
+      NotificationService notificationService) {
     this.issueRepository = issueRepository;
     this.projectRepository = projectRepository;
     this.commentRepository = commentRepository;
@@ -60,6 +62,7 @@ public class IssueService {
     this.storageService = storageService;
     this.jdbcTemplate = new JdbcTemplate(dataSource);
     this.sprintRepository = sprintRepository;
+    this.notificationService = notificationService;
   }
 
   @Transactional
@@ -93,6 +96,7 @@ public class IssueService {
 
     if (request.getAssigneeId() != null) {
       sendAssignmentEmail(request.getAssigneeId(), issue.getTitle());
+      notificationService.notifyIssueAssigned(request.getAssigneeId(), issue);
     }
 
     return mapToResponse(issue);
@@ -120,6 +124,8 @@ public class IssueService {
     Issue issue =
         issueRepository.findById(id).orElseThrow(() -> AppException.notFound("Issue not found"));
 
+    Long previousAssignee = issue.getAssigneeId();
+
     issue.setTitle(request.getTitle());
     issue.setDescription(request.getDescription());
     if (request.getStatus() != null) issue.setStatus(request.getStatus());
@@ -138,8 +144,10 @@ public class IssueService {
 
     issue = issueRepository.save(issue);
 
-    if (request.getAssigneeId() != null) {
-      sendAssignmentEmail(request.getAssigneeId(), issue.getTitle());
+    Long newAssignee = request.getAssigneeId();
+    if (newAssignee != null && !newAssignee.equals(previousAssignee)) {
+      sendAssignmentEmail(newAssignee, issue.getTitle());
+      notificationService.notifyIssueAssigned(newAssignee, issue);
     }
 
     return mapToResponse(issue);

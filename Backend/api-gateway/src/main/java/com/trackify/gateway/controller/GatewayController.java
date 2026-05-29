@@ -44,7 +44,8 @@ public class GatewayController {
       targetBaseUrl = tenantUrl;
     } else if (path.startsWith("/projects")
         || path.startsWith("/issues")
-        || path.startsWith("/search")) {
+        || path.startsWith("/search")
+        || path.startsWith("/notifications")) {
       targetBaseUrl = projectUrl;
     } else {
       return ResponseEntity.notFound().build();

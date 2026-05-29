@@ -40,6 +40,7 @@ class IssueServiceTest {
   @Mock private StorageService storageService;
   @Mock private DataSource dataSource;
   @Mock private SprintRepository sprintRepository;
+  @Mock private NotificationService notificationService;
 
   @InjectMocks private IssueService issueService;
 
