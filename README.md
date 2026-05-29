@@ -20,6 +20,8 @@ Trackify helps organizations onboard into isolated workspaces, manage teams, cre
 - Shared frontend package for API clients, roles, tokens, and reusable UI components
 - Docker Compose development stack
 - GitHub Actions CI for backend tests and frontend lint/build
+- OpenAPI spec at `/openapi.yaml`, Swagger UI, gateway rate limiting, correlation IDs, actuator health probes
+- Optional S3 attachment storage (see `documents/DOCKER_PRODUCTION.md`)
 
 ## Architecture Summary
 
@@ -73,7 +75,9 @@ trackify-saas-platform/
 │   ├── master-app/
 │   └── tenant-app/
 ├── documents/
-│   └── Improvement_Plan.md
+│   ├── Improvement_Plan.md
+│   ├── DOCKER_PRODUCTION.md
+│   └── openapi.yaml
 ├── docker-compose.yml
 ├── docker-compose.override.yml.example
 ├── nginx.conf

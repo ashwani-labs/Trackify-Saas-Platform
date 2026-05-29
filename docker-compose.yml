@@ -1,7 +1,8 @@
 version: '3.8'
 
 # Requires a root `.env` file — copy from `.env.example` and set secrets before starting.
-# If you previously committed real credentials, rotate JWT_SECRET and mail passwords.
+# Profiles: `full` adds notification-service; `s3` adds MinIO (set STORAGE_PROVIDER=s3 in .env).
+# See documents/DOCKER_PRODUCTION.md for production deployment notes.
 
 services:
   db:
@@ -28,8 +29,22 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       JWT_SECRET: ${JWT_SECRET}
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      RATE_LIMIT_RPM: ${RATE_LIMIT_RPM:-120}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     depends_on:
       db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      tenant-service:
+        condition: service_healthy
+      project-service:
         condition: service_healthy
 
   auth-service:
@@ -46,6 +61,12 @@ services:
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-root}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-root}
       JWT_SECRET: ${JWT_SECRET}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
     depends_on:
       db:
         condition: service_healthy
@@ -64,7 +85,14 @@ services:
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-root}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-root}
       JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
       TENANT_DATASOURCE_DEFAULT_HOST: db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
     depends_on:
       db:
         condition: service_healthy
@@ -83,9 +111,43 @@ services:
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-root}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-root}
       JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
+      STORAGE_LOCAL_PATH: ${STORAGE_LOCAL_PATH:-/tmp/uploads}
+      S3_BUCKET: ${S3_BUCKET:-trackify-attachments}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_KEY_PREFIX: ${S3_KEY_PREFIX:-attachments}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
     depends_on:
       db:
         condition: service_healthy
+
+  minio:
+    profiles:
+      - s3
+    image: minio/minio:latest
+    container_name: trackify-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   notification-service:
     profiles:
@@ -107,6 +169,12 @@ services:
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     depends_on:
       db:
         condition: service_healthy

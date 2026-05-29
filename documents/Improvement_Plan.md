@@ -25,15 +25,15 @@ Trackify is a multi-tenant project management SaaS with:
 | P0 | Backend test coverage is thin | 5 test files under `Backend/**/src/test` | Add focused tests for issue transitions, tenant provisioning, auth, and gateway auth |
 | P0 | No frontend tests | No `*.test.*` files under `Frontend/` | Add Vitest + React Testing Library smoke tests |
 | P1 | API gateway has duplicate application packages | `com.trackify.gateway` and `com.trackify.apigateway` | Remove duplicate gateway package/classes and keep one application package |
-| P1 | Gateway proxy is generic and logs full headers | `GatewayController` | Avoid logging sensitive headers, add request IDs, and consider Spring Cloud Gateway routing |
+| P1 | ~~Gateway proxy is generic and logs full headers~~ | `GatewayController` correlation ID logging | Consider Spring Cloud Gateway routing |
 | P1 | Assignment emails are synchronous best-effort REST calls | `IssueService.sendAssignmentEmail` | Move notification dispatch behind a notification client or async queue abstraction |
 | P1 | ~~Global search is client-only~~ | `GET /search` in `project-service`, `GlobalSearch.jsx` calls API | Add issue keys to search results when Jira-style keys ship |
 | P1 | ~~Master dashboard growth chart is derived fake history~~ | `GET /tenants/dashboard-stats` + master-app chart | Add provisioning rate (new per month) view |
-| P1 | Attachments use local storage | `LocalStorageService` | Add S3-compatible storage provider and file validation |
+| P1 | Attachments use local storage | `LocalStorageService`, optional S3 via `STORAGE_PROVIDER=s3` | Use S3 in multi-node deployments |
 | P2 | ~~In-app notifications missing~~ | Full inbox + user-approval admin alerts | Add more notification event types |
 | P2 | ~~Activity/audit log is missing~~ | `GET /issues/{id}/activity` + issue detail timeline | Add project-level activity feed |
 | P2 | ~~Issue keys are missing~~ | `project_key`, `issue_key`, deep link routes | Backfill keys for legacy tenants |
-| P2 | OpenAPI is missing | No generated OpenAPI spec | Add `springdoc-openapi` and publish generated API spec |
+| P2 | ~~OpenAPI is missing~~ | `GET /openapi.yaml`, Swagger UI at gateway | Keep spec updated when routes change |
 
 ### UI and UX
 
@@ -86,12 +86,12 @@ Trackify is a multi-tenant project management SaaS with:
 
 ### Phase 3: Operational Readiness
 
-- [ ] Add OpenAPI generation and publish `openapi.yaml`.
-- [ ] Add request correlation IDs through gateway and services.
-- [ ] Add rate limiting at gateway.
-- [ ] Add S3-compatible attachment storage and upload validation.
-- [ ] Add structured health checks and readiness checks.
-- [ ] Add Docker production notes and environment matrix.
+- [x] Add OpenAPI generation and publish `openapi.yaml`.
+- [x] Add request correlation IDs through gateway and services.
+- [x] Add rate limiting at gateway.
+- [x] Add S3-compatible attachment storage and upload validation.
+- [x] Add structured health checks and readiness checks.
+- [x] Add Docker production notes and environment matrix.
 
 ## UI Improvement Roadmap
 
