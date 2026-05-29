@@ -17,9 +17,9 @@ const IssueCard = ({ issue }) => {
     dispatch(setSelectedIssue(issue));
   };
 
-  const issueKey = issue.projectHeaderName
-    ? `${issue.projectHeaderName}-${issue.id}`
-    : `ISSUE-${issue.id}`;
+  const issueKey =
+    issue.issueKey ||
+    (issue.projectHeaderName ? `${issue.projectHeaderName}-${issue.id}` : `ISSUE-${issue.id}`);
 
   return (
     <div

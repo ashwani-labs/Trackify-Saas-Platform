@@ -61,6 +61,30 @@ export const deleteIssue = createAsyncThunk('issues/delete', async (id, { reject
   }
 });
 
+export const fetchIssueByKey = createAsyncThunk(
+  'issues/fetchByKey',
+  async (issueKey, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/issues/key/${encodeURIComponent(issueKey)}`);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch issue'));
+    }
+  }
+);
+
+export const fetchIssueActivity = createAsyncThunk(
+  'issues/fetchActivity',
+  async (issueId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/issues/${issueId}/activity`);
+      return { issueId, activity: response.data.data };
+    } catch (error) {
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch activity'));
+    }
+  }
+);
+
 export const fetchIssueComments = createAsyncThunk(
   'issues/fetchComments',
   async (issueId, { rejectWithValue }) => {
@@ -129,7 +153,9 @@ export const deleteAttachment = createAsyncThunk(
 const initialState = {
   issues: [],
   comments: {},
+  activity: {},
   selectedIssue: null,
+  isActivityLoading: false,
   filters: {
     status: 'ALL',
     priority: 'ALL',
@@ -162,6 +188,7 @@ const issueSlice = createSlice({
       state.backlogTotalPages = 0;
       state.backlogTotalElements = 0;
       state.comments = {};
+      state.activity = {};
       state.selectedIssue = null;
       state.error = null;
     },
@@ -216,6 +243,19 @@ const issueSlice = createSlice({
       .addCase(deleteIssue.fulfilled, (state, action) => {
         state.issues = state.issues.filter((i) => i.id !== action.payload);
         if (state.selectedIssue?.id === action.payload) state.selectedIssue = null;
+      })
+      .addCase(fetchIssueByKey.fulfilled, (state, action) => {
+        state.selectedIssue = action.payload;
+      })
+      .addCase(fetchIssueActivity.pending, (state) => {
+        state.isActivityLoading = true;
+      })
+      .addCase(fetchIssueActivity.fulfilled, (state, action) => {
+        state.isActivityLoading = false;
+        state.activity[action.payload.issueId] = action.payload.activity;
+      })
+      .addCase(fetchIssueActivity.rejected, (state) => {
+        state.isActivityLoading = false;
       })
       .addCase(fetchIssueComments.pending, (state) => {
         state.isCommentLoading = true;

@@ -99,6 +99,17 @@ function App() {
 
                 {/* Project Detail / Kanban */}
                 <Route
+                  path="/projects/:id/issue/:issueKey"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <ProjectDetailPage />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
                   path="/projects/:id"
                   element={
                     <ProtectedRoute>

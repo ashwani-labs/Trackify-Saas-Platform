@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjectById } from '../features/projects/projectSlice';
-import { fetchIssuesByProject, clearIssues } from '../features/issues/issueSlice';
+import {
+  fetchIssuesByProject,
+  fetchIssueByKey,
+  clearIssues,
+} from '../features/issues/issueSlice';
 import { fetchSprintsByProject } from '../features/sprints/sprintSlice';
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import CreateIssueModal from '../components/issues/CreateIssueModal';
@@ -21,7 +25,7 @@ const STAT_CONFIG = [
 ];
 
 const ProjectDetailPage = () => {
-  const { id } = useParams();
+  const { id, issueKey } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
 
@@ -45,6 +49,12 @@ const ProjectDetailPage = () => {
       dispatch(clearIssues());
     };
   }, [id, dispatch]);
+
+  useEffect(() => {
+    if (issueKey) {
+      dispatch(fetchIssueByKey(issueKey));
+    }
+  }, [issueKey, dispatch]);
 
   useEffect(() => {
     if (searchParams.get('createIssue') === '1') {

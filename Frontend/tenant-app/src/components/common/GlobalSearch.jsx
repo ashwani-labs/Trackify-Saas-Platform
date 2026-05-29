@@ -96,8 +96,12 @@ const GlobalSearch = () => {
     (issue) => {
       setOpen(false);
       setQuery('');
-      navigate(`/projects/${issue.projectId}`);
-      dispatch(setSelectedIssue(issue));
+      if (issue.issueKey) {
+        navigate(`/projects/${issue.projectId}/issue/${issue.issueKey}`);
+      } else {
+        navigate(`/projects/${issue.projectId}`);
+        dispatch(setSelectedIssue(issue));
+      }
     },
     [navigate, dispatch]
   );
@@ -169,7 +173,7 @@ const GlobalSearch = () => {
                   <div>
                     <div className="search-result__title">{issue.title}</div>
                     <div className="search-result__meta">
-                      {issue.projectHeaderName} · {issue.status}
+                      {issue.issueKey || issue.projectHeaderName} · {issue.status}
                     </div>
                   </div>
                 </button>

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   clearSelectedIssue,
   fetchIssueComments,
+  fetchIssueActivity,
   addComment,
   updateIssue,
   deleteIssue,
@@ -40,9 +41,8 @@ const STATUS_LABELS = { TODO: 'To Do', IN_PROGRESS: 'In Progress', DONE: 'Done' 
 
 const IssueDetailPanel = () => {
   const dispatch = useDispatch();
-  const { selectedIssue, comments, isCommentLoading, isAttachmentLoading } = useSelector(
-    (s) => s.issues
-  );
+  const { selectedIssue, comments, activity, isCommentLoading, isActivityLoading, isAttachmentLoading } =
+    useSelector((s) => s.issues);
 
   const [commentText, setCommentText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -57,12 +57,14 @@ const IssueDetailPanel = () => {
   useEffect(() => {
     if (selectedIssue?.id) {
       dispatch(fetchIssueComments(selectedIssue.id));
+      dispatch(fetchIssueActivity(selectedIssue.id));
     }
   }, [selectedIssue?.id, dispatch]);
 
   if (!selectedIssue) return null;
 
   const issueComments = comments[selectedIssue.id] || [];
+  const issueActivity = activity[selectedIssue.id] || [];
 
   const handleClose = () => dispatch(clearSelectedIssue());
 
@@ -156,7 +158,8 @@ const IssueDetailPanel = () => {
           }}
         >
           <span style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-muted)' }}>
-            {selectedIssue.projectHeaderName}-{selectedIssue.id}
+            {selectedIssue.issueKey ||
+              `${selectedIssue.projectHeaderName}-${selectedIssue.id}`}
           </span>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             {!isEditing ? (
@@ -403,6 +406,42 @@ const IssueDetailPanel = () => {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Activity */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h4
+              style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-muted)',
+                marginBottom: '0.75rem',
+              }}
+            >
+              Activity
+            </h4>
+            {isActivityLoading && (
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Loading activity…</p>
+            )}
+            {!isActivityLoading && issueActivity.length === 0 && (
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>No activity yet.</p>
+            )}
+            <ul className="activity-timeline" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              {issueActivity.map((event) => (
+                <li
+                  key={event.id}
+                  style={{
+                    padding: '0.5rem 0',
+                    borderBottom: '1px solid var(--border-main)',
+                    fontSize: '0.8125rem',
+                  }}
+                >
+                  <div style={{ color: 'var(--text-main)' }}>{event.summary}</div>
+                  <div style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                    {event.createdAt ? new Date(event.createdAt).toLocaleString() : ''}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Comments */}
