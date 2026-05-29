@@ -5,6 +5,8 @@ import com.trackify.common.enums.TenantStatus;
 import com.trackify.common.enums.UserStatus;
 import com.trackify.common.exception.AppException;
 import com.trackify.tenant.dto.CreateTenantRequest;
+import com.trackify.tenant.dto.TenantDashboardStatsResponse;
+import com.trackify.tenant.dto.TenantGrowthPoint;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
 import com.trackify.tenant.client.ProjectNotificationClient;
@@ -18,6 +20,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -162,6 +167,38 @@ public class TenantService {
 
   public Page<TenantResponse> getAllTenants(Pageable pageable) {
     return tenantRepository.findAll(pageable).map(this::mapToResponse);
+  }
+
+  public TenantDashboardStatsResponse getDashboardStats(int months) {
+    int effectiveMonths = Math.min(Math.max(months, 1), 24);
+    long total = tenantRepository.count();
+    long active = tenantRepository.countByStatus(TenantStatus.ACTIVE);
+    long inactive = tenantRepository.countByStatus(TenantStatus.INACTIVE);
+
+    List<Tenant> tenants = tenantRepository.findAll();
+    YearMonth start = YearMonth.now().minusMonths(effectiveMonths - 1L);
+    DateTimeFormatter labelFormat = DateTimeFormatter.ofPattern("MMM yy");
+    List<TenantGrowthPoint> growth = new ArrayList<>();
+
+    for (YearMonth cursor = start; !cursor.isAfter(YearMonth.now()); cursor = cursor.plusMonths(1)) {
+      LocalDateTime endOfMonth = cursor.atEndOfMonth().atTime(23, 59, 59);
+      long cumulative =
+          tenants.stream()
+              .filter(
+                  tenant ->
+                      tenant.getCreatedAt() != null
+                          && !tenant.getCreatedAt().isAfter(endOfMonth))
+              .count();
+      growth.add(
+          TenantGrowthPoint.builder().label(cursor.format(labelFormat)).count(cumulative).build());
+    }
+
+    return TenantDashboardStatsResponse.builder()
+        .totalTenants(total)
+        .activeTenants(active)
+        .inactiveTenants(inactive)
+        .growth(growth)
+        .build();
   }
 
   public TenantResponse getTenantById(Long id) {

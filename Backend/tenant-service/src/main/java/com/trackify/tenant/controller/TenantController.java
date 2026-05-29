@@ -3,6 +3,7 @@ package com.trackify.tenant.controller;
 import com.trackify.common.dto.ApiResponse;
 import com.trackify.common.enums.UserStatus;
 import com.trackify.tenant.dto.CreateTenantRequest;
+import com.trackify.tenant.dto.TenantDashboardStatsResponse;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
 import com.trackify.tenant.dto.UserRegistrationRequest;
@@ -34,6 +35,12 @@ public class TenantController {
   @GetMapping
   public ResponseEntity<ApiResponse<Page<TenantResponse>>> getAllTenants(Pageable pageable) {
     return ResponseEntity.ok(ApiResponse.ok(tenantService.getAllTenants(pageable)));
+  }
+
+  @GetMapping("/dashboard-stats")
+  public ResponseEntity<ApiResponse<TenantDashboardStatsResponse>> getDashboardStats(
+      @RequestParam(value = "months", defaultValue = "6") int months) {
+    return ResponseEntity.ok(ApiResponse.ok(tenantService.getDashboardStats(months)));
   }
 
   @GetMapping("/{id}")
