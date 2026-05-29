@@ -27,7 +27,7 @@ Trackify is a multi-tenant project management SaaS with:
 | P1 | API gateway has duplicate application packages | `com.trackify.gateway` and `com.trackify.apigateway` | Remove duplicate gateway package/classes and keep one application package |
 | P1 | Gateway proxy is generic and logs full headers | `GatewayController` | Avoid logging sensitive headers, add request IDs, and consider Spring Cloud Gateway routing |
 | P1 | Assignment emails are synchronous best-effort REST calls | `IssueService.sendAssignmentEmail` | Move notification dispatch behind a notification client or async queue abstraction |
-| P1 | Global search is an MVP only | `GlobalSearch.jsx` searches projects and currently loaded issues | Add backend search endpoint for cross-project issues, users, and recent entities |
+| P1 | ~~Global search is client-only~~ | `GET /search` in `project-service`, `GlobalSearch.jsx` calls API | Add issue keys to search results when Jira-style keys ship |
 | P1 | Master dashboard growth chart is derived fake history | `DashboardPage.jsx` uses Jan/Feb/Mar from current tenant count | Add tenant growth API or remove historical chart |
 | P1 | Attachments use local storage | `LocalStorageService` | Add S3-compatible storage provider and file validation |
 | P2 | In-app notifications are not implemented | `notification-service` only sends email | Add notification inbox with read/unread state and links to issues/projects |
@@ -55,7 +55,7 @@ Trackify is a multi-tenant project management SaaS with:
 - [x] Add Flyway to `auth-service` or a shared migration strategy for `trackify_master`.
 - [x] Extract tenant schema creation from inline Java SQL into a versioned tenant schema script.
 - [x] Delete duplicate `api-gateway` application package and keep a single `com.trackify.gateway` entrypoint.
-- [ ] Add backend tests for:
+- [x] Add backend tests for:
   - [x] `IssueService` create/update/delete and sprint assignment
   - [x] status transitions and assignee changes
   - [x] `TenantService` provisioning failure cleanup
@@ -64,10 +64,10 @@ Trackify is a multi-tenant project management SaaS with:
 
 ### Phase 2: Improve Product Workflows
 
-- [ ] Add global search backend endpoint:
-  - [ ] projects by name/key/description
-  - [ ] issues by title/key/assignee/status
-  - [ ] users by email/name
+- [x] Add global search backend endpoint:
+  - [x] projects by name/key/description
+  - [x] issues by title/key/assignee/status
+  - [x] users by email/name
 - [ ] Add in-app notifications:
   - [ ] notification entity/table
   - [ ] list unread/read notifications
@@ -144,7 +144,7 @@ Trackify is a multi-tenant project management SaaS with:
 6. Add Vitest + React Testing Library setup and smoke tests.
 7. Migrate `TeamPage.jsx` to shared UI components and token classes.
 8. Replace master dashboard fake growth chart.
-9. Add keyboard navigation to `GlobalSearch.jsx`.
+9. Add keyboard navigation to `GlobalSearch.jsx` (arrow keys / Enter).
 10. Add OpenAPI generation at the gateway or service level.
 
 ## Tracking Notes

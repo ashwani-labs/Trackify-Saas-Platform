@@ -251,7 +251,7 @@ High-priority next work:
 - Add Vitest/React Testing Library frontend smoke tests
 - Remove duplicate gateway package/classes
 - Replace remaining inline UI styles with shared tokens/components
-- Add backend-backed global search and in-app notifications
+- Add in-app notifications (global search is available via `GET /search`)
 
 ## Troubleshooting
 
