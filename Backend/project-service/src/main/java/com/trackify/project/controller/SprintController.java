@@ -3,6 +3,7 @@ package com.trackify.project.controller;
 import com.trackify.common.dto.ApiResponse;
 import com.trackify.project.dto.SprintRequest;
 import com.trackify.project.dto.SprintResponse;
+import com.trackify.common.security.JwtUtil;
 import com.trackify.project.service.SprintService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class SprintController {
 
   private final SprintService sprintService;
+  private final JwtUtil jwtUtil;
 
   @PostMapping
   public ResponseEntity<ApiResponse<SprintResponse>> createSprint(
@@ -45,13 +47,20 @@ public class SprintController {
 
   @PutMapping("/{id}/start")
   public ResponseEntity<ApiResponse<SprintResponse>> startSprint(
-      @PathVariable Long projectId, @PathVariable Long id) {
-    return ResponseEntity.ok(ApiResponse.ok("Sprint started", sprintService.startSprint(id)));
+      @RequestHeader("Authorization") String authHeader,
+      @PathVariable Long projectId,
+      @PathVariable Long id) {
+    Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+    return ResponseEntity.ok(ApiResponse.ok("Sprint started", sprintService.startSprint(id, userId)));
   }
 
   @PutMapping("/{id}/complete")
   public ResponseEntity<ApiResponse<SprintResponse>> completeSprint(
-      @PathVariable Long projectId, @PathVariable Long id) {
-    return ResponseEntity.ok(ApiResponse.ok("Sprint completed", sprintService.completeSprint(id)));
+      @RequestHeader("Authorization") String authHeader,
+      @PathVariable Long projectId,
+      @PathVariable Long id) {
+    Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+    return ResponseEntity.ok(
+        ApiResponse.ok("Sprint completed", sprintService.completeSprint(id, userId)));
   }
 }

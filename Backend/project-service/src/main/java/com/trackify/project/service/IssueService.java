@@ -18,8 +18,10 @@ import com.trackify.project.repository.IssueCommentRepository;
 import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
 import com.trackify.project.repository.SprintRepository;
+import com.trackify.project.util.ProjectKeyUtil;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,7 @@ public class IssueService {
   private final JdbcTemplate jdbcTemplate;
   private final SprintRepository sprintRepository;
   private final NotificationService notificationService;
+  private final ActivityService activityService;
 
   @Value("${services.notification-url}")
   private String notificationUrl;
@@ -54,7 +57,8 @@ public class IssueService {
       StorageService storageService,
       DataSource dataSource,
       SprintRepository sprintRepository,
-      NotificationService notificationService) {
+      NotificationService notificationService,
+      ActivityService activityService) {
     this.issueRepository = issueRepository;
     this.projectRepository = projectRepository;
     this.commentRepository = commentRepository;
@@ -63,6 +67,7 @@ public class IssueService {
     this.jdbcTemplate = new JdbcTemplate(dataSource);
     this.sprintRepository = sprintRepository;
     this.notificationService = notificationService;
+    this.activityService = activityService;
   }
 
   @Transactional
@@ -80,8 +85,11 @@ public class IssueService {
               .orElseThrow(() -> AppException.notFound("Sprint not found"));
     }
 
+    String issueKey = allocateIssueKey(project);
+
     Issue issue =
         Issue.builder()
+            .issueKey(issueKey)
             .title(request.getTitle())
             .description(request.getDescription())
             .status(request.getStatus() != null ? request.getStatus() : IssueStatus.TODO)
@@ -119,12 +127,22 @@ public class IssueService {
     return mapToResponse(issue);
   }
 
+  public IssueResponse getIssueByKey(String issueKey) {
+    Issue issue =
+        issueRepository
+            .findByIssueKey(issueKey)
+            .orElseThrow(() -> AppException.notFound("Issue not found"));
+    return mapToResponse(issue);
+  }
+
   @Transactional
-  public IssueResponse updateIssue(Long id, IssueRequest request) {
+  public IssueResponse updateIssue(Long id, IssueRequest request, Long actorUserId) {
     Issue issue =
         issueRepository.findById(id).orElseThrow(() -> AppException.notFound("Issue not found"));
 
     Long previousAssignee = issue.getAssigneeId();
+    IssueStatus previousStatus = issue.getStatus();
+    Long projectId = issue.getProject().getId();
 
     issue.setTitle(request.getTitle());
     issue.setDescription(request.getDescription());
@@ -144,10 +162,23 @@ public class IssueService {
 
     issue = issueRepository.save(issue);
 
+    if (request.getStatus() != null && request.getStatus() != previousStatus) {
+      activityService.recordStatusChanged(
+          projectId,
+          issue.getId(),
+          actorUserId,
+          previousStatus.name(),
+          issue.getStatus().name());
+    }
+
     Long newAssignee = request.getAssigneeId();
-    if (newAssignee != null && !newAssignee.equals(previousAssignee)) {
-      sendAssignmentEmail(newAssignee, issue.getTitle());
-      notificationService.notifyIssueAssigned(newAssignee, issue);
+    if (!Objects.equals(newAssignee, previousAssignee)) {
+      activityService.recordAssigneeChanged(
+          projectId, issue.getId(), actorUserId, previousAssignee, newAssignee);
+      if (newAssignee != null) {
+        sendAssignmentEmail(newAssignee, issue.getTitle());
+        notificationService.notifyIssueAssigned(newAssignee, issue);
+      }
     }
 
     return mapToResponse(issue);
@@ -172,6 +203,8 @@ public class IssueService {
         IssueComment.builder().issue(issue).userId(userId).content(request.getContent()).build();
 
     comment = commentRepository.save(comment);
+    activityService.recordCommentAdded(
+        issue.getProject().getId(), issue.getId(), userId);
     return mapToCommentResponse(comment);
   }
 
@@ -256,9 +289,39 @@ public class IssueService {
     }
   }
 
+  private String allocateIssueKey(Project project) {
+    ensureProjectKey(project);
+    long next = (project.getIssueCounter() == null ? 0L : project.getIssueCounter()) + 1;
+    project.setIssueCounter(next);
+    projectRepository.save(project);
+    return project.getProjectKey() + "-" + next;
+  }
+
+  private void ensureProjectKey(Project project) {
+    if (project.getProjectKey() != null && !project.getProjectKey().isBlank()) {
+      if (project.getIssueCounter() == null) {
+        project.setIssueCounter(0L);
+        projectRepository.save(project);
+      }
+      return;
+    }
+    String base = ProjectKeyUtil.deriveBaseKey(project.getName());
+    String candidate = base;
+    int suffix = 1;
+    while (projectRepository.existsByProjectKey(candidate)) {
+      candidate = base + suffix++;
+    }
+    project.setProjectKey(candidate);
+    if (project.getIssueCounter() == null) {
+      project.setIssueCounter(0L);
+    }
+    projectRepository.save(project);
+  }
+
   private IssueResponse mapToResponse(Issue issue) {
     return IssueResponse.builder()
         .id(issue.getId())
+        .issueKey(issue.getIssueKey())
         .title(issue.getTitle())
         .description(issue.getDescription())
         .status(issue.getStatus())

@@ -41,6 +41,7 @@ class IssueServiceTest {
   @Mock private DataSource dataSource;
   @Mock private SprintRepository sprintRepository;
   @Mock private NotificationService notificationService;
+  @Mock private ActivityService activityService;
 
   @InjectMocks private IssueService issueService;
 
@@ -49,7 +50,10 @@ class IssueServiceTest {
 
   @BeforeEach
   void setUp() {
-    project = Project.builder().id(10L).name("Platform").build();
+    project =
+        Project.builder().id(10L).name("Platform").projectKey("PLATFORM").issueCounter(0L).build();
+    when(projectRepository.save(any(Project.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
     baseRequest = IssueRequest.builder().title("Bug: login fails").projectId(10L).build();
   }
 
@@ -93,7 +97,7 @@ class IssueServiceTest {
     when(issueRepository.findById(200L)).thenReturn(Optional.of(existing));
     when(sprintRepository.findById(999L)).thenReturn(Optional.empty());
 
-    assertThrows(AppException.class, () -> issueService.updateIssue(200L, updateRequest));
+    assertThrows(AppException.class, () -> issueService.updateIssue(200L, updateRequest, 1L));
 
     verify(issueRepository, never()).save(any(Issue.class));
   }
@@ -116,7 +120,7 @@ class IssueServiceTest {
     when(sprintRepository.findById(300L)).thenReturn(Optional.of(sprint));
     when(issueRepository.save(any(Issue.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    IssueResponse response = issueService.updateIssue(201L, updateRequest);
+    IssueResponse response = issueService.updateIssue(201L, updateRequest, 1L);
 
     assertEquals(IssueStatus.IN_PROGRESS, response.getStatus());
     assertEquals(IssuePriority.HIGH, response.getPriority());
@@ -152,7 +156,7 @@ class IssueServiceTest {
     when(issueRepository.findById(301L)).thenReturn(Optional.of(existing));
     when(issueRepository.save(any(Issue.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    IssueResponse response = issueService.updateIssue(301L, updateRequest);
+    IssueResponse response = issueService.updateIssue(301L, updateRequest, 1L);
 
     assertEquals(IssueStatus.DONE, response.getStatus());
     verify(issueRepository).save(existing);
@@ -171,7 +175,7 @@ class IssueServiceTest {
     when(issueRepository.findById(302L)).thenReturn(Optional.of(existing));
     when(issueRepository.save(any(Issue.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    IssueResponse response = issueService.updateIssue(302L, updateRequest);
+    IssueResponse response = issueService.updateIssue(302L, updateRequest, 1L);
 
     assertEquals(77L, response.getAssigneeId());
     verify(issueRepository).save(existing);

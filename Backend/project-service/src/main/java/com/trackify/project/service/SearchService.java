@@ -178,6 +178,7 @@ public class SearchService {
   private ProjectResponse mapProject(Project project) {
     return ProjectResponse.builder()
         .id(project.getId())
+        .key(project.getProjectKey())
         .name(project.getName())
         .description(project.getDescription())
         .ownerId(project.getOwnerId())
@@ -189,6 +190,7 @@ public class SearchService {
   private IssueResponse mapIssue(Issue issue) {
     return IssueResponse.builder()
         .id(issue.getId())
+        .issueKey(issue.getIssueKey())
         .title(issue.getTitle())
         .description(issue.getDescription())
         .status(issue.getStatus())

@@ -57,10 +57,19 @@ public class IssueController {
     return ResponseEntity.ok(ApiResponse.ok("Issue fetched successfully", response));
   }
 
+  @GetMapping("/key/{issueKey}")
+  public ResponseEntity<ApiResponse<IssueResponse>> getIssueByKey(@PathVariable String issueKey) {
+    IssueResponse response = issueService.getIssueByKey(issueKey);
+    return ResponseEntity.ok(ApiResponse.ok("Issue fetched successfully", response));
+  }
+
   @PutMapping("/{id}")
   public ResponseEntity<ApiResponse<IssueResponse>> updateIssue(
-      @PathVariable Long id, @Valid @RequestBody IssueRequest request) {
-    IssueResponse response = issueService.updateIssue(id, request);
+      @RequestHeader("Authorization") String authHeader,
+      @PathVariable Long id,
+      @Valid @RequestBody IssueRequest request) {
+    Long userId = jwtUtil.extractUserId(authHeader.substring(7));
+    IssueResponse response = issueService.updateIssue(id, request, userId);
     return ResponseEntity.ok(ApiResponse.ok("Issue updated successfully", response));
   }
 

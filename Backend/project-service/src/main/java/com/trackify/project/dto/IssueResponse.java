@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IssueResponse {
   private Long id;
+  private String issueKey;
   private String title;
   private String description;
   private IssueStatus status;

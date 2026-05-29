@@ -24,6 +24,7 @@ public class SprintService {
   private final SprintRepository sprintRepository;
   private final ProjectRepository projectRepository;
   private final IssueRepository issueRepository;
+  private final ActivityService activityService;
 
   @Transactional
   public SprintResponse createSprint(SprintRequest request) {
@@ -87,11 +88,14 @@ public class SprintService {
     }
 
     sprint.setStatus(SprintStatus.ACTIVE);
-    return mapToResponse(sprintRepository.save(sprint));
+    sprint = sprintRepository.save(sprint);
+    activityService.recordSprintStarted(
+        sprint.getProject().getId(), sprint.getId(), actorUserId, sprint.getName());
+    return mapToResponse(sprint);
   }
 
   @Transactional
-  public SprintResponse completeSprint(Long id) {
+  public SprintResponse completeSprint(Long id, Long actorUserId) {
     Sprint sprint =
         sprintRepository
             .findById(id)
@@ -128,7 +132,10 @@ public class SprintService {
       issueRepository.saveAll(unfinishedIssues);
     }
 
-    return mapToResponse(sprintRepository.save(sprint));
+    sprint = sprintRepository.save(sprint);
+    activityService.recordSprintCompleted(
+        sprint.getProject().getId(), sprint.getId(), actorUserId, sprint.getName());
+    return mapToResponse(sprint);
   }
 
   private SprintResponse mapToResponse(Sprint sprint) {

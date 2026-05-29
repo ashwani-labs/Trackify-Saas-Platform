@@ -8,6 +8,7 @@ import com.trackify.project.entity.Project;
 import com.trackify.project.enums.IssueStatus;
 import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
+import com.trackify.project.util.ProjectKeyUtil;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,8 @@ public class ProjectService {
             .name(request.getName())
             .description(request.getDescription())
             .ownerId(ownerId)
+            .projectKey(resolveUniqueProjectKey(request.getName()))
+            .issueCounter(0L)
             .build();
 
     project = projectRepository.save(project);
@@ -125,9 +128,20 @@ public class ProjectService {
     projectRepository.deleteById(id);
   }
 
+  private String resolveUniqueProjectKey(String name) {
+    String base = ProjectKeyUtil.deriveBaseKey(name);
+    String candidate = base;
+    int suffix = 1;
+    while (projectRepository.existsByProjectKey(candidate)) {
+      candidate = base + suffix++;
+    }
+    return candidate;
+  }
+
   private ProjectResponse mapToResponse(Project project) {
     return ProjectResponse.builder()
         .id(project.getId())
+        .key(project.getProjectKey())
         .name(project.getName())
         .description(project.getDescription())
         .ownerId(project.getOwnerId())

@@ -1,5 +1,6 @@
 package com.trackify.project.dto;
 
+import com.trackify.project.enums.ActivityEventType;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,12 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectResponse {
+public class ActivityEventResponse {
   private Long id;
-  private String key;
-  private String name;
-  private String description;
-  private Long ownerId;
+  private Long projectId;
+  private Long issueId;
+  private Long actorUserId;
+  private ActivityEventType eventType;
+  private String summary;
   private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
 }

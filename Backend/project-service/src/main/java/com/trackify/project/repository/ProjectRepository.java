@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
+  boolean existsByProjectKey(String projectKey);
+
   List<Project> findAllByOwnerId(Long ownerId);
 
   @Query(
@@ -22,12 +24,14 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
   @Query(
       "SELECT p FROM Project p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :term, '%')) "
+          + "OR LOWER(COALESCE(p.projectKey, '')) LIKE LOWER(CONCAT('%', :term, '%')) "
           + "OR LOWER(COALESCE(p.description, '')) LIKE LOWER(CONCAT('%', :term, '%'))")
   List<Project> searchAllByTerm(@Param("term") String term, Pageable pageable);
 
   @Query(
       "SELECT p FROM Project p WHERE p.id IN :projectIds AND ("
           + "LOWER(p.name) LIKE LOWER(CONCAT('%', :term, '%')) "
+          + "OR LOWER(COALESCE(p.projectKey, '')) LIKE LOWER(CONCAT('%', :term, '%')) "
           + "OR LOWER(COALESCE(p.description, '')) LIKE LOWER(CONCAT('%', :term, '%')))")
   List<Project> searchByTermAndProjectIds(
       @Param("projectIds") List<Long> projectIds, @Param("term") String term, Pageable pageable);

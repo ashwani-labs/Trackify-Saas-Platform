@@ -3,6 +3,7 @@ package com.trackify.project.repository;
 import com.trackify.project.entity.Issue;
 import com.trackify.project.enums.IssueStatus;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IssueRepository extends JpaRepository<Issue, Long> {
+  Optional<Issue> findByIssueKey(String issueKey);
+
   List<Issue> findAllByProjectId(Long projectId);
 
   Page<Issue> findAllByProjectId(Long projectId, Pageable pageable);
@@ -31,6 +34,7 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
   @Query(
       "SELECT DISTINCT i FROM Issue i JOIN FETCH i.project p WHERE "
           + "LOWER(i.title) LIKE LOWER(CONCAT('%', :term, '%')) "
+          + "OR LOWER(COALESCE(i.issueKey, '')) LIKE LOWER(CONCAT('%', :term, '%')) "
           + "OR LOWER(CONCAT('', i.status)) LIKE LOWER(CONCAT('%', :term, '%')) "
           + "OR LOWER(p.name) LIKE LOWER(CONCAT('%', :term, '%'))")
   List<Issue> searchAllByTerm(@Param("term") String term, Pageable pageable);
@@ -38,6 +42,7 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
   @Query(
       "SELECT DISTINCT i FROM Issue i JOIN FETCH i.project p WHERE i.project.id IN :projectIds AND ("
           + "LOWER(i.title) LIKE LOWER(CONCAT('%', :term, '%')) "
+          + "OR LOWER(COALESCE(i.issueKey, '')) LIKE LOWER(CONCAT('%', :term, '%')) "
           + "OR LOWER(CONCAT('', i.status)) LIKE LOWER(CONCAT('%', :term, '%')) "
           + "OR LOWER(p.name) LIKE LOWER(CONCAT('%', :term, '%')))")
   List<Issue> searchByTermAndProjectIds(
