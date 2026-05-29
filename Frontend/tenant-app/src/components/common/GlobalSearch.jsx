@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { Search, FolderKanban, Bug } from 'lucide-react';
-import { fetchProjects } from '../../features/projects/projectSlice';
+import { useDispatch } from 'react-redux';
+import { Search, FolderKanban, Bug, Users } from 'lucide-react';
 import { setSelectedIssue } from '../../features/issues/issueSlice';
+import { fetchGlobalSearch } from '../../features/search/searchApi';
 
 const GlobalSearch = () => {
   const dispatch = useDispatch();
@@ -13,18 +13,10 @@ const GlobalSearch = () => {
 
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState({ projects: [], issues: [], users: [] });
 
-  const { projects } = useSelector((s) => s.projects);
-  const { issues } = useSelector((s) => s.issues);
-  const { currentProject } = useSelector((s) => s.projects);
-
-  const q = query.trim().toLowerCase();
-
-  useEffect(() => {
-    if (open && projects.length === 0) {
-      dispatch(fetchProjects({ page: 0, size: 50 }));
-    }
-  }, [open, projects.length, dispatch]);
+  const q = query.trim();
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -52,22 +44,44 @@ const GlobalSearch = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const projectResults = useMemo(() => {
-    if (!q) return projects.slice(0, 8);
-    return projects.filter(
-      (p) =>
-        p.name?.toLowerCase().includes(q) ||
-        p.key?.toLowerCase().includes(q) ||
-        p.description?.toLowerCase().includes(q)
-    );
-  }, [projects, q]);
+  useEffect(() => {
+    if (!open || q.length === 0) {
+      setResults({ projects: [], issues: [], users: [] });
+      setLoading(false);
+      return undefined;
+    }
 
-  const issueResults = useMemo(() => {
-    if (!q || issues.length === 0) return [];
-    return issues.filter((i) => i.title?.toLowerCase().includes(q)).slice(0, 8);
-  }, [issues, q]);
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const data = await fetchGlobalSearch(q);
+        if (!cancelled) {
+          setResults({
+            projects: data.projects ?? [],
+            issues: data.issues ?? [],
+            users: data.users ?? [],
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          setResults({ projects: [], issues: [], users: [] });
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }, 300);
 
-  const hasResults = projectResults.length > 0 || issueResults.length > 0;
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [q, open]);
+
+  const { projects, issues, users } = results;
+  const hasResults = projects.length > 0 || issues.length > 0 || users.length > 0;
 
   const goToProject = useCallback(
     (projectId) => {
@@ -88,6 +102,12 @@ const GlobalSearch = () => {
     [navigate, dispatch]
   );
 
+  const goToTeam = useCallback(() => {
+    setOpen(false);
+    setQuery('');
+    navigate('/team');
+  }, [navigate]);
+
   return (
     <div className="search-panel hide-mobile" ref={panelRef}>
       <div className="input-wrap">
@@ -96,8 +116,8 @@ const GlobalSearch = () => {
           ref={inputRef}
           type="search"
           className="input input--with-icon topbar-search__input"
-          placeholder="Search projects and issues (/)"
-          aria-label="Search projects and issues"
+          placeholder="Search projects, issues, and people (/)"
+          aria-label="Search projects, issues, and people"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -107,12 +127,14 @@ const GlobalSearch = () => {
         />
       </div>
 
-      {open && (q || projects.length > 0) && (
+      {open && q && (
         <div className="search-results" role="listbox">
-          {projectResults.length > 0 && (
+          {loading && <div className="search-results__empty">Searching…</div>}
+
+          {!loading && projects.length > 0 && (
             <>
               <div className="search-results__section">Projects</div>
-              {projectResults.map((p) => (
+              {projects.map((p) => (
                 <button
                   key={p.id}
                   type="button"
@@ -123,19 +145,19 @@ const GlobalSearch = () => {
                   <FolderKanban size={16} color="var(--primary)" />
                   <div>
                     <div className="search-result__title">{p.name}</div>
-                    <div className="search-result__meta">{p.key}</div>
+                    {p.description && (
+                      <div className="search-result__meta">{p.description}</div>
+                    )}
                   </div>
                 </button>
               ))}
             </>
           )}
 
-          {issueResults.length > 0 && (
+          {!loading && issues.length > 0 && (
             <>
-              <div className="search-results__section">
-                Issues{currentProject ? ` in ${currentProject.name}` : ''}
-              </div>
-              {issueResults.map((issue) => (
+              <div className="search-results__section">Issues</div>
+              {issues.map((issue) => (
                 <button
                   key={issue.id}
                   type="button"
@@ -146,21 +168,40 @@ const GlobalSearch = () => {
                   <Bug size={16} color="var(--text-muted)" />
                   <div>
                     <div className="search-result__title">{issue.title}</div>
-                    <div className="search-result__meta">{issue.status}</div>
+                    <div className="search-result__meta">
+                      {issue.projectHeaderName} · {issue.status}
+                    </div>
                   </div>
                 </button>
               ))}
             </>
           )}
 
-          {!hasResults && q && (
-            <div className="search-results__empty">No matches for &quot;{query}&quot;</div>
+          {!loading && users.length > 0 && (
+            <>
+              <div className="search-results__section">People</div>
+              {users.map((user) => (
+                <button
+                  key={user.id}
+                  type="button"
+                  className="search-result"
+                  role="option"
+                  onClick={goToTeam}
+                >
+                  <Users size={16} color="var(--text-muted)" />
+                  <div>
+                    <div className="search-result__title">
+                      {user.fullName || user.email}
+                    </div>
+                    <div className="search-result__meta">{user.email}</div>
+                  </div>
+                </button>
+              ))}
+            </>
           )}
 
-          {issues.length === 0 && q && (
-            <p className="search-hint">
-              Open a project to search its issues, or browse projects above.
-            </p>
+          {!loading && !hasResults && (
+            <div className="search-results__empty">No matches for &quot;{query}&quot;</div>
           )}
         </div>
       )}
