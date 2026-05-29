@@ -7,3 +7,12 @@ spring:
 
 services:
   notification-url: http://notification-service:8084
+
+trackify:
+  storage:
+    provider: ${STORAGE_PROVIDER:local}
+    s3:
+      endpoint: ${S3_ENDPOINT:http://minio:9000}
+      bucket: ${S3_BUCKET:trackify-attachments}
+      access-key: ${S3_ACCESS_KEY:minioadmin}
+      secret-key: ${S3_SECRET_KEY:minioadmin}

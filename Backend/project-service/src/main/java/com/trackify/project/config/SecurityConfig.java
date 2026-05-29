@@ -25,7 +25,7 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/actuator/**", "/internal/**")
+                auth.requestMatchers("/actuator/**", "/internal/**", "/health")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

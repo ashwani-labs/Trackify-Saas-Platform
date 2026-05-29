@@ -41,6 +41,7 @@ public class IssueService {
   private final IssueCommentRepository commentRepository;
   private final IssueAttachmentRepository attachmentRepository;
   private final StorageService storageService;
+  private final FileUploadValidator fileUploadValidator;
   private final JdbcTemplate jdbcTemplate;
   private final SprintRepository sprintRepository;
   private final NotificationService notificationService;
@@ -58,12 +59,14 @@ public class IssueService {
       DataSource dataSource,
       SprintRepository sprintRepository,
       NotificationService notificationService,
-      ActivityService activityService) {
+      ActivityService activityService,
+      FileUploadValidator fileUploadValidator) {
     this.issueRepository = issueRepository;
     this.projectRepository = projectRepository;
     this.commentRepository = commentRepository;
     this.attachmentRepository = attachmentRepository;
     this.storageService = storageService;
+    this.fileUploadValidator = fileUploadValidator;
     this.jdbcTemplate = new JdbcTemplate(dataSource);
     this.sprintRepository = sprintRepository;
     this.notificationService = notificationService;
@@ -223,6 +226,7 @@ public class IssueService {
             .findById(issueId)
             .orElseThrow(() -> AppException.notFound("Issue not found"));
 
+    fileUploadValidator.validate(file);
     String fileKey = storageService.store(file);
 
     IssueAttachment attachment =
