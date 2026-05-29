@@ -251,7 +251,7 @@ High-priority next work:
 - Add Vitest/React Testing Library frontend smoke tests
 - Remove duplicate gateway package/classes
 - Replace remaining inline UI styles with shared tokens/components
-- Add in-app notifications (global search is available via `GET /search`)
+- Wire user-approval in-app notifications from `tenant-service` (inbox via `GET /notifications`)
 
 ## Troubleshooting
 

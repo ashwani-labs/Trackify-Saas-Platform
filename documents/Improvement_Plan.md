@@ -30,7 +30,7 @@ Trackify is a multi-tenant project management SaaS with:
 | P1 | ~~Global search is client-only~~ | `GET /search` in `project-service`, `GlobalSearch.jsx` calls API | Add issue keys to search results when Jira-style keys ship |
 | P1 | Master dashboard growth chart is derived fake history | `DashboardPage.jsx` uses Jan/Feb/Mar from current tenant count | Add tenant growth API or remove historical chart |
 | P1 | Attachments use local storage | `LocalStorageService` | Add S3-compatible storage provider and file validation |
-| P2 | In-app notifications are not implemented | `notification-service` only sends email | Add notification inbox with read/unread state and links to issues/projects |
+| P2 | ~~In-app notifications missing~~ | Tenant `notifications` table + `GET /notifications` in `project-service` | Wire user-approval events from `tenant-service` |
 | P2 | Activity/audit log is missing | No activity timeline endpoints | Add issue/project activity events and surface them in UI |
 | P2 | Issue keys are missing | Issues use numeric IDs only | Add Jira-style keys like `PROJ-123` and expose in URLs/cards |
 | P2 | OpenAPI is missing | No generated OpenAPI spec | Add `springdoc-openapi` and publish generated API spec |
@@ -68,11 +68,11 @@ Trackify is a multi-tenant project management SaaS with:
   - [x] projects by name/key/description
   - [x] issues by title/key/assignee/status
   - [x] users by email/name
-- [ ] Add in-app notifications:
-  - [ ] notification entity/table
-  - [ ] list unread/read notifications
-  - [ ] mark read/unread
-  - [ ] link to issue/project/user approval
+- [x] Add in-app notifications:
+  - [x] notification entity/table
+  - [x] list unread/read notifications
+  - [x] mark read/unread
+  - [x] link to issue/project/user approval (issue assignment wired; user-approval events pending)
 - [ ] Add activity log:
   - [ ] issue status changed
   - [ ] assignee changed

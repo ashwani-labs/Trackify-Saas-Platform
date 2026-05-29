@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { NavLink, useNavigate, useMatch } from 'react-router-dom';
 import CreateMenu from '../components/common/CreateMenu';
 import GlobalSearch from '../components/common/GlobalSearch';
+import NotificationBell from '../components/common/NotificationBell';
 import { logout } from '../features/auth/authSlice';
 import { useTheme } from '../hooks/useTheme';
 import { ROLES } from '@trackify/shared';
@@ -107,6 +108,7 @@ const DashboardLayout = ({ children }) => {
 
         <div className="topbar-actions">
           <CreateMenu />
+          <NotificationBell />
 
           <button
             className="theme-toggle"
