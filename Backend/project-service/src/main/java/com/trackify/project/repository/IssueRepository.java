@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -25,4 +27,19 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
   long countByProjectIdIn(List<Long> projectIds);
 
   long countByStatusAndProjectIdIn(IssueStatus status, List<Long> projectIds);
+
+  @Query(
+      "SELECT DISTINCT i FROM Issue i JOIN FETCH i.project p WHERE "
+          + "LOWER(i.title) LIKE LOWER(CONCAT('%', :term, '%')) "
+          + "OR LOWER(CONCAT('', i.status)) LIKE LOWER(CONCAT('%', :term, '%')) "
+          + "OR LOWER(p.name) LIKE LOWER(CONCAT('%', :term, '%'))")
+  List<Issue> searchAllByTerm(@Param("term") String term, Pageable pageable);
+
+  @Query(
+      "SELECT DISTINCT i FROM Issue i JOIN FETCH i.project p WHERE i.project.id IN :projectIds AND ("
+          + "LOWER(i.title) LIKE LOWER(CONCAT('%', :term, '%')) "
+          + "OR LOWER(CONCAT('', i.status)) LIKE LOWER(CONCAT('%', :term, '%')) "
+          + "OR LOWER(p.name) LIKE LOWER(CONCAT('%', :term, '%')))")
+  List<Issue> searchByTermAndProjectIds(
+      @Param("projectIds") List<Long> projectIds, @Param("term") String term, Pageable pageable);
 }
