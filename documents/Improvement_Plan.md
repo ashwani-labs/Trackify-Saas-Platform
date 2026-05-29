@@ -28,7 +28,7 @@ Trackify is a multi-tenant project management SaaS with:
 | P1 | Gateway proxy is generic and logs full headers | `GatewayController` | Avoid logging sensitive headers, add request IDs, and consider Spring Cloud Gateway routing |
 | P1 | Assignment emails are synchronous best-effort REST calls | `IssueService.sendAssignmentEmail` | Move notification dispatch behind a notification client or async queue abstraction |
 | P1 | ~~Global search is client-only~~ | `GET /search` in `project-service`, `GlobalSearch.jsx` calls API | Add issue keys to search results when Jira-style keys ship |
-| P1 | Master dashboard growth chart is derived fake history | `DashboardPage.jsx` uses Jan/Feb/Mar from current tenant count | Add tenant growth API or remove historical chart |
+| P1 | ~~Master dashboard growth chart is derived fake history~~ | `GET /tenants/dashboard-stats` + master-app chart | Add provisioning rate (new per month) view |
 | P1 | Attachments use local storage | `LocalStorageService` | Add S3-compatible storage provider and file validation |
 | P2 | ~~In-app notifications missing~~ | Full inbox + user-approval admin alerts | Add more notification event types |
 | P2 | ~~Activity/audit log is missing~~ | `GET /issues/{id}/activity` + issue detail timeline | Add project-level activity feed |
@@ -82,7 +82,7 @@ Trackify is a multi-tenant project management SaaS with:
   - [x] project key + sequence
   - [x] display key on cards and detail panel
   - [x] route support for issue key deep links
-- [ ] Replace master dashboard fake growth chart with real tenant growth data.
+- [x] Replace master dashboard fake growth chart with real tenant growth data.
 
 ### Phase 3: Operational Readiness
 

@@ -245,7 +245,7 @@ documents/Improvement_Plan.md
 
 High-priority next work:
 
-- Replace master dashboard fake growth chart with real tenant growth data
+- Replace master dashboard fake growth chart (done — `GET /tenants/dashboard-stats`)
 - Remove duplicate gateway package/classes (done — keep docs in sync)
 - Replace remaining inline UI styles with shared tokens/components
 - Set `INTERNAL_API_KEY` on `tenant-service` and `project-service` for admin approval notifications

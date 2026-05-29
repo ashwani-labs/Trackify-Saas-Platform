@@ -14,6 +14,18 @@ export const loadTenants = createAsyncThunk(
   }
 );
 
+export const loadDashboardStats = createAsyncThunk(
+  'tenants/fetchDashboardStats',
+  async ({ months = 6 } = {}, { rejectWithValue }) => {
+    try {
+      const response = await tenantApi.fetchDashboardStats(months);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch dashboard stats');
+    }
+  }
+);
+
 export const createTenantAsync = createAsyncThunk(
   'tenants/create',
   async (tenantData, { rejectWithValue }) => {
@@ -56,6 +68,8 @@ const initialState = {
   currentPage: 0,
   totalPages: 0,
   totalElements: 0,
+  dashboardStats: null,
+  isStatsLoading: false,
   isLoading: false,
   error: null,
 };
@@ -87,6 +101,17 @@ const tenantSlice = createSlice({
       })
       .addCase(loadTenants.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(loadDashboardStats.pending, (state) => {
+        state.isStatsLoading = true;
+      })
+      .addCase(loadDashboardStats.fulfilled, (state, action) => {
+        state.isStatsLoading = false;
+        state.dashboardStats = action.payload;
+      })
+      .addCase(loadDashboardStats.rejected, (state, action) => {
+        state.isStatsLoading = false;
         state.error = action.payload;
       })
       .addCase(toggleTenantStatus.fulfilled, (state, action) => {
@@ -127,6 +152,8 @@ export const { clearTenantError } = tenantSlice.actions;
 // Selectors
 export const selectAllTenants = (state) => state.tenants.list;
 export const selectTenantLoading = (state) => state.tenants.isLoading;
+export const selectTenantStatsLoading = (state) => state.tenants.isStatsLoading;
+export const selectDashboardStats = (state) => state.tenants.dashboardStats;
 export const selectTenantCurrentPage = (state) => state.tenants.currentPage;
 export const selectTenantTotalPages = (state) => state.tenants.totalPages;
 

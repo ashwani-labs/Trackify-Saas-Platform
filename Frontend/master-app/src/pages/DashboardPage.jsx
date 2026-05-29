@@ -1,12 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   loadTenants,
+  loadDashboardStats,
   selectAllTenants,
   selectTenantLoading,
+  selectTenantStatsLoading,
+  selectDashboardStats,
 } from '../features/tenants/tenantSlice';
 import { useAuth } from '../hooks/useAuth';
-import { Users, Globe, CheckCircle2, ShieldAlert, TrendingUp } from 'lucide-react';
+import { Globe, CheckCircle2, ShieldAlert } from 'lucide-react';
 import {
   PieChart,
   Pie,
@@ -24,25 +27,32 @@ const DashboardPage = () => {
   useAuth({ requireAuth: true });
   const tenants = useSelector(selectAllTenants);
   const isLoading = useSelector(selectTenantLoading);
+  const isStatsLoading = useSelector(selectTenantStatsLoading);
+  const dashboardStats = useSelector(selectDashboardStats);
 
   useEffect(() => {
-    dispatch(loadTenants());
+    dispatch(loadTenants({ page: 0, size: 5 }));
+    dispatch(loadDashboardStats({ months: 6 }));
   }, [dispatch]);
 
-  const totalTenants = tenants.length;
-  const activeTenants = tenants.filter((t) => t.status === 'ACTIVE').length;
-  const inactiveTenants = tenants.filter((t) => t.status === 'INACTIVE').length;
+  const totalTenants = dashboardStats?.totalTenants ?? 0;
+  const activeTenants = dashboardStats?.activeTenants ?? 0;
+  const inactiveTenants = dashboardStats?.inactiveTenants ?? 0;
 
   const statusData = [
-    { name: 'Active', value: activeTenants, color: '#36B37E' }, // Success G300
-    { name: 'Inactive', value: inactiveTenants, color: '#FF5630' }, // Danger R300
+    { name: 'Active', value: activeTenants, color: '#36B37E' },
+    { name: 'Inactive', value: inactiveTenants, color: '#FF5630' },
   ];
 
-  const distributionData = [
-    { month: 'Jan', count: Math.max(0, totalTenants - 4) },
-    { month: 'Feb', count: Math.max(0, totalTenants - 2) },
-    { month: 'Mar', count: totalTenants },
-  ];
+  const growthData = useMemo(() => {
+    if (!dashboardStats?.growth?.length) {
+      return [];
+    }
+    return dashboardStats.growth.map((point) => ({
+      month: point.label,
+      count: point.count,
+    }));
+  }, [dashboardStats]);
 
   const statCards = [
     {
@@ -64,6 +74,8 @@ const DashboardPage = () => {
       color: '#FF5630',
     },
   ];
+
+  const statsLoading = isStatsLoading && !dashboardStats;
 
   return (
     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
@@ -88,7 +100,7 @@ const DashboardPage = () => {
               <span style={{ color: card.color }}>{card.icon}</span>
             </div>
             <div className="stat-value">
-              {isLoading ? (
+              {statsLoading ? (
                 <div className="skeleton" style={{ height: '2rem', width: '40%' }} />
               ) : (
                 card.value
@@ -160,28 +172,46 @@ const DashboardPage = () => {
             Provisioning Growth
           </h3>
           <div style={{ height: '240px', minWidth: 0 }}>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={distributionData}>
-                <XAxis
-                  dataKey="month"
-                  stroke="var(--text-muted)"
-                  fontSize={10}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: 'rgba(9, 30, 66, 0.05)' }}
-                  contentStyle={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-main)',
-                    borderRadius: '3px',
-                    boxShadow: 'var(--shadow-md)',
-                    fontSize: '0.75rem',
-                  }}
-                />
-                <Bar dataKey="count" fill="var(--primary)" radius={[2, 2, 0, 0]} barSize={32} />
-              </BarChart>
-            </ResponsiveContainer>
+            {statsLoading ? (
+              <div className="skeleton" style={{ height: '100%', width: '100%' }} />
+            ) : growthData.length === 0 ? (
+              <div
+                style={{
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.875rem',
+                }}
+              >
+                No tenant growth data yet.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={growthData}>
+                  <XAxis
+                    dataKey="month"
+                    stroke="var(--text-muted)"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(9, 30, 66, 0.05)' }}
+                    contentStyle={{
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-main)',
+                      borderRadius: '3px',
+                      boxShadow: 'var(--shadow-md)',
+                      fontSize: '0.75rem',
+                    }}
+                    formatter={(value) => [`${value} tenants`, 'Total']}
+                  />
+                  <Bar dataKey="count" fill="var(--primary)" radius={[2, 2, 0, 0]} barSize={32} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </section>
@@ -211,7 +241,11 @@ const DashboardPage = () => {
           </button>
         </div>
 
-        {tenants.length === 0 ? (
+        {isLoading && tenants.length === 0 ? (
+          <div className="card" style={{ padding: '2rem' }}>
+            <div className="skeleton" style={{ height: '1.5rem', width: '40%' }} />
+          </div>
+        ) : tenants.length === 0 ? (
           <div
             className="card"
             style={{
@@ -235,7 +269,7 @@ const DashboardPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {tenants.slice(0, 5).map((tenant) => (
+                {tenants.map((tenant) => (
                   <tr key={tenant.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
