@@ -1,6 +1,8 @@
 package com.trackify.gateway.config;
 
+import com.trackify.common.web.CorrelationIdFilter;
 import com.trackify.gateway.filter.JwtGatewayFilter;
+import com.trackify.gateway.filter.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,15 +21,25 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
   private final JwtGatewayFilter jwtGatewayFilter;
+  private final RateLimitFilter rateLimitFilter;
   private final CorsFilter corsFilter;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
         .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(HttpMethod.OPTIONS, "/**")
+                    .permitAll()
+                    .requestMatchers(
+                        "/health",
+                        "/actuator/**",
+                        "/openapi.yaml",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html")
                     .permitAll()
                     .requestMatchers("/auth/**")
                     .permitAll()

@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: api-gateway
+  config:
+    import: optional:classpath:trackify-management.yml
   servlet:
     multipart:
       enabled: false
@@ -16,3 +18,14 @@ services:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000
+
+trackify:
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    requests-per-minute: ${RATE_LIMIT_RPM:120}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

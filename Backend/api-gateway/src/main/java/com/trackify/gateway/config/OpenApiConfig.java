@@ -1,0 +1,35 @@
+package com.trackify.gateway.config;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OpenApiConfig {
+
+  @Bean
+  public OpenAPI trackifyOpenApi() {
+    final String bearerScheme = "bearerAuth";
+    return new OpenAPI()
+        .info(
+            new Info()
+                .title("Trackify Platform API")
+                .description(
+                    "Gateway-facing REST API for Trackify SaaS. Authenticated routes require a"
+                        + " Bearer JWT from POST /auth/login.")
+                .version("1.0.0"))
+        .components(
+            new Components()
+                .addSecuritySchemes(
+                    bearerScheme,
+                    new SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")))
+        .addSecurityItem(new SecurityRequirement().addList(bearerScheme));
+  }
+}

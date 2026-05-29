@@ -1,10 +1,12 @@
 package com.trackify.gateway.controller;
 
+import com.trackify.common.web.CorrelationIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.Enumeration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -56,14 +58,23 @@ public class GatewayController {
     String targetUrl = targetBaseUrl + path + queryParams;
 
     HttpHeaders headers = new HttpHeaders();
+    String correlationId = request.getHeader(CorrelationIdFilter.HEADER);
+    if (correlationId == null || correlationId.isBlank()) {
+      correlationId = MDC.get(CorrelationIdFilter.MDC_KEY);
+    }
+    if (correlationId != null && !correlationId.isBlank()) {
+      headers.add(CorrelationIdFilter.HEADER, correlationId);
+    }
+
     Enumeration<String> headerNames = request.getHeaderNames();
     while (headerNames.hasMoreElements()) {
       String headerName = headerNames.nextElement();
-      if (!headerName.equalsIgnoreCase("Content-Length")) {
-        Enumeration<String> values = request.getHeaders(headerName);
-        while (values.hasMoreElements()) {
-          headers.add(headerName, values.nextElement());
-        }
+      if (shouldSkipRequestHeader(headerName)) {
+        continue;
+      }
+      Enumeration<String> values = request.getHeaders(headerName);
+      while (values.hasMoreElements()) {
+        headers.add(headerName, values.nextElement());
       }
     }
 
@@ -80,7 +91,11 @@ public class GatewayController {
     HttpEntity<byte[]> entity = new HttpEntity<>(bodyBytes, headers);
 
     try {
-      log.info("Proxying request: {} {} with headers: {}", method, targetUrl, headers);
+      log.info(
+          "Proxying request: {} {} correlationId={}",
+          method,
+          targetUrl,
+          correlationId != null ? correlationId : "n/a");
       return restTemplate.exchange(URI.create(targetUrl), method, entity, byte[].class);
     } catch (HttpClientErrorException | HttpServerErrorException e) {
       return ResponseEntity.status(e.getStatusCode())
@@ -95,5 +110,10 @@ public class GatewayController {
           .header("Content-Type", "application/json")
           .body(errorJson.getBytes());
     }
+  }
+
+  private boolean shouldSkipRequestHeader(String headerName) {
+    return headerName.equalsIgnoreCase("Content-Length")
+        || headerName.equalsIgnoreCase("Host");
   }
 }

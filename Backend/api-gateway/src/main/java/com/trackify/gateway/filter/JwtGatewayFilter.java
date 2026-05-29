@@ -38,7 +38,7 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
       return;
     }
 
-    if (path.startsWith("/auth/") || path.startsWith("/tenants/users/register")) {
+    if (isPublicPath(path)) {
       filterChain.doFilter(request, response);
       return;
     }
@@ -75,5 +75,15 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
     }
 
     filterChain.doFilter(request, response);
+  }
+
+  private boolean isPublicPath(String path) {
+    return path.startsWith("/auth/")
+        || path.startsWith("/tenants/users/register")
+        || path.startsWith("/health")
+        || path.startsWith("/actuator")
+        || path.startsWith("/openapi.yaml")
+        || path.startsWith("/v3/api-docs")
+        || path.startsWith("/swagger-ui");
   }
 }

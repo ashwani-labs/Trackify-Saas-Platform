@@ -1,0 +1,557 @@
+openapi: 3.0.3
+info:
+  title: Trackify Platform API
+  description: |
+    Gateway-facing REST API for the Trackify multi-tenant SaaS platform.
+    Authenticated routes require a Bearer JWT obtained from `POST /auth/login`.
+    All responses may include `X-Correlation-Id` for request tracing.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local API gateway
+tags:
+  - name: Auth
+  - name: Tenants
+  - name: Projects
+  - name: Issues
+  - name: Sprints
+  - name: Search
+  - name: Notifications
+  - name: Health
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          nullable: true
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    IssueRequest:
+      type: object
+      required: [title, projectId]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        projectId:
+          type: integer
+          format: int64
+        assigneeId:
+          type: integer
+          format: int64
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        status:
+          type: string
+          enum: [TODO, IN_PROGRESS, DONE]
+        sprintId:
+          type: integer
+          format: int64
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Gateway health check
+      security: []
+      responses:
+        '200':
+          description: Service is up
+  /actuator/health/liveness:
+    get:
+      tags: [Health]
+      summary: Kubernetes liveness probe
+      security: []
+      responses:
+        '200':
+          description: Live
+  /actuator/health/readiness:
+    get:
+      tags: [Health]
+      summary: Kubernetes readiness probe
+      security: []
+      responses:
+        '200':
+          description: Ready
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate and receive JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+        '401':
+          description: Invalid credentials
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request password reset email
+      security: []
+      responses:
+        '200':
+          description: Reset initiated
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password with token
+      security: []
+      responses:
+        '200':
+          description: Password updated
+  /auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Change password for authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Password changed
+  /tenants:
+    get:
+      tags: [Tenants]
+      summary: List tenants (MASTER)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Tenant list
+    post:
+      tags: [Tenants]
+      summary: Create tenant (MASTER)
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Tenant created
+  /tenants/dashboard-stats:
+    get:
+      tags: [Tenants]
+      summary: Platform growth statistics (MASTER)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard stats
+  /tenants/users/register:
+    post:
+      tags: [Tenants]
+      summary: Self-register tenant user (public)
+      security: []
+      responses:
+        '201':
+          description: Registration submitted for approval
+  /tenants/{id}/users/pending:
+    get:
+      tags: [Tenants]
+      summary: Pending user approvals
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Pending users
+  /tenants/{id}/users/{userId}/status:
+    patch:
+      tags: [Tenants]
+      summary: Approve or reject user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User status updated
+  /projects:
+    get:
+      tags: [Projects]
+      summary: List projects for current tenant
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Project list
+    post:
+      tags: [Projects]
+      summary: Create project
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Project created
+  /projects/stats:
+    get:
+      tags: [Projects]
+      summary: Tenant dashboard project statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Stats payload
+  /projects/{id}:
+    get:
+      tags: [Projects]
+      summary: Get project by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Project details
+    put:
+      tags: [Projects]
+      summary: Update project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Project updated
+    delete:
+      tags: [Projects]
+      summary: Delete project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /issues:
+    post:
+      tags: [Issues]
+      summary: Create issue
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueRequest'
+      responses:
+        '201':
+          description: Issue created
+  /issues/project/{projectId}:
+    get:
+      tags: [Issues]
+      summary: List issues for project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Issue list
+  /issues/key/{issueKey}:
+    get:
+      tags: [Issues]
+      summary: Get issue by Jira-style key (e.g. PLATFORM-1)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: issueKey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Issue details
+  /issues/{id}:
+    get:
+      tags: [Issues]
+      summary: Get issue by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Issue details
+    put:
+      tags: [Issues]
+      summary: Update issue
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Issue updated
+    delete:
+      tags: [Issues]
+      summary: Delete issue
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Deleted
+  /issues/{id}/comments:
+    get:
+      tags: [Issues]
+      summary: List issue comments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Comments
+    post:
+      tags: [Issues]
+      summary: Add comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: Comment added
+  /issues/{id}/attachments:
+    get:
+      tags: [Issues]
+      summary: List attachments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Attachments
+    post:
+      tags: [Issues]
+      summary: Upload attachment (multipart)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Attachment stored
+  /issues/{id}/activity:
+    get:
+      tags: [Issues]
+      summary: Issue activity timeline
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Activity events
+  /sprints:
+    get:
+      tags: [Sprints]
+      summary: List sprints
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sprint list
+    post:
+      tags: [Sprints]
+      summary: Create sprint
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Sprint created
+  /sprints/{id}/start:
+    put:
+      tags: [Sprints]
+      summary: Start sprint
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Sprint started
+  /sprints/{id}/complete:
+    put:
+      tags: [Sprints]
+      summary: Complete sprint
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Sprint completed
+  /search:
+    get:
+      tags: [Search]
+      summary: Global search across projects, issues, and users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List in-app notifications
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications
+  /notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: Unread notification count
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Count
+  /notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      summary: Mark notification read
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Updated
