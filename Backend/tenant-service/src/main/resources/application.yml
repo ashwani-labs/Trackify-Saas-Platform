@@ -16,6 +16,10 @@ spring:
 
 services:
   notification-url: http://localhost:8084
+  project-url: http://localhost:8083
+
+trackify:
+  internal-api-key: ${INTERNAL_API_KEY:}
 
 tenant:
   datasource:

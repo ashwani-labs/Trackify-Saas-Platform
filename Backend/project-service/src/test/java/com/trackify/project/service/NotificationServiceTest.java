@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -68,6 +69,17 @@ class NotificationServiceTest {
   void getUnreadCount_returnsRepositoryCount() {
     when(notificationRepository.countByUserIdAndReadAtIsNull(5L)).thenReturn(3L);
     assertEquals(3L, notificationService.getUnreadCount(5L));
+  }
+
+  @Test
+  void notifyUserApprovalPending_createsNotificationPerAdmin() {
+    when(jdbcTemplate.queryForList(
+            "SELECT id FROM users WHERE role = 'ADMIN' AND status = 'ACTIVE'", Long.class))
+        .thenReturn(List.of(1L, 2L));
+
+    notificationService.notifyUserApprovalPending(99L, "new@example.com", "New User");
+
+    verify(notificationRepository, times(2)).save(any(Notification.class));
   }
 
   @Test

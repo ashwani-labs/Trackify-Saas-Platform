@@ -8,19 +8,59 @@ import com.trackify.project.enums.NotificationReferenceType;
 import com.trackify.project.enums.NotificationType;
 import com.trackify.project.repository.NotificationRepository;
 import java.time.LocalDateTime;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class NotificationService {
 
   private final NotificationRepository notificationRepository;
+  private final JdbcTemplate jdbcTemplate;
+
+  public NotificationService(
+      NotificationRepository notificationRepository, DataSource dataSource) {
+    this.notificationRepository = notificationRepository;
+    this.jdbcTemplate = new JdbcTemplate(dataSource);
+  }
+
+  @Transactional
+  public void notifyUserApprovalPending(Long pendingUserId, String email, String fullName) {
+    if (pendingUserId == null) {
+      return;
+    }
+
+    List<Long> adminIds =
+        jdbcTemplate.queryForList(
+            "SELECT id FROM users WHERE role = 'ADMIN' AND status = 'ACTIVE'", Long.class);
+    if (adminIds.isEmpty()) {
+      log.warn("No active admins found for user approval notification");
+      return;
+    }
+
+    String displayName = fullName != null && !fullName.isBlank() ? fullName : email;
+    String message =
+        displayName + " (" + email + ") registered and is waiting for approval.";
+
+    for (Long adminId : adminIds) {
+      Notification notification =
+          Notification.builder()
+              .userId(adminId)
+              .type(NotificationType.USER_APPROVAL)
+              .title("New user pending approval")
+              .message(message)
+              .referenceType(NotificationReferenceType.USER)
+              .referenceId(pendingUserId)
+              .build();
+      notificationRepository.save(notification);
+    }
+  }
 
   @Transactional
   public void notifyIssueAssigned(Long assigneeId, Issue issue) {

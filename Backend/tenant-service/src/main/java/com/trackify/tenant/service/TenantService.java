@@ -7,6 +7,7 @@ import com.trackify.common.exception.AppException;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
+import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.UserRegistrationRequest;
 import com.trackify.tenant.dto.UserResponse;
 import com.trackify.tenant.entity.Tenant;
@@ -43,6 +44,7 @@ public class TenantService {
   private final UserLookupRepository userLookupRepository;
   private final JdbcTemplate jdbcTemplate;
   private final PasswordEncoder passwordEncoder;
+  private final ProjectNotificationClient projectNotificationClient;
 
   @Value("${tenant.app-url-pattern:http://%s.trackify.com:5174}")
   private String appUrlPattern;
@@ -233,6 +235,10 @@ public class TenantService {
       if (initialStatus == UserStatus.ACTIVE) {
         sendInviteEmail(
             request.getEmail(), tenant.getName(), request.getPassword(), tenant.getDomain());
+      } else if (initialStatus == UserStatus.PENDING) {
+        Long pendingUserId = ((Number) userMap.get("id")).longValue();
+        projectNotificationClient.notifyUserApprovalPending(
+            tenant.getId(), pendingUserId, request.getEmail(), request.getFullName());
       }
 
       return mapToUserResponse(userMap, tenant.getId());
@@ -472,6 +478,10 @@ public class TenantService {
       executeSqlStatements(schemaSql);
       String notificationsSql = loadSqlTemplate("db/tenant/V2__notifications.sql", dbName);
       executeSqlStatements(notificationsSql);
+      String activitySql = loadSqlTemplate("db/tenant/V3__activity_events.sql", dbName);
+      executeSqlStatements(activitySql);
+      String issueKeysSql = loadSqlTemplate("db/tenant/V4__issue_keys.sql", dbName);
+      executeSqlStatements(issueKeysSql);
 
       // 3. Create Admin User
       String hashedPassword = passwordEncoder.encode(adminPassword);

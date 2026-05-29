@@ -42,6 +42,8 @@ public class GatewayController {
       targetBaseUrl = authUrl;
     } else if (path.startsWith("/tenants")) {
       targetBaseUrl = tenantUrl;
+    } else if (path.startsWith("/internal")) {
+      targetBaseUrl = projectUrl;
     } else if (path.startsWith("/projects")
         || path.startsWith("/issues")
         || path.startsWith("/search")
