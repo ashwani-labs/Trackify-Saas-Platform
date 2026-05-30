@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
-import { getApiErrorMessage } from '@trackify/shared';
+import { getApiErrorMessage, Button, Input, Alert } from '@trackify/shared';
 import axios from '../utils/axios';
 import AuthLayout from '../layouts/AuthLayout';
 
@@ -61,117 +61,58 @@ const ResetPasswordPage = () => {
   return (
     <AuthLayout title="Choose a new password" subtitle="Create a secure password for your account">
       {success ? (
-        <div
-          style={{ textAlign: 'center', animation: 'fadeIn 0.4s ease-out', marginTop: '1.5rem' }}
-        >
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              background: '#E3FCEF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem',
-              color: '#36B37E',
-            }}
-          >
+        <div className="auth-success">
+          <div className="auth-icon-circle auth-icon-circle--success">
             <CheckCircle2 size={32} />
           </div>
-          <p
-            style={{
-              color: 'var(--text-main)',
-              marginBottom: '1.5rem',
-              lineHeight: '1.6',
-              fontSize: '0.875rem',
-            }}
-          >
-            Your password has been successfully reset.
-          </p>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '2rem' }}>
-            Redirecting to login...
-          </div>
-          <Link to="/login" className="btn btn-primary" style={{ width: '100%', height: '40px' }}>
+          <p className="auth-message">Your password has been successfully reset.</p>
+          <p className="auth-muted-note">Redirecting to login...</p>
+          <Link to="/login" className="btn btn--primary btn--full btn--lg">
             Log in now
           </Link>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
-          <div className="form-group">
-            <label
-              className="form-label"
-              style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
-            >
-              NEW PASSWORD
-            </label>
-            <input
-              type="password"
-              className="input-field"
-              placeholder="Enter new password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              style={{ height: '40px', fontSize: '0.875rem' }}
-            />
-          </div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <Input
+            id="new-password"
+            label="New password"
+            type="password"
+            placeholder="Enter new password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+            size="lg"
+          />
 
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-            <label
-              className="form-label"
-              style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
-            >
-              CONFIRM PASSWORD
-            </label>
-            <input
-              type="password"
-              className="input-field"
-              placeholder="Confirm new password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              style={{ height: '40px', fontSize: '0.875rem' }}
-            />
-          </div>
+          <Input
+            id="confirm-password"
+            label="Confirm password"
+            type="password"
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            size="lg"
+          />
 
           {error && (
-            <div
-              style={{
-                padding: '0.75rem',
-                marginBottom: '1.5rem',
-                backgroundColor: '#FFEBE6',
-                color: '#BF2600',
-                borderRadius: '3px',
-                fontSize: '0.8rem',
-                textAlign: 'center',
-                border: '1px solid #FFBDAD',
-              }}
-            >
+            <Alert variant="danger" center className="auth-alert">
               {error}
-            </div>
+            </Alert>
           )}
 
-          <button
+          <Button
             type="submit"
-            className="btn btn-primary"
-            style={{ width: '100%', height: '40px', fontSize: '0.875rem', fontWeight: '600' }}
-            disabled={isLoading || !token || !email || !newPassword || !confirmPassword}
+            fullWidth
+            size="lg"
+            isLoading={isLoading}
+            disabled={!token || !email || !newPassword || !confirmPassword}
           >
-            {isLoading ? 'Resetting...' : 'Reset password'}
-          </button>
+            Reset password
+          </Button>
 
-          <div
-            style={{
-              marginTop: '2rem',
-              textAlign: 'center',
-              borderTop: '1px solid var(--border-main)',
-              paddingTop: '1.5rem',
-            }}
-          >
-            <Link
-              to="/login"
-              style={{ fontSize: '0.875rem', color: 'var(--primary)', fontWeight: '600' }}
-            >
+          <div className="auth-divider">
+            <Link to="/login" className="auth-link">
               Back to login
             </Link>
           </div>
