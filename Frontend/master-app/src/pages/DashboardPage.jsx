@@ -21,6 +21,18 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
+import PageHeader from '../ui/PageHeader';
+import Button from '../ui/Button';
+import Badge from '../ui/Badge';
+import EmptyState from '../ui/EmptyState';
+
+const CHART_TOOLTIP_STYLE = {
+  background: 'var(--bg-surface)',
+  border: '1px solid var(--border-main)',
+  borderRadius: 'var(--radius-md)',
+  boxShadow: 'var(--shadow-md)',
+  fontSize: '0.75rem',
+};
 
 const DashboardPage = () => {
   const dispatch = useDispatch();
@@ -40,8 +52,8 @@ const DashboardPage = () => {
   const inactiveTenants = dashboardStats?.inactiveTenants ?? 0;
 
   const statusData = [
-    { name: 'Active', value: activeTenants, color: '#36B37E' },
-    { name: 'Inactive', value: inactiveTenants, color: '#FF5630' },
+    { name: 'Active', value: activeTenants, color: 'var(--success)' },
+    { name: 'Inactive', value: inactiveTenants, color: 'var(--danger)' },
   ];
 
   const growthData = useMemo(() => {
@@ -59,45 +71,42 @@ const DashboardPage = () => {
       label: 'Organizations',
       value: totalTenants,
       icon: <Globe size={18} />,
-      color: '#0052CC',
+      accent: 'primary',
     },
     {
       label: 'Active Workspaces',
       value: activeTenants,
       icon: <CheckCircle2 size={18} />,
-      color: '#36B37E',
+      accent: 'success',
     },
     {
       label: 'Inactive',
       value: inactiveTenants,
       icon: <ShieldAlert size={18} />,
-      color: '#FF5630',
+      accent: 'danger',
     },
   ];
 
   const statsLoading = isStatsLoading && !dashboardStats;
 
   return (
-    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
-      <nav style={{ marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-        Administration / <span style={{ color: 'var(--text-main)' }}>Dashboard</span>
-      </nav>
-
-      <section style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-          Platform Overview
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-          Real-time insights into global platform health and organizational metrics.
-        </p>
-      </section>
+    <div className="page">
+      <PageHeader
+        breadcrumb={
+          <>
+            Administration / <strong>Dashboard</strong>
+          </>
+        }
+        title="Platform Overview"
+        subtitle="Real-time insights into global platform health and organizational metrics."
+      />
 
       <section className="stats-grid">
         {statCards.map((card) => (
-          <div key={card.label} className="stat-card">
-            <div className="stat-header">
-              <span>{card.label}</span>
-              <span style={{ color: card.color }}>{card.icon}</span>
+          <div key={card.label} className={`stat-card stat-card--${card.accent}`}>
+            <div className="stat-header stat-header--between">
+              <span className="stat-label">{card.label}</span>
+              <span className={`stat-card__icon--${card.accent}`}>{card.icon}</span>
             </div>
             <div className="stat-value">
               {statsLoading ? (
@@ -110,27 +119,10 @@ const DashboardPage = () => {
         ))}
       </section>
 
-      <section
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '2.5rem',
-        }}
-      >
-        <div className="card">
-          <h3
-            style={{
-              marginBottom: '1.25rem',
-              fontSize: '0.875rem',
-              fontWeight: '700',
-              color: 'var(--text-muted)',
-              textTransform: 'uppercase',
-            }}
-          >
-            Workspace Distribution
-          </h3>
-          <div style={{ height: '240px', minWidth: 0 }}>
+      <section className="dashboard-grid dashboard-grid--compact">
+        <div className="card chart-card">
+          <h3 className="chart-title">Workspace Distribution</h3>
+          <div className="chart-container--sm">
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
@@ -144,49 +136,20 @@ const DashboardPage = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-main)',
-                    borderRadius: '3px',
-                    boxShadow: 'var(--shadow-md)',
-                    fontSize: '0.75rem',
-                  }}
-                />
+                <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '0.75rem' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="card">
-          <h3
-            style={{
-              marginBottom: '1.25rem',
-              fontSize: '0.875rem',
-              fontWeight: '700',
-              color: 'var(--text-muted)',
-              textTransform: 'uppercase',
-            }}
-          >
-            Provisioning Growth
-          </h3>
-          <div style={{ height: '240px', minWidth: 0 }}>
+        <div className="card chart-card">
+          <h3 className="chart-title">Provisioning Growth</h3>
+          <div className="chart-container--sm">
             {statsLoading ? (
-              <div className="skeleton" style={{ height: '100%', width: '100%' }} />
+              <div className="skeleton chart-empty" />
             ) : growthData.length === 0 ? (
-              <div
-                style={{
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--text-muted)',
-                  fontSize: '0.875rem',
-                }}
-              >
-                No tenant growth data yet.
-              </div>
+              <div className="chart-empty">No tenant growth data yet.</div>
             ) : (
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={growthData}>
@@ -198,14 +161,8 @@ const DashboardPage = () => {
                     axisLine={false}
                   />
                   <Tooltip
-                    cursor={{ fill: 'rgba(9, 30, 66, 0.05)' }}
-                    contentStyle={{
-                      background: 'var(--bg-surface)',
-                      border: '1px solid var(--border-main)',
-                      borderRadius: '3px',
-                      boxShadow: 'var(--shadow-md)',
-                      fontSize: '0.75rem',
-                    }}
+                    cursor={{ fill: 'color-mix(in srgb, var(--text-main) 5%, transparent)' }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                     formatter={(value) => [`${value} tenants`, 'Total']}
                   />
                   <Bar dataKey="count" fill="var(--primary)" radius={[2, 2, 0, 0]} barSize={32} />
@@ -217,46 +174,19 @@ const DashboardPage = () => {
       </section>
 
       <section>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1rem',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '1rem',
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            Recent Organizations
-          </h2>
-          <button className="btn btn-secondary" style={{ height: '32px', fontSize: '0.75rem' }}>
+        <div className="list-section-header">
+          <h2 className="list-section-title">Recent Organizations</h2>
+          <Button variant="secondary" size="sm">
             View all tenants
-          </button>
+          </Button>
         </div>
 
         {isLoading && tenants.length === 0 ? (
-          <div className="card" style={{ padding: '2rem' }}>
+          <div className="card card--spaced">
             <div className="skeleton" style={{ height: '1.5rem', width: '40%' }} />
           </div>
         ) : tenants.length === 0 ? (
-          <div
-            className="card"
-            style={{
-              textAlign: 'center',
-              padding: '3rem',
-              color: 'var(--text-muted)',
-              fontSize: '0.875rem',
-            }}
-          >
-            No tenants provisioned yet.
-          </div>
+          <EmptyState title="No tenants provisioned yet." className="card--spaced" />
         ) : (
           <div className="table-wrapper">
             <table>
@@ -272,48 +202,25 @@ const DashboardPage = () => {
                 {tenants.map((tenant) => (
                   <tr key={tenant.id}>
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div
-                          style={{
-                            width: '24px',
-                            height: '24px',
-                            borderRadius: '3px',
-                            background: 'var(--primary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '0.7rem',
-                            fontWeight: '700',
-                            color: 'white',
-                          }}
-                        >
+                      <div className="org-row">
+                        <div className="org-avatar" aria-hidden>
                           {tenant.name.charAt(0)}
                         </div>
-                        <span style={{ fontWeight: '500', fontSize: '0.875rem' }}>
-                          {tenant.name}
-                        </span>
+                        <span className="org-name">{tenant.name}</span>
                       </div>
                     </td>
                     <td>
-                      <code style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>
-                        {tenant.domain}.trackify.io
-                      </code>
+                      <code className="domain-code">{tenant.domain}.trackify.io</code>
                     </td>
                     <td>
-                      <span
-                        className={`badge badge-${tenant.status === 'ACTIVE' ? 'success' : 'danger'}`}
-                        style={{ fontSize: '0.65rem' }}
-                      >
+                      <Badge variant={tenant.status === 'ACTIVE' ? 'success' : 'danger'}>
                         {tenant.status}
-                      </span>
+                      </Badge>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <button
-                        className="btn btn-secondary"
-                        style={{ height: '24px', padding: '0 0.5rem', fontSize: '0.7rem' }}
-                      >
+                      <Button variant="secondary" size="sm">
                         Manage
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}

@@ -11,16 +11,10 @@ import {
 } from '../features/tenants/tenantSlice';
 import CreateTenantModal from '../components/tenants/CreateTenantModal';
 import Pagination from '../components/common/Pagination';
-import {
-  Globe,
-  Activity,
-  RefreshCw,
-  Plus,
-  Trash2,
-  Mail,
-  ShieldCheck,
-  ShieldAlert,
-} from 'lucide-react';
+import { Globe, Activity, RefreshCw, Plus, Trash2 } from 'lucide-react';
+import PageHeader from '../ui/PageHeader';
+import Button from '../ui/Button';
+import Badge from '../ui/Badge';
 
 const TenantManagementPage = () => {
   const dispatch = useDispatch();
@@ -57,87 +51,53 @@ const TenantManagementPage = () => {
   };
 
   return (
-    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
-      <nav style={{ marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-        Administration / <span style={{ color: 'var(--text-main)' }}>Tenants</span>
-      </nav>
+    <div className="page">
+      <PageHeader
+        breadcrumb={
+          <>
+            Administration / <strong>Tenants</strong>
+          </>
+        }
+        title="Tenant Management"
+        subtitle="Centralized control for all active organizations and infrastructure provisioning."
+        actions={
+          <Button leftIcon={<Plus size={16} />} onClick={() => setIsModalOpen(true)}>
+            Create Tenant
+          </Button>
+        }
+      />
 
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '2rem',
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-            Tenant Management
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            Centralized control for all active organizations and infrastructure provisioning.
-          </p>
-        </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => setIsModalOpen(true)}
-          style={{ height: '32px' }}
-        >
-          <Plus size={16} /> Create Tenant
-        </button>
-      </header>
-
-      <div className="stats-grid" style={{ marginBottom: '2rem' }}>
-        <div className="stat-card">
-          <div className="stat-header">
-            <span>Total Tenants</span>
-            <Globe size={16} color="var(--primary)" />
+      <div className="stats-grid">
+        <div className="stat-card stat-card--primary">
+          <div className="stat-header stat-header--between">
+            <span className="stat-label">Total Tenants</span>
+            <Globe size={16} className="stat-card__icon--primary" aria-hidden />
           </div>
           <div className="stat-value">{tenants.length}</div>
         </div>
-        <div className="stat-card">
-          <div className="stat-header">
-            <span>Active Workspaces</span>
-            <Activity size={16} color="var(--success)" />
+        <div className="stat-card stat-card--success">
+          <div className="stat-header stat-header--between">
+            <span className="stat-label">Active Workspaces</span>
+            <Activity size={16} className="stat-card__icon--success" aria-hidden />
           </div>
           <div className="stat-value">{tenants.filter((t) => t.status === 'ACTIVE').length}</div>
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0 }}>
-        <div
-          style={{
-            padding: '1.25rem 1.5rem',
-            borderBottom: '1px solid var(--border-main)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '0.875rem',
-              fontWeight: '700',
-              color: 'var(--text-muted)',
-              textTransform: 'uppercase',
-            }}
-          >
-            Organization List
-          </h2>
-          <button
-            className="theme-toggle"
+      <div className="card card--flush">
+        <div className="card-section-header">
+          <h2 className="card-section-title">Organization List</h2>
+          <Button
+            variant="ghost"
+            className="icon-btn"
+            aria-label="Refresh tenant list"
+            isLoading={isLoading}
             onClick={() => dispatch(loadTenants({ page: currentPage, size: 10 }))}
-            disabled={isLoading}
-            style={{ width: '32px', height: '32px' }}
-          >
-            <RefreshCw
-              size={16}
-              style={{ animation: isLoading ? 'loading 2s linear infinite' : 'none' }}
-            />
-          </button>
+            leftIcon={!isLoading ? <RefreshCw size={16} /> : null}
+          />
         </div>
 
-        <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
+        <div className="table-wrapper table-wrapper--embedded">
           <table>
             <thead>
               <tr>
@@ -153,72 +113,45 @@ const TenantManagementPage = () => {
               {tenants.map((tenant) => (
                 <tr key={tenant.id}>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div
-                        style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '3px',
-                          background: 'var(--primary)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.7rem',
-                          fontWeight: '700',
-                          color: 'white',
-                        }}
-                      >
+                    <div className="org-row">
+                      <div className="org-avatar" aria-hidden>
                         {tenant.name.charAt(0)}
                       </div>
-                      <span style={{ fontWeight: '500', fontSize: '0.875rem' }}>{tenant.name}</span>
+                      <span className="org-name">{tenant.name}</span>
                     </div>
                   </td>
                   <td>
-                    <code style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>
-                      {tenant.domain}.trackify.io
-                    </code>
+                    <code className="domain-code">{tenant.domain}.trackify.io</code>
                   </td>
                   <td>
-                    <span
-                      className="badge"
-                      style={{
-                        backgroundColor: '#DEEBFF',
-                        color: '#0052CC',
-                        fontSize: '0.65rem',
-                      }}
-                    >
-                      {tenant.plan}
-                    </span>
+                    <Badge variant="primary">{tenant.plan}</Badge>
                   </td>
                   <td>
-                    <span
-                      className={`badge badge-${tenant.status === 'ACTIVE' ? 'success' : 'danger'}`}
-                      style={{ fontSize: '0.65rem' }}
-                    >
+                    <Badge variant={tenant.status === 'ACTIVE' ? 'success' : 'danger'}>
                       {tenant.status}
-                    </span>
+                    </Badge>
                   </td>
-                  <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  <td className="member-email">
                     {new Date(tenant.createdAt).toLocaleDateString()}
                   </td>
                   <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                      <button
+                    <div className="table-actions">
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={() => handleToggleStatus(tenant.id, tenant.status)}
-                        className="btn btn-secondary"
-                        style={{ fontSize: '0.7rem', height: '24px', padding: '0 0.5rem' }}
                       >
                         {tenant.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                      </button>
+                      </Button>
 
                       {tenant.status === 'INACTIVE' && (
-                        <button
+                        <Button
+                          variant="ghost"
+                          className="icon-btn btn--danger-text"
+                          aria-label={`Delete ${tenant.name}`}
                           onClick={() => handleDeleteTenant(tenant.id, tenant.name)}
-                          className="theme-toggle"
-                          style={{ color: 'var(--danger)', width: '24px', height: '24px' }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                          leftIcon={<Trash2 size={14} />}
+                        />
                       )}
                     </div>
                   </td>
@@ -226,15 +159,7 @@ const TenantManagementPage = () => {
               ))}
               {tenants.length === 0 && !isLoading && (
                 <tr>
-                  <td
-                    colSpan="6"
-                    style={{
-                      textAlign: 'center',
-                      padding: '4rem',
-                      color: 'var(--text-muted)',
-                      fontSize: '0.875rem',
-                    }}
-                  >
+                  <td colSpan={6} className="table-empty">
                     No tenants found.
                   </td>
                 </tr>
@@ -244,7 +169,7 @@ const TenantManagementPage = () => {
         </div>
 
         {tenants.length > 0 && totalPages > 1 && (
-          <div style={{ padding: '1rem', borderTop: '1px solid var(--border-main)' }}>
+          <div className="card-footer">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
