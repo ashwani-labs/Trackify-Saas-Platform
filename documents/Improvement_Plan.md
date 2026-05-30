@@ -101,18 +101,18 @@ Trackify is a multi-tenant project management SaaS with:
   - [x] `TeamPage.jsx`
   - [x] `DashboardPage.jsx`
   - [x] `ProfilePage.jsx`
-  - [ ] `RegisterPage.jsx`
-  - [ ] `ForgotPasswordPage.jsx`
-  - [ ] `ResetPasswordPage.jsx`
-  - [ ] `UserApprovalPage.jsx`
-- [ ] Migrate `master-app` UI primitives to `@trackify/shared`:
-  - [ ] `Button`
-  - [ ] `Input`
-  - [ ] `Modal`
-  - [ ] `Badge`
-  - [ ] `PageHeader`
-  - [ ] `EmptyState`
-- [ ] Replace remaining hardcoded colors with semantic tokens.
+  - [x] `RegisterPage.jsx`
+  - [x] `ForgotPasswordPage.jsx`
+  - [x] `ResetPasswordPage.jsx`
+  - [x] `UserApprovalPage.jsx`
+- [x] Migrate `master-app` UI primitives to `@trackify/shared`:
+  - [x] `Button`
+  - [x] `Input`
+  - [x] `Modal`
+  - [x] `Badge`
+  - [x] `PageHeader`
+  - [x] `EmptyState`
+- [x] Replace remaining hardcoded colors with semantic tokens.
 
 ### Phase 2: Usability and Accessibility
 
