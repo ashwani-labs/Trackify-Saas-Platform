@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-const Modal = ({ isOpen, onClose, title, children, footer }) => {
+const Modal = ({ isOpen, onClose, title, children, footer, className = '' }) => {
   useEffect(() => {
     if (!isOpen) return undefined;
     const onKey = (e) => {
@@ -16,7 +16,7 @@ const Modal = ({ isOpen, onClose, title, children, footer }) => {
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
       <div
-        className="modal"
+        className={`modal ${className}`.trim()}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

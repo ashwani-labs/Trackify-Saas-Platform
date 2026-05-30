@@ -2,25 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllUsers, updateUserStatus } from '../features/users/userSlice';
 import Pagination from '../components/common/Pagination';
-import {
-  Users,
-  UserCheck,
-  UserX,
-  Clock,
-  ShieldCheck,
-  Mail,
-  Search,
-  RefreshCw,
-  UserPlus,
-  X,
-  User,
-  Lock,
-  Globe,
-  Copy,
-  Loader2,
-} from 'lucide-react';
+import { Globe, Copy, Search, RefreshCw, UserPlus } from 'lucide-react';
 import { registerUser } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
+import { PageHeader, Button, Input, Modal, Badge, Alert } from '@trackify/shared';
 
 const STATUS_VARIANTS = {
   ACTIVE: 'success',
@@ -84,146 +69,78 @@ const TeamPage = () => {
       )
     : allUsers;
 
+  const closeModal = () => setIsModalOpen(false);
+
   return (
-    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
-      <nav style={{ marginBottom: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-        Administration / <span style={{ color: 'var(--text-main)' }}>Team</span>
-      </nav>
+    <div className="page">
+      <PageHeader
+        breadcrumb={
+          <>
+            Administration / <strong>Team</strong>
+          </>
+        }
+        title="Users and Permissions"
+        subtitle="Manage who has access to this workspace and their respective roles."
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              className="icon-btn"
+              aria-label="Refresh team list"
+              isLoading={isLoading}
+              onClick={() => dispatch(fetchAllUsers({ tenantId, page: allUsersPage, size: 10 }))}
+              leftIcon={!isLoading ? <RefreshCw size={16} /> : null}
+            />
+            <Button leftIcon={<UserPlus size={16} />} onClick={() => setIsModalOpen(true)}>
+              Add Member
+            </Button>
+          </>
+        }
+      />
 
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '2rem',
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-            Users and Permissions
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            Manage who has access to this workspace and their respective roles.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button
-            className="theme-toggle"
-            onClick={() => dispatch(fetchAllUsers({ tenantId, page: allUsersPage, size: 10 }))}
-            disabled={isLoading}
-            style={{ width: '32px', height: '32px' }}
-          >
-            {isLoading ? (
-              <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} />
-            ) : (
-              <RefreshCw size={16} />
-            )}
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => setIsModalOpen(true)}
-            style={{ height: '32px' }}
-          >
-            <UserPlus size={16} /> Add Member
-          </button>
-        </div>
-      </header>
-
-      <div
-        className="card"
-        style={{
-          padding: '1rem 1.25rem',
-          marginBottom: '2rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1rem',
-          backgroundColor: '#EBECF0',
-          border: 'none',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Globe style={{ color: 'var(--primary)' }} size={20} />
-          <div style={{ fontSize: '0.875rem' }}>
-            <span style={{ color: 'var(--text-muted)', fontWeight: '500' }}>
-              Self-registration Link:
-            </span>
-            <code style={{ marginLeft: '0.75rem', color: 'var(--primary)', fontWeight: '700' }}>
-              {tenantUrl}/register
-            </code>
+      <div className="card team-banner">
+        <div className="team-banner__content">
+          <Globe className="team-banner__icon" size={20} aria-hidden />
+          <div>
+            <span className="team-banner__label">Self-registration Link:</span>
+            <code className="team-banner__link">{tenantUrl}/register</code>
           </div>
         </div>
-        <button
-          className="btn btn-secondary"
-          style={{
-            padding: '0.3rem 0.75rem',
-            fontSize: '0.75rem',
-            height: '24px',
-            backgroundColor: 'white',
-          }}
+        <Button
+          variant="secondary"
+          size="sm"
+          className="team-banner__copy"
+          leftIcon={<Copy size={12} />}
           onClick={() => copyToClipboard(`${tenantUrl}/register`, 'Link')}
         >
-          <Copy size={12} /> Copy
-        </button>
+          Copy
+        </Button>
       </div>
 
-      <div className="card" style={{ padding: 0 }}>
-        <div
-          style={{
-            padding: '1.25rem 1.5rem',
-            borderBottom: '1px solid var(--border-main)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '0.875rem',
-              fontWeight: '700',
-              color: 'var(--text-muted)',
-              textTransform: 'uppercase',
-            }}
-          >
-            Members ({allUsersTotalElements ?? 0})
-          </h2>
-          <div style={{ position: 'relative', width: '240px' }}>
-            <Search
-              style={{
-                position: 'absolute',
-                left: '0.75rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={14}
-            />
-            <input
-              className="input-field"
-              style={{ paddingLeft: '2.25rem', height: '32px', fontSize: '0.8rem' }}
-              placeholder="Filter members..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      <div className="card card--flush">
+        <div className="card-section-header">
+          <h2 className="card-section-title">Members ({allUsersTotalElements ?? 0})</h2>
+          <div className="search-field">
+            <div className="input-wrap">
+              <Search className="input-wrap__icon" size={14} aria-hidden />
+              <input
+                className="input input--with-icon input--sm"
+                placeholder="Filter members..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="Filter team members"
+              />
+            </div>
           </div>
         </div>
 
         {error && (
-          <div
-            style={{
-              padding: '1rem',
-              margin: '1rem',
-              backgroundColor: '#FFEBE6',
-              color: '#BF2600',
-              borderRadius: '3px',
-              fontSize: '0.8rem',
-            }}
-          >
+          <Alert variant="danger" className="alert--inset">
             {error}
-          </div>
+          </Alert>
         )}
 
-        <div className="table-wrapper" style={{ border: 'none', marginTop: 0, borderRadius: 0 }}>
+        <div className="table-wrapper table-wrapper--embedded">
           <table>
             <thead>
               <tr>
@@ -248,80 +165,43 @@ const TeamPage = () => {
                   {filtered.map((u) => (
                     <tr key={u.id}>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <div
-                            style={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '50%',
-                              background: '#F4F5F7',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '0.75rem',
-                              fontWeight: '600',
-                              color: '#42526E',
-                            }}
-                          >
+                        <div className="member-cell">
+                          <div className="avatar-md" aria-hidden>
                             {(u.fullName || u.email).charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div style={{ fontWeight: '500', fontSize: '0.875rem' }}>
-                              {u.fullName || '—'}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                              {u.email}
-                            </div>
+                            <div className="member-name">{u.fullName || '—'}</div>
+                            <div className="member-email">{u.email}</div>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <span
-                          className="badge"
-                          style={{
-                            backgroundColor: '#DEEBFF',
-                            color: '#0052CC',
-                            fontSize: '0.65rem',
-                          }}
-                        >
-                          {u.role}
-                        </span>
+                        <Badge variant="primary">{u.role}</Badge>
                       </td>
                       <td>
-                        <span
-                          className={`badge badge-${STATUS_VARIANTS[u.status] || 'primary'}`}
-                          style={{ fontSize: '0.65rem' }}
-                        >
-                          {u.status}
-                        </span>
+                        <Badge variant={STATUS_VARIANTS[u.status] || 'primary'}>{u.status}</Badge>
                       </td>
-                      <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        {new Date(u.createdAt).toLocaleDateString()}
-                      </td>
+                      <td className="member-email">{new Date(u.createdAt).toLocaleDateString()}</td>
                       <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                        <div className="table-actions">
                           {u.status !== 'ACTIVE' && u.role !== 'ADMIN' && (
-                            <button
-                              className="btn btn-secondary"
+                            <Button
+                              variant="secondary"
+                              size="sm"
                               onClick={() => handleStatusChange(u.id, 'ACTIVE')}
-                              style={{ height: '24px', fontSize: '0.7rem', padding: '0 0.5rem' }}
                             >
                               Activate
-                            </button>
+                            </Button>
                           )}
                           {u.status === 'ACTIVE' && u.role !== 'ADMIN' && (
-                            <button
-                              className="btn btn-secondary"
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="btn--danger-text"
                               onClick={() => handleStatusChange(u.id, 'INACTIVE')}
-                              style={{
-                                height: '24px',
-                                fontSize: '0.7rem',
-                                padding: '0 0.5rem',
-                                color: 'var(--danger)',
-                              }}
                             >
                               Deactivate
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </td>
@@ -329,15 +209,7 @@ const TeamPage = () => {
                   ))}
                   {filtered.length === 0 && !isLoading && (
                     <tr>
-                      <td
-                        colSpan={5}
-                        style={{
-                          textAlign: 'center',
-                          padding: '4rem',
-                          color: 'var(--text-muted)',
-                          fontSize: '0.875rem',
-                        }}
-                      >
+                      <td colSpan={5} className="table-empty">
                         No team members found.
                       </td>
                     </tr>
@@ -349,7 +221,7 @@ const TeamPage = () => {
         </div>
 
         {allUsersTotalPages > 1 && (
-          <div style={{ padding: '1rem', borderTop: '1px solid var(--border-main)' }}>
+          <div className="card-footer">
             <Pagination
               currentPage={allUsersPage}
               totalPages={allUsersTotalPages}
@@ -359,105 +231,70 @@ const TeamPage = () => {
         )}
       </div>
 
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 style={{ fontSize: '1rem', fontWeight: '600' }}>Add Team Member</h2>
-              <button className="theme-toggle" onClick={() => setIsModalOpen(false)}>
-                <X size={18} />
-              </button>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title="Add Team Member"
+        className="modal--narrow"
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button type="submit" form="add-member-form" isLoading={isAdding}>
+              Add Member
+            </Button>
+          </>
+        }
+      >
+        <form id="add-member-form" className="form-stack" onSubmit={handleAddMember}>
+          <Input
+            id="member-full-name"
+            label="Full name"
+            required
+            placeholder="e.g. John Doe"
+            value={formData.fullName}
+            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+          />
+          <Input
+            id="member-email"
+            label="Email address"
+            type="email"
+            required
+            placeholder="john@company.com"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          />
+          <div className="form-group">
+            <label className="form-label" htmlFor="member-password">
+              Password
+            </label>
+            <div className="input-row">
+              <input
+                id="member-password"
+                className="input"
+                type="text"
+                required
+                placeholder="Min 6 characters"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    password: Math.random().toString(36).slice(-8),
+                  })
+                }
+              >
+                Auto
+              </Button>
             </div>
-            <form onSubmit={handleAddMember}>
-              <div className="modal-body">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
-                      FULL NAME
-                    </label>
-                    <input
-                      className="input-field"
-                      required
-                      placeholder="e.g. John Doe"
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      style={{ height: '36px', fontSize: '0.875rem' }}
-                    />
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
-                      EMAIL ADDRESS
-                    </label>
-                    <input
-                      className="input-field"
-                      type="email"
-                      required
-                      placeholder="john@company.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      style={{ height: '36px', fontSize: '0.875rem' }}
-                    />
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ fontSize: '0.7rem', fontWeight: '700' }}>
-                      PASSWORD
-                    </label>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <input
-                        className="input-field"
-                        type="text"
-                        required
-                        placeholder="Min 6 characters"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        style={{ height: '36px', fontSize: '0.875rem' }}
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() =>
-                          setFormData({
-                            ...formData,
-                            password: Math.random().toString(36).slice(-8),
-                          })
-                        }
-                        style={{ height: '36px', padding: '0 0.75rem', fontSize: '0.7rem' }}
-                      >
-                        Auto
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="btn btn-secondary"
-                  style={{ height: '32px' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isAdding}
-                  className="btn btn-primary"
-                  style={{ height: '32px', minWidth: '120px' }}
-                >
-                  {isAdding ? (
-                    <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} />
-                  ) : (
-                    'Add Member'
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </div>
   );
 };

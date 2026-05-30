@@ -97,8 +97,8 @@ Trackify is a multi-tenant project management SaaS with:
 
 ### Phase 1: Shared UI Consistency
 
-- [ ] Migrate `tenant-app` pages still using inline styles:
-  - [ ] `TeamPage.jsx`
+- [x] Migrate `tenant-app` pages still using inline styles:
+  - [x] `TeamPage.jsx`
   - [ ] `DashboardPage.jsx`
   - [ ] `ProfilePage.jsx`
   - [ ] `RegisterPage.jsx`
@@ -142,10 +142,11 @@ Trackify is a multi-tenant project management SaaS with:
 4. Remove duplicate `api-gateway` package/classes.
 5. Add `IssueService` unit tests.
 6. Add Vitest + React Testing Library setup and smoke tests.
-7. Migrate `TeamPage.jsx` to shared UI components and token classes.
-8. Replace master dashboard fake growth chart.
+7. ~~Migrate `TeamPage.jsx` to shared UI components and token classes.~~
+8. ~~Replace master dashboard fake growth chart.~~
 9. Add keyboard navigation to `GlobalSearch.jsx` (arrow keys / Enter).
-10. Add OpenAPI generation at the gateway or service level.
+10. ~~Add OpenAPI generation at the gateway or service level.~~
+11. Migrate `DashboardPage.jsx` to shared UI components and token classes.
 
 ## Tracking Notes
 

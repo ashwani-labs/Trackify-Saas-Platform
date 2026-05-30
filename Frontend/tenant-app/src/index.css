@@ -519,8 +519,40 @@ tr:hover td {
   border-color: var(--primary);
 }
 
-.stat-footer {
-  font-size: 0.75rem;
+.team-banner {
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--surface-raised);
+  border: none;
+}
+
+.team-banner__content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.team-banner__label {
   color: var(--text-muted);
-  margin-top: auto;
+  font-weight: 500;
+}
+
+.team-banner__link {
+  margin-left: 0.75rem;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.team-banner__icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.team-banner__copy {
+  background-color: var(--bg-surface);
 }

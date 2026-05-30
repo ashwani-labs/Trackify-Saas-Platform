@@ -24,6 +24,7 @@ const Button = forwardRef(
       `btn--${variant}`,
       fullWidth && 'btn--full',
       size === 'lg' && 'btn--lg',
+      size === 'sm' && 'btn--sm',
       className,
     ]
       .filter(Boolean)
@@ -32,11 +33,14 @@ const Button = forwardRef(
     return (
       <button ref={ref} type={type} disabled={isDisabled} className={classes} {...rest}>
         {isLoading ? (
-          <Loader2 size={size === 'lg' ? 18 : 16} className="btn-spinner" style={{ animation: 'tf-spin 1s linear infinite' }} />
+          <Loader2
+            size={size === 'lg' ? 18 : 16}
+            className="btn-spinner"
+          />
         ) : (
           leftIcon
         )}
-        <span>{children}</span>
+        {children != null && children !== '' && <span>{children}</span>}
         {!isLoading && rightIcon}
       </button>
     );
