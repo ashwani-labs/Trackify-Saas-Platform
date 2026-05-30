@@ -45,6 +45,15 @@
   --overlay-scrim: rgba(9, 30, 66, 0.54);
   --surface-raised: var(--bg-aside);
   --surface-overlay: var(--bg-input);
+
+  /* Chart / status accents (map to palette) */
+  --chart-todo: var(--text-muted);
+  --chart-progress: var(--warning);
+  --chart-done: var(--success);
+  --accent-surface: color-mix(in srgb, var(--accent) 14%, var(--bg-surface));
+  --primary-surface: color-mix(in srgb, var(--primary) 14%, var(--bg-surface));
+  --success-surface: color-mix(in srgb, var(--success) 14%, var(--bg-surface));
+  --code-bg: var(--surface-raised);
 }
 
 [data-theme='dark'] {
