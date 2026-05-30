@@ -99,8 +99,8 @@ Trackify is a multi-tenant project management SaaS with:
 
 - [x] Migrate `tenant-app` pages still using inline styles:
   - [x] `TeamPage.jsx`
-  - [ ] `DashboardPage.jsx`
-  - [ ] `ProfilePage.jsx`
+  - [x] `DashboardPage.jsx`
+  - [x] `ProfilePage.jsx`
   - [ ] `RegisterPage.jsx`
   - [ ] `ForgotPasswordPage.jsx`
   - [ ] `ResetPasswordPage.jsx`
