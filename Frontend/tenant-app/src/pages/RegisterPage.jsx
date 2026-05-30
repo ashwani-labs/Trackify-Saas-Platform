@@ -1,20 +1,13 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../features/auth/authSlice';
 import AuthLayout from '../layouts/AuthLayout';
-import {
-  UserPlus,
-  Mail,
-  Lock,
-  User,
-  Loader2,
-  CheckCircle2,
-  ChevronRight,
-  Globe,
-} from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import { Button, Input, Alert } from '@trackify/shared';
 
 const RegisterPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -41,48 +34,17 @@ const RegisterPage = () => {
   if (isSuccess) {
     return (
       <AuthLayout title="Check your email" subtitle="We've received your request">
-        <div
-          style={{ textAlign: 'center', animation: 'fadeIn 0.4s ease-out', marginTop: '1.5rem' }}
-        >
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              background: '#E3FCEF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.5rem',
-              color: '#36B37E',
-            }}
-          >
+        <div className="auth-success">
+          <div className="auth-icon-circle auth-icon-circle--success">
             <CheckCircle2 size={32} />
           </div>
-          <p
-            style={{
-              color: 'var(--text-main)',
-              marginBottom: '2rem',
-              lineHeight: '1.6',
-              fontSize: '0.875rem',
-            }}
-          >
+          <p className="auth-message">
             Your registration is pending approval by your workspace administrator. You'll receive an
             email once your account is active.
           </p>
-          <Link
-            to="/login"
-            className="btn btn-primary"
-            style={{
-              width: '100%',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <Button fullWidth size="lg" onClick={() => navigate('/login')}>
             Back to Login
-          </Link>
+          </Button>
         </div>
       </AuthLayout>
     );
@@ -90,124 +52,69 @@ const RegisterPage = () => {
 
   return (
     <AuthLayout title="Sign up for an account" subtitle="Join your team and start collaborating">
-      <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label
-            className="form-label"
-            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
-          >
-            FULL NAME
-          </label>
-          <input
-            name="fullName"
-            className="input-field"
-            type="text"
-            placeholder="e.g. Alex Rivera"
-            value={formData.fullName}
-            onChange={handleChange}
-            required
-            style={{ height: '40px', fontSize: '0.875rem' }}
-          />
-        </div>
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <Input
+          id="fullName"
+          name="fullName"
+          label="Full name"
+          type="text"
+          placeholder="e.g. Alex Rivera"
+          value={formData.fullName}
+          onChange={handleChange}
+          required
+          size="lg"
+        />
 
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label
-            className="form-label"
-            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
-          >
-            EMAIL ADDRESS
-          </label>
-          <input
-            name="email"
-            className="input-field"
-            type="email"
-            placeholder="e.g. alex@company.com"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            style={{ height: '40px', fontSize: '0.875rem' }}
-          />
-        </div>
+        <Input
+          id="email"
+          name="email"
+          label="Email address"
+          type="email"
+          placeholder="e.g. alex@company.com"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          size="lg"
+        />
 
-        <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label
-            className="form-label"
-            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
-          >
-            WORKSPACE ID
-          </label>
-          <input
-            name="tenantId"
-            className="input-field"
-            type="number"
-            placeholder="Enter your workspace ID"
-            value={formData.tenantId}
-            onChange={handleChange}
-            required
-            style={{ height: '40px', fontSize: '0.875rem' }}
-          />
-        </div>
+        <Input
+          id="tenantId"
+          name="tenantId"
+          label="Workspace ID"
+          type="number"
+          placeholder="Enter your workspace ID"
+          value={formData.tenantId}
+          onChange={handleChange}
+          required
+          size="lg"
+        />
 
-        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-          <label
-            className="form-label"
-            style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)' }}
-          >
-            PASSWORD
-          </label>
-          <input
-            name="password"
-            className="input-field"
-            type="password"
-            placeholder="Create a strong password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            style={{ height: '40px', fontSize: '0.875rem' }}
-          />
-        </div>
+        <Input
+          id="password"
+          name="password"
+          label="Password"
+          type="password"
+          placeholder="Create a strong password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+          size="lg"
+        />
 
         {error && (
-          <div
-            style={{
-              padding: '0.75rem',
-              marginBottom: '1.5rem',
-              backgroundColor: '#FFEBE6',
-              color: '#BF2600',
-              borderRadius: '3px',
-              fontSize: '0.8rem',
-              textAlign: 'center',
-              border: '1px solid #FFBDAD',
-            }}
-          >
+          <Alert variant="danger" center className="auth-alert">
             {error}
-          </div>
+          </Alert>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn btn-primary"
-          style={{ width: '100%', height: '40px', fontSize: '0.875rem', fontWeight: '600' }}
-        >
-          {loading ? (
-            <Loader2 style={{ animation: 'loading 2s linear infinite' }} size={18} />
-          ) : (
-            'Sign up'
-          )}
-        </button>
+        <Button type="submit" fullWidth size="lg" isLoading={loading}>
+          Sign up
+        </Button>
 
-        <div
-          style={{
-            marginTop: '2rem',
-            textAlign: 'center',
-            borderTop: '1px solid var(--border-main)',
-            paddingTop: '1.5rem',
-          }}
-        >
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+        <div className="auth-divider">
+          <p className="auth-footer-text">
             Already have an account?{' '}
-            <Link to="/login" style={{ color: 'var(--primary)', fontWeight: '600' }}>
+            <Link to="/login" className="auth-link">
               Log in
             </Link>
           </p>
