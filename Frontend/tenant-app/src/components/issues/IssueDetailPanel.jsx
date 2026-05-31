@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   clearSelectedIssue,
@@ -10,6 +10,7 @@ import {
   addAttachment,
   deleteAttachment,
 } from '../../features/issues/issueSlice';
+import { useFocusTrap, useEscapeKey } from '@trackify/shared';
 import {
   X,
   Edit2,
@@ -41,6 +42,7 @@ const STATUS_LABELS = { TODO: 'To Do', IN_PROGRESS: 'In Progress', DONE: 'Done' 
 
 const IssueDetailPanel = () => {
   const dispatch = useDispatch();
+  const panelRef = useRef(null);
   const { selectedIssue, comments, activity, isCommentLoading, isActivityLoading, isAttachmentLoading } =
     useSelector((s) => s.issues);
 
@@ -61,12 +63,15 @@ const IssueDetailPanel = () => {
     }
   }, [selectedIssue?.id, dispatch]);
 
+  const handleClose = useCallback(() => dispatch(clearSelectedIssue()), [dispatch]);
+
+  useFocusTrap(panelRef, Boolean(selectedIssue));
+  useEscapeKey(Boolean(selectedIssue), handleClose);
+
   if (!selectedIssue) return null;
 
   const issueComments = comments[selectedIssue.id] || [];
   const issueActivity = activity[selectedIssue.id] || [];
-
-  const handleClose = () => dispatch(clearSelectedIssue());
 
   const handleCommentSubmit = (e) => {
     e.preventDefault();
@@ -113,55 +118,25 @@ const IssueDetailPanel = () => {
       {/* Backdrop */}
       <div
         className="modal-overlay"
-        style={{ zIndex: 90, animation: 'fadeIn 0.2s ease-out' }}
+        style={{ zIndex: 90 }}
         onClick={handleClose}
+        role="presentation"
       />
 
-      {/* Slide-in Panel */}
       <aside
+        ref={panelRef}
         key={selectedIssue.id}
-        style={{
-          position: 'fixed',
-          right: 0,
-          top: 0,
-          height: '100vh',
-          width: '100%',
-          maxWidth: '550px',
-          backgroundColor: 'var(--bg-surface)',
-          borderLeft: '1px solid var(--border-main)',
-          zIndex: 100,
-          boxShadow: 'var(--shadow-xl)',
-          display: 'flex',
-          flexDirection: 'column',
-          animation: 'slideLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
+        className="issue-detail-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="issue-detail-title"
       >
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-          @keyframes slideLeft { 
-            from { transform: translateX(100%); } 
-            to { transform: translateX(0); } 
-          }
-        `,
-          }}
-        />
-
-        {/* Header */}
-        <div
-          style={{
-            padding: '1.25rem 1.75rem',
-            borderBottom: '1px solid var(--border-main)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-muted)' }}>
+        <div className="issue-detail-panel__header">
+          <span className="issue-detail-panel__key">
             {selectedIssue.issueKey ||
               `${selectedIssue.projectHeaderName}-${selectedIssue.id}`}
           </span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className="issue-detail-panel__actions">
             {!isEditing ? (
               <button
                 className="btn btn-secondary"
@@ -189,19 +164,26 @@ const IssueDetailPanel = () => {
               </>
             )}
             <button
+              type="button"
               className="theme-toggle"
               onClick={handleDelete}
               style={{ color: 'var(--danger)' }}
+              aria-label="Delete issue"
             >
               <Trash2 size={18} />
             </button>
-            <button className="theme-toggle" onClick={handleClose}>
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={handleClose}
+              aria-label="Close issue details"
+            >
               <X size={20} />
             </button>
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem 1.75rem' }}>
+        <div className="issue-detail-panel__body">
           {/* Title */}
           {isEditing ? (
             <input
@@ -212,18 +194,13 @@ const IssueDetailPanel = () => {
               onChange={handleEditChange}
             />
           ) : (
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>{selectedIssue.title}</h2>
+            <h2 id="issue-detail-title" style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>
+              {selectedIssue.title}
+            </h2>
           )}
 
           {/* Meta Grid */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '1.5rem',
-              marginBottom: '2.5rem',
-            }}
-          >
+          <div className="issue-detail-panel__meta">
             <div>
               <label className="form-label">Status</label>
               {isEditing ? (
@@ -383,15 +360,18 @@ const IssueDetailPanel = () => {
                   </div>
                   <div style={{ display: 'flex', gap: '0.25rem' }}>
                     <button
+                      type="button"
                       className="theme-toggle"
                       style={{ width: '28px', height: '28px' }}
                       onClick={() =>
                         window.open(`${API_BASE_URL}/issues/attachments/${a.id}/download`, '_blank')
                       }
+                      aria-label={`Download ${a.fileName}`}
                     >
                       <Download size={14} />
                     </button>
                     <button
+                      type="button"
                       className="theme-toggle"
                       style={{ width: '28px', height: '28px', color: 'var(--danger)' }}
                       onClick={() =>
@@ -399,6 +379,7 @@ const IssueDetailPanel = () => {
                           deleteAttachment({ issueId: selectedIssue.id, attachmentId: a.id })
                         )
                       }
+                      aria-label={`Delete attachment ${a.fileName}`}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -472,6 +453,7 @@ const IssueDetailPanel = () => {
                 <button
                   type="submit"
                   disabled={!commentText.trim() || isCommentLoading}
+                  aria-label="Send comment"
                   style={{
                     position: 'absolute',
                     bottom: '0.75rem',

@@ -58,7 +58,12 @@ const DashboardLayout = ({ children }) => {
     <div className="layout-container" style={{ flexDirection: 'column' }}>
       {/* Top Navigation */}
       <header className="top-bar">
-        <button className="theme-toggle show-mobile" onClick={() => setMobileOpen(true)}>
+        <button
+          type="button"
+          className="theme-toggle show-mobile"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open navigation menu"
+        >
           <Menu size={20} />
         </button>
 
@@ -111,15 +116,19 @@ const DashboardLayout = ({ children }) => {
           <NotificationBell />
 
           <button
+            type="button"
             className="theme-toggle"
             onClick={toggleTheme}
             style={{ width: '32px', height: '32px' }}
+            aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           >
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </button>
 
           <div
             className="avatar-circle"
+            role="img"
+            aria-label="User profile"
             style={{
               width: '28px',
               height: '28px',
@@ -153,7 +162,12 @@ const DashboardLayout = ({ children }) => {
         >
           <div className="sidebar-header show-mobile">
             <span className="logo-text">Trackify</span>
-            <button className="theme-toggle" onClick={() => setMobileOpen(false)}>
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Close navigation menu"
+            >
               <X size={20} />
             </button>
           </div>

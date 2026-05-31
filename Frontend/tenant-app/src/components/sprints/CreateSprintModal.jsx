@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { createSprint } from '../../features/sprints/sprintSlice';
 import toast from 'react-hot-toast';
+import { Modal, Button } from '@trackify/shared';
 
 const CreateSprintModal = ({ isOpen, onClose, projectId }) => {
   const dispatch = useDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     goal: '',
     startDate: '',
     endDate: '',
   });
-
-  if (!isOpen) return null;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,6 +25,7 @@ const CreateSprintModal = ({ isOpen, onClose, projectId }) => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await dispatch(
         createSprint({
@@ -33,165 +34,94 @@ const CreateSprintModal = ({ isOpen, onClose, projectId }) => {
         })
       ).unwrap();
       toast.success('Sprint created successfully');
+      setFormData({ name: '', goal: '', startDate: '', endDate: '' });
       onClose();
     } catch (err) {
       toast.error(err.message || 'Failed to create sprint');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000,
-      }}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Create Sprint"
+      className="modal--narrow"
+      footer={
+        <>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" form="create-sprint-form" isLoading={isSubmitting}>
+            Create Sprint
+          </Button>
+        </>
+      }
     >
-      <div
-        style={{
-          background: '#1c1c1c',
-          padding: '24px',
-          borderRadius: '8px',
-          width: '400px',
-          color: '#fff',
-        }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Create Sprint</h3>
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-        >
-          <div>
-            <label
-              style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#888' }}
-            >
-              Sprint Name
+      <form id="create-sprint-form" onSubmit={handleSubmit} className="form-stack">
+        <div className="form-group">
+          <label className="form-label" htmlFor="sprint-name">
+            Sprint Name *
+          </label>
+          <input
+            id="sprint-name"
+            name="name"
+            className="input-field"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            placeholder="Sprint 1"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label" htmlFor="sprint-goal">
+            Goal
+          </label>
+          <textarea
+            id="sprint-goal"
+            name="goal"
+            className="input-field"
+            value={formData.goal}
+            onChange={handleChange}
+            rows="3"
+            placeholder="What should this sprint achieve?"
+            style={{ resize: 'vertical' }}
+          />
+        </div>
+
+        <div className="form-row form-row--2">
+          <div className="form-group">
+            <label className="form-label" htmlFor="sprint-start">
+              Start Date
             </label>
             <input
-              name="name"
-              value={formData.name}
+              id="sprint-start"
+              type="date"
+              name="startDate"
+              className="input-field"
+              value={formData.startDate}
               onChange={handleChange}
-              required
-              style={{
-                width: '100%',
-                padding: '8px',
-                boxSizing: 'border-box',
-                background: '#2c2c2e',
-                border: '1px solid #444',
-                color: '#fff',
-                borderRadius: '4px',
-              }}
             />
           </div>
-          <div>
-            <label
-              style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#888' }}
-            >
-              Goal
+          <div className="form-group">
+            <label className="form-label" htmlFor="sprint-end">
+              End Date
             </label>
-            <textarea
-              name="goal"
-              value={formData.goal}
+            <input
+              id="sprint-end"
+              type="date"
+              name="endDate"
+              className="input-field"
+              value={formData.endDate}
               onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '8px',
-                boxSizing: 'border-box',
-                background: '#2c2c2e',
-                border: '1px solid #444',
-                color: '#fff',
-                borderRadius: '4px',
-                minHeight: '60px',
-              }}
             />
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{ flex: 1 }}>
-              <label
-                style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#888' }}
-              >
-                Start Date
-              </label>
-              <input
-                type="date"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  boxSizing: 'border-box',
-                  background: '#2c2c2e',
-                  border: '1px solid #444',
-                  color: '#fff',
-                  borderRadius: '4px',
-                }}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label
-                style={{ display: 'block', marginBottom: '4px', fontSize: '14px', color: '#888' }}
-              >
-                End Date
-              </label>
-              <input
-                type="date"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  boxSizing: 'border-box',
-                  background: '#2c2c2e',
-                  border: '1px solid #444',
-                  color: '#fff',
-                  borderRadius: '4px',
-                }}
-              />
-            </div>
-          </div>
-          <div
-            style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}
-          >
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '4px',
-                background: 'transparent',
-                color: '#ccc',
-                border: '1px solid #444',
-                cursor: 'pointer',
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              style={{
-                padding: '8px 16px',
-                borderRadius: '4px',
-                background: '#3b82f6',
-                color: '#fff',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              Create
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 };
 
