@@ -95,6 +95,7 @@ const initialState = {
   members: [],
   stats: null,
   statsLoading: false,
+  statsError: null,
   isLoading: false,
   memberLoading: false,
   error: null,
@@ -144,18 +145,29 @@ const projectSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
+      .addCase(fetchProjectById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
       .addCase(fetchProjectById.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.currentProject = action.payload;
+      })
+      .addCase(fetchProjectById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       })
       .addCase(fetchProjectStats.pending, (state) => {
         state.statsLoading = true;
+        state.statsError = null;
       })
       .addCase(fetchProjectStats.fulfilled, (state, action) => {
         state.statsLoading = false;
         state.stats = action.payload;
       })
-      .addCase(fetchProjectStats.rejected, (state) => {
+      .addCase(fetchProjectStats.rejected, (state, action) => {
         state.statsLoading = false;
+        state.statsError = action.payload;
       })
       .addCase(fetchProjectMembers.pending, (state) => {
         state.memberLoading = true;

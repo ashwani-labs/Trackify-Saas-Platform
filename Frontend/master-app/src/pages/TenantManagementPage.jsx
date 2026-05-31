@@ -8,6 +8,7 @@ import {
   selectTenantLoading,
   selectTenantCurrentPage,
   selectTenantTotalPages,
+  selectTenantError,
 } from '../features/tenants/tenantSlice';
 import CreateTenantModal from '../components/tenants/CreateTenantModal';
 import Pagination from '../components/common/Pagination';
@@ -15,6 +16,7 @@ import { Globe, Activity, RefreshCw, Plus, Trash2 } from 'lucide-react';
 import PageHeader from '../ui/PageHeader';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+import { Alert, EmptyState } from '@trackify/shared';
 
 const TenantManagementPage = () => {
   const dispatch = useDispatch();
@@ -23,6 +25,7 @@ const TenantManagementPage = () => {
   const isLoading = useSelector(selectTenantLoading);
   const currentPage = useSelector(selectTenantCurrentPage);
   const totalPages = useSelector(selectTenantTotalPages);
+  const error = useSelector(selectTenantError);
 
   useEffect(() => {
     dispatch(loadTenants({ page: 0, size: 10 }));
@@ -67,6 +70,8 @@ const TenantManagementPage = () => {
         }
       />
 
+      {error && <Alert className="page-alert">{error}</Alert>}
+
       <div className="stats-grid">
         <div className="stat-card stat-card--primary">
           <div className="stat-header stat-header--between">
@@ -110,7 +115,14 @@ const TenantManagementPage = () => {
               </tr>
             </thead>
             <tbody>
-              {tenants.map((tenant) => (
+              {isLoading && tenants.length === 0 ? (
+                <tr>
+                  <td colSpan={6}>
+                    <div className="skeleton" style={{ height: '200px', width: '100%' }} />
+                  </td>
+                </tr>
+              ) : (
+                tenants.map((tenant) => (
                 <tr key={tenant.id}>
                   <td>
                     <div className="org-row">
@@ -156,11 +168,15 @@ const TenantManagementPage = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
               {tenants.length === 0 && !isLoading && (
                 <tr>
-                  <td colSpan={6} className="table-empty">
-                    No tenants found.
+                  <td colSpan={6}>
+                    <EmptyState
+                      title="No tenants yet"
+                      description="Create your first organization to get started."
+                    />
                   </td>
                 </tr>
               )}

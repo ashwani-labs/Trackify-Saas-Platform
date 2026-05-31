@@ -156,5 +156,6 @@ export const selectTenantStatsLoading = (state) => state.tenants.isStatsLoading;
 export const selectDashboardStats = (state) => state.tenants.dashboardStats;
 export const selectTenantCurrentPage = (state) => state.tenants.currentPage;
 export const selectTenantTotalPages = (state) => state.tenants.totalPages;
+export const selectTenantError = (state) => state.tenants.error;
 
 export default tenantSlice.reducer;

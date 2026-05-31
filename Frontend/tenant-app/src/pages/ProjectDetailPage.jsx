@@ -16,7 +16,7 @@ import ProjectMembersModal from '../components/projects/ProjectMembersModal';
 import BacklogView from '../components/sprints/BacklogView';
 import CreateSprintModal from '../components/sprints/CreateSprintModal';
 import { Users, LayoutDashboard, ListTodo, Plus, Calendar } from 'lucide-react';
-import { Button, PageHeader } from '@trackify/shared';
+import { Button, PageHeader, Alert } from '@trackify/shared';
 
 const STAT_CONFIG = [
   { label: 'To Do', status: 'TODO', pillClass: 'stat-pill--todo' },
@@ -29,7 +29,9 @@ const ProjectDetailPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
 
-  const { currentProject, isLoading: projectLoading } = useSelector((s) => s.projects);
+  const { currentProject, isLoading: projectLoading, error: projectError } = useSelector(
+    (s) => s.projects
+  );
   const { selectedIssue, issues, filters } = useSelector((s) => s.issues);
   const { list: sprints } = useSelector((s) => s.sprints);
 
@@ -82,6 +84,14 @@ const ProjectDetailPage = () => {
       <div className="page-loading">
         <div className="skeleton page-loading__bar" />
         <div className="skeleton page-loading__body" />
+      </div>
+    );
+  }
+
+  if (projectError && !currentProject) {
+    return (
+      <div className="page">
+        <Alert className="page-alert">{projectError}</Alert>
       </div>
     );
   }

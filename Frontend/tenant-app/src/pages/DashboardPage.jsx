@@ -23,7 +23,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { PageHeader, Button } from '@trackify/shared';
+import { PageHeader, Button, Alert } from '@trackify/shared';
 
 const CHART_TOOLTIP_STYLE = {
   background: 'var(--bg-surface)',
@@ -37,7 +37,7 @@ const DashboardPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, tenantId, tenantDomain } = useSelector((s) => s.auth);
-  const { stats, statsLoading } = useSelector((s) => s.projects);
+  const { stats, statsLoading, statsError } = useSelector((s) => s.projects);
 
   const tenantUrl = `http://${tenantDomain}.trackify.com:5174`;
 
@@ -124,6 +124,8 @@ const DashboardPage = () => {
           </>
         }
       />
+
+      {statsError && <Alert className="page-alert">{statsError}</Alert>}
 
       {user?.role === 'ADMIN' && (
         <div className="card workspace-card">
