@@ -21,10 +21,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import PageHeader from '../ui/PageHeader';
-import Button from '../ui/Button';
-import Badge from '../ui/Badge';
-import EmptyState from '../ui/EmptyState';
+import { PageHeader, Button, Badge, EmptyState } from '@trackify/shared';
 
 const CHART_TOOLTIP_STYLE = {
   background: 'var(--bg-surface)',

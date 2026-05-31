@@ -30,6 +30,8 @@ class AuthControllerTest {
   @MockBean private com.trackify.auth.repository.TenantRepository tenantRepository;
   @MockBean private com.trackify.auth.repository.UserLookupRepository userLookupRepository;
   @MockBean private com.trackify.common.security.JwtUtil jwtUtil;
+  @MockBean private com.trackify.auth.filter.JwtAuthFilter jwtAuthFilter;
+  @MockBean private com.trackify.auth.service.FileStorageService fileStorageService;
 
   @Autowired private ObjectMapper objectMapper;
 

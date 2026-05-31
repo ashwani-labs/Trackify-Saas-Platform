@@ -13,10 +13,7 @@ import {
 import CreateTenantModal from '../components/tenants/CreateTenantModal';
 import Pagination from '../components/common/Pagination';
 import { Globe, Activity, RefreshCw, Plus, Trash2 } from 'lucide-react';
-import PageHeader from '../ui/PageHeader';
-import Button from '../ui/Button';
-import Badge from '../ui/Badge';
-import { Alert, EmptyState } from '@trackify/shared';
+import { PageHeader, Button, Badge, Alert, EmptyState } from '@trackify/shared';
 
 const TenantManagementPage = () => {
   const dispatch = useDispatch();
