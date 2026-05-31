@@ -116,15 +116,15 @@ Trackify is a multi-tenant project management SaaS with:
 
 ### Phase 2: Usability and Accessibility
 
-- [ ] Add keyboard navigation for global search results.
-- [ ] Add `aria-label` to icon-only buttons.
-- [ ] Add modal focus trap and Escape close behavior.
-- [ ] Add consistent loading, empty, and error states for every list page.
-- [ ] Verify mobile behavior for:
-  - [ ] tenant dashboard
-  - [ ] team management
-  - [ ] project board/backlog
-  - [ ] master tenant management
+- [x] Add keyboard navigation for global search results.
+- [x] Add `aria-label` to icon-only buttons.
+- [x] Add modal focus trap and Escape close behavior.
+- [x] Add consistent loading, empty, and error states for every list page.
+- [x] Verify mobile behavior for:
+  - [x] tenant dashboard
+  - [x] team management
+  - [x] project board/backlog
+  - [x] master tenant management
 
 ### Phase 3: Product Polish
 
