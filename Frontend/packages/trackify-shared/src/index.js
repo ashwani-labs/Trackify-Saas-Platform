@@ -10,3 +10,4 @@ export { default as Badge } from './components/Badge.jsx';
 export { default as Modal } from './components/Modal.jsx';
 export { default as EmptyState } from './components/EmptyState.jsx';
 export { default as PageHeader } from './components/PageHeader.jsx';
+export { useFocusTrap, useEscapeKey } from './hooks/useFocusTrap.js';

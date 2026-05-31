@@ -1,21 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import { useFocusTrap, useEscapeKey } from '../hooks/useFocusTrap.js';
 
 const Modal = ({ isOpen, onClose, title, children, footer, className = '' }) => {
+  const dialogRef = useRef(null);
+
+  useFocusTrap(dialogRef, isOpen);
+  useEscapeKey(isOpen, onClose);
+
   useEffect(() => {
     if (!isOpen) return undefined;
-    const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
     };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose} role="presentation">
       <div
+        ref={dialogRef}
         className={`modal ${className}`.trim()}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
