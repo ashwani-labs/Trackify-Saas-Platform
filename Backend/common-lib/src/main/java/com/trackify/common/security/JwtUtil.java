@@ -2,7 +2,9 @@ package com.trackify.common.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,8 +24,22 @@ public class JwtUtil {
   }
 
   private SecretKey getSigningKey() {
-    byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecret());
-    return Keys.hmacShaKeyFor(keyBytes);
+    return Keys.hmacShaKeyFor(resolveSecretKeyBytes(jwtProperties.getSecret()));
+  }
+
+  /**
+   * Accepts either a Base64-encoded key (from {@code openssl rand -base64 32}) or a plain-text
+   * secret of at least 32 characters for local development.
+   */
+  static byte[] resolveSecretKeyBytes(String secret) {
+    if (secret == null || secret.isBlank()) {
+      throw new IllegalArgumentException("JWT secret must not be blank");
+    }
+    try {
+      return Decoders.BASE64.decode(secret);
+    } catch (DecodingException | IllegalArgumentException ex) {
+      return secret.getBytes(StandardCharsets.UTF_8);
+    }
   }
 
   public String generateToken(String subject, Map<String, Object> extraClaims) {
