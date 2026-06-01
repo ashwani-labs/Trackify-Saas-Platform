@@ -25,7 +25,7 @@
     <lombok.version>1.18.32</lombok.version>
     <mapstruct.version>1.5.5.Final</mapstruct.version>
     <springdoc.version>2.6.0</springdoc.version>
-    <bucket4j.version>8.10.1</bucket4j.version>
+    <bucket4j.version>8.11.1</bucket4j.version>
     <aws.sdk.version>2.25.60</aws.sdk.version>
   </properties>
 
@@ -75,7 +75,7 @@
 
       <dependency>
         <groupId>com.bucket4j</groupId>
-        <artifactId>bucket4j-core</artifactId>
+        <artifactId>bucket4j_jdk17-core</artifactId>
         <version>${bucket4j.version}</version>
       </dependency>
 
