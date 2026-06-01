@@ -99,10 +99,10 @@ class TenantServiceTest {
 
     doThrow(new RuntimeException("db provisioning failed")).when(jdbcTemplate).execute(anyString());
 
-    RuntimeException ex =
-        assertThrows(RuntimeException.class, () -> tenantService.createTenant(createRequest));
+    AppException ex =
+        assertThrows(AppException.class, () -> tenantService.createTenant(createRequest));
 
-    assertEquals("db provisioning failed", ex.getMessage());
+    assertEquals("Failed to provision tenant database: db provisioning failed", ex.getMessage());
     verify(tenantRepository).delete(savedTenant);
     verify(userLookupRepository, never()).save(any());
   }
@@ -125,11 +125,11 @@ class TenantServiceTest {
     doThrow(new RuntimeException("provisioning exploded")).when(jdbcTemplate).execute(anyString());
     doThrow(new RuntimeException("cleanup exploded")).when(tenantRepository).delete(savedTenant);
 
-    RuntimeException ex =
-        assertThrows(RuntimeException.class, () -> tenantService.createTenant(createRequest));
+    AppException ex =
+        assertThrows(AppException.class, () -> tenantService.createTenant(createRequest));
 
-    // Service should propagate the original provisioning exception even if cleanup also fails.
-    assertEquals("provisioning exploded", ex.getMessage());
+    assertEquals(
+        "Failed to provision tenant database: provisioning exploded", ex.getMessage());
     verify(tenantRepository).delete(savedTenant);
     verify(userLookupRepository, never()).save(any());
   }
