@@ -53,14 +53,14 @@ class IssueServiceTest {
   void setUp() {
     project =
         Project.builder().id(10L).name("Platform").projectKey("PLATFORM").issueCounter(0L).build();
-    when(projectRepository.save(any(Project.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
     baseRequest = IssueRequest.builder().title("Bug: login fails").projectId(10L).build();
   }
 
   @Test
   void createIssue_setsDefaultStatusAndPriority_whenNotProvided() {
     when(projectRepository.findById(10L)).thenReturn(Optional.of(project));
+    when(projectRepository.save(any(Project.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
     when(issueRepository.save(any(Issue.class)))
         .thenAnswer(
             invocation -> {

@@ -9,7 +9,7 @@ import com.trackify.project.enums.NotificationType;
 import com.trackify.project.repository.NotificationRepository;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,16 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class NotificationService {
 
   private final NotificationRepository notificationRepository;
   private final JdbcTemplate jdbcTemplate;
-
-  public NotificationService(
-      NotificationRepository notificationRepository, DataSource dataSource) {
-    this.notificationRepository = notificationRepository;
-    this.jdbcTemplate = new JdbcTemplate(dataSource);
-  }
 
   @Transactional
   public void notifyUserApprovalPending(Long pendingUserId, String email, String fullName) {

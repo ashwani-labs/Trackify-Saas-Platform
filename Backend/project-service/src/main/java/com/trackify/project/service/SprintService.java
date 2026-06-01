@@ -70,7 +70,7 @@ public class SprintService {
   }
 
   @Transactional
-  public SprintResponse startSprint(Long id) {
+  public SprintResponse startSprint(Long id, Long actorUserId) {
     Sprint sprint =
         sprintRepository
             .findById(id)

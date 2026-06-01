@@ -165,13 +165,10 @@ public class IssueService {
 
     issue = issueRepository.save(issue);
 
-    if (request.getStatus() != null && request.getStatus() != previousStatus) {
+    if (request.getStatus() != null && !Objects.equals(request.getStatus(), previousStatus)) {
+      String fromStatus = previousStatus != null ? previousStatus.name() : "UNSET";
       activityService.recordStatusChanged(
-          projectId,
-          issue.getId(),
-          actorUserId,
-          previousStatus.name(),
-          issue.getStatus().name());
+          projectId, issue.getId(), actorUserId, fromStatus, issue.getStatus().name());
     }
 
     Long newAssignee = request.getAssigneeId();
