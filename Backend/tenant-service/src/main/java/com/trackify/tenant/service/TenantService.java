@@ -510,15 +510,9 @@ public class TenantService {
 
       jdbcTemplate.execute("FLUSH PRIVILEGES");
 
-      // 2. Create schema from versioned SQL template
+      // 2. Create schema (V1 is the full current schema; V2–V4 are legacy upgrade scripts only)
       String schemaSql = loadSqlTemplate("db/tenant/V1__tenant_schema.sql", dbName);
       executeSqlStatements(schemaSql);
-      String notificationsSql = loadSqlTemplate("db/tenant/V2__notifications.sql", dbName);
-      executeSqlStatements(notificationsSql);
-      String activitySql = loadSqlTemplate("db/tenant/V3__activity_events.sql", dbName);
-      executeSqlStatements(activitySql);
-      String issueKeysSql = loadSqlTemplate("db/tenant/V4__issue_keys.sql", dbName);
-      executeSqlStatements(issueKeysSql);
 
       // 3. Create Admin User
       String hashedPassword = passwordEncoder.encode(adminPassword);

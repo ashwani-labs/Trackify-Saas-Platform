@@ -1,3 +1,4 @@
+-- Legacy upgrade only: activity_events are created in V1__tenant_schema.sql for new tenants.
 CREATE TABLE IF NOT EXISTS {{DB_NAME}}.activity_events (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   project_id BIGINT NOT NULL,

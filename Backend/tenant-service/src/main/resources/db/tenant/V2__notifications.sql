@@ -1,3 +1,4 @@
+-- Legacy upgrade only: notifications are created in V1__tenant_schema.sql for new tenants.
 CREATE TABLE IF NOT EXISTS {{DB_NAME}}.notifications (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   user_id BIGINT NOT NULL,
