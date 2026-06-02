@@ -112,14 +112,17 @@ SPRING_DATASOURCE_PASSWORD=root
 VITE_API_BASE_URL=http://localhost:8080
 ```
 
-Email is optional for basic local development. To test email flows, set:
+Email is optional for basic local development. To send real mail, set Gmail App Password values in `.env` (no spaces in the password). `notification-service` loads the root `.env` automatically on startup.
 
 ```env
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=your-email@example.com
-MAIL_PASSWORD=your-app-password
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-16-char-app-password
+MAIL_FROM=your-email@gmail.com
 ```
+
+For IntelliJ, set the run configuration **Working directory** to the repo root (`trackify-saas-platform`) or `Backend/notification-service`, then restart `notification-service`.
 
 Security note: if real secrets were ever committed or pushed, rotate them before deployment.
 
