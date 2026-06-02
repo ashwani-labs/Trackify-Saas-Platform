@@ -57,6 +57,10 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <!-- Repo-root .env (parent of Backend/) -->
+          <workingDirectory>${project.basedir}/../..</workingDirectory>
+        </configuration>
       </plugin>
     </plugins>
   </build>
