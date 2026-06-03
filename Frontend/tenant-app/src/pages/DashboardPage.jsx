@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchProjectStats } from '../features/projects/projectSlice';
+import { fetchAllUsers } from '../features/users/userSlice';
 import {
   FolderKanban,
   CheckCircle2,
@@ -23,7 +24,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { PageHeader, Button, Alert } from '@trackify/shared';
+import { PageHeader, Button, Alert, OnboardingChecklist, ROLES } from '@trackify/shared';
 
 const CHART_TOOLTIP_STYLE = {
   background: 'var(--bg-surface)',
@@ -38,6 +39,8 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const { user, tenantId, tenantDomain } = useSelector((s) => s.auth);
   const { stats, statsLoading, statsError } = useSelector((s) => s.projects);
+  const { allUsersTotalElements, isLoading: usersLoading } = useSelector((s) => s.users);
+  const isAdmin = user?.role === ROLES.ADMIN;
 
   const tenantUrl = `http://${tenantDomain}.trackify.com:5174`;
 
@@ -49,6 +52,40 @@ const DashboardPage = () => {
   useEffect(() => {
     dispatch(fetchProjectStats());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isAdmin && tenantId) {
+      dispatch(fetchAllUsers({ tenantId, page: 0, size: 10 }));
+    }
+  }, [dispatch, isAdmin, tenantId]);
+
+  const hasProject = (stats?.totalProjects ?? 0) > 0;
+  const hasTeam = (allUsersTotalElements ?? 0) > 1;
+
+  const onboardingSteps = useMemo(
+    () => [
+      {
+        id: 'project',
+        label: 'Create your first project',
+        description: 'Organize issues, sprints, and boards in a dedicated workspace.',
+        done: hasProject,
+        actionLabel: 'Create project',
+        onAction: () => navigate('/projects', { state: { openCreate: true } }),
+      },
+      {
+        id: 'team',
+        label: 'Invite your first teammate',
+        description: 'Add colleagues or share your self-registration link so others can join.',
+        done: hasTeam,
+        actionLabel: 'Add member',
+        onAction: () => navigate('/team', { state: { openAdd: true } }),
+      },
+    ],
+    [hasProject, hasTeam, navigate]
+  );
+
+  const showOnboarding =
+    isAdmin && !statsLoading && !usersLoading && (!hasProject || !hasTeam);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -126,6 +163,14 @@ const DashboardPage = () => {
       />
 
       {statsError && <Alert className="page-alert">{statsError}</Alert>}
+
+      {showOnboarding && (
+        <OnboardingChecklist
+          title="Welcome to your workspace"
+          subtitle="A quick setup checklist — finish these steps to unlock the full Trackify experience."
+          steps={onboardingSteps}
+        />
+      )}
 
       {user?.role === 'ADMIN' && (
         <div className="card workspace-card">
