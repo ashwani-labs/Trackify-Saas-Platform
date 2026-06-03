@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchProjects, clearProjectError } from '../features/projects/projectSlice';
 import CreateProjectModal from '../components/projects/CreateProjectModal';
+import ProjectCard from '../components/projects/ProjectCard';
 import Pagination from '../components/common/Pagination';
-import { Plus, FolderKanban, ArrowRight, Layers, Clock, Users } from 'lucide-react';
+import { Plus, FolderKanban, Users } from 'lucide-react';
 import { ROLES, Button, Alert, EmptyState, PageHeader } from '@trackify/shared';
 
 const ProjectsPage = () => {
@@ -87,37 +88,11 @@ const ProjectsPage = () => {
       ) : (
         <div className="stats-grid">
           {projects.map((project) => (
-            <div
+            <ProjectCard
               key={project.id}
-              className="card project-card"
-              onClick={() => navigate(`/projects/${project.id}`)}
-              onKeyDown={(e) => e.key === 'Enter' && navigate(`/projects/${project.id}`)}
-              role="button"
-              tabIndex={0}
-            >
-              <div className="project-card__top">
-                <div className="project-card__identity">
-                  <div className="project-card__avatar">{project.name.charAt(0).toUpperCase()}</div>
-                  <span className="project-card__key">{project.key}</span>
-                </div>
-                <Layers size={16} className="project-card__icon" />
-              </div>
-
-              <div>
-                <h3 className="project-card__title">{project.name}</h3>
-                <p className="project-card__desc">
-                  {project.description || 'No description provided.'}
-                </p>
-              </div>
-
-              <div className="project-card__footer">
-                <span className="project-card__date">
-                  <Clock size={12} />
-                  Updated {new Date(project.createdAt).toLocaleDateString()}
-                </span>
-                <ArrowRight size={16} className="project-card__arrow" />
-              </div>
-            </div>
+              project={project}
+              onOpen={(id) => navigate(`/projects/${id}`)}
+            />
           ))}
         </div>
       )}
