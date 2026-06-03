@@ -18,4 +18,11 @@ public class ProjectResponse {
   private Long ownerId;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
+  private long totalIssues;
+  private long todoCount;
+  private long inProgressCount;
+  private long doneCount;
+  private long memberCount;
+  private String lastActivitySummary;
+  private LocalDateTime lastActivityAt;
 }
