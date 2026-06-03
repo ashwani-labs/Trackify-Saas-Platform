@@ -31,6 +31,10 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
   long countByStatusAndProjectIdIn(IssueStatus status, List<Long> projectIds);
 
+  long countByProjectId(Long projectId);
+
+  long countByProjectIdAndStatus(Long projectId, IssueStatus status);
+
   @Query(
       "SELECT DISTINCT i FROM Issue i JOIN FETCH i.project p WHERE "
           + "LOWER(i.title) LIKE LOWER(CONCAT('%', :term, '%')) "
