@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchProjects, clearProjectError } from '../features/projects/projectSlice';
 import CreateProjectModal from '../components/projects/CreateProjectModal';
 import Pagination from '../components/common/Pagination';
-import { Plus, FolderKanban, ArrowRight, Layers, Clock } from 'lucide-react';
+import { Plus, FolderKanban, ArrowRight, Layers, Clock, Users } from 'lucide-react';
 import { ROLES, Button, Alert, EmptyState, PageHeader } from '@trackify/shared';
 
 const ProjectsPage = () => {
@@ -66,12 +66,21 @@ const ProjectsPage = () => {
         <EmptyState
           icon={<FolderKanban size={40} />}
           title="No projects yet"
-          description="Create a project to start tracking issues, planning sprints, and collaborating with your team."
+          description="Create a project to start tracking issues, planning sprints, and collaborating with your team. You can invite teammates anytime from Team settings."
           action={
             isAdmin && (
-              <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-                Create Your First Project
-              </Button>
+              <div className="empty-state__actions">
+                <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+                  Create Your First Project
+                </Button>
+                <Button
+                  variant="secondary"
+                  leftIcon={<Users size={16} />}
+                  onClick={() => navigate('/team', { state: { openAdd: true } })}
+                >
+                  Invite Teammates
+                </Button>
+              </div>
             )
           }
         />
