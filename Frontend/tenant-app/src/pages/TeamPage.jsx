@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchAllUsers, updateUserStatus } from '../features/users/userSlice';
 import Pagination from '../components/common/Pagination';
 import { Globe, Copy, Search, RefreshCw, UserPlus } from 'lucide-react';
 import { registerUser } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
-import { PageHeader, Button, Input, Modal, Badge, Alert } from '@trackify/shared';
+import { PageHeader, Button, Input, Modal, Badge, Alert, EmptyState } from '@trackify/shared';
 
 const STATUS_VARIANTS = {
   ACTIVE: 'success',
@@ -15,11 +16,13 @@ const STATUS_VARIANTS = {
 
 const TeamPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { tenantId, tenantDomain } = useSelector((s) => s.auth);
   const { allUsers, allUsersPage, allUsersTotalPages, allUsersTotalElements, isLoading, error } =
     useSelector((s) => s.users);
   const [search, setSearch] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(() => Boolean(location.state?.openAdd));
   const [formData, setFormData] = useState({ fullName: '', email: '', password: '' });
   const [isAdding, setIsAdding] = useState(false);
 
@@ -28,6 +31,15 @@ const TeamPage = () => {
   useEffect(() => {
     if (tenantId) dispatch(fetchAllUsers({ tenantId, page: 0, size: 10 }));
   }, [dispatch, tenantId]);
+
+  useEffect(() => {
+    if (location.state?.openAdd) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state?.openAdd, navigate, location.pathname]);
+
+  const isSoloWorkspace =
+    !isLoading && !search && (allUsersTotalElements ?? 0) <= 1 && allUsers.length <= 1;
 
   const handleAddMember = async (e) => {
     e.preventDefault();
@@ -97,6 +109,20 @@ const TeamPage = () => {
           </>
         }
       />
+
+      {isSoloWorkspace && (
+        <EmptyState
+          icon={<UserPlus size={40} />}
+          title="You're the only member so far"
+          description="Invite teammates to collaborate on projects, or share your self-registration link below so others can join your workspace."
+          action={
+            <Button leftIcon={<UserPlus size={16} />} onClick={() => setIsModalOpen(true)}>
+              Invite Your First Teammate
+            </Button>
+          }
+          className="card--spaced"
+        />
+      )}
 
       <div className="card team-banner">
         <div className="team-banner__content">
