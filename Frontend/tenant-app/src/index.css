@@ -336,7 +336,82 @@ tr:hover td {
 }
 
 .project-card-skeleton {
-  height: 180px;
+  height: 220px;
+}
+
+.project-card__top-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.project-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.project-card__stat {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+}
+
+.project-card__stat strong {
+  margin-left: 0.25rem;
+  color: var(--text-main);
+}
+
+.project-card__stat--todo strong {
+  color: var(--chart-todo);
+}
+
+.project-card__stat--progress strong {
+  color: var(--chart-progress);
+}
+
+.project-card__stat--done strong {
+  color: var(--chart-done);
+}
+
+.project-card__progress {
+  height: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+
+.project-card__progress-bar {
+  height: 100%;
+  background: var(--success);
+  border-radius: inherit;
+  transition: width 0.2s ease;
+}
+
+.project-card__activity {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.project-card__activity-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-card__activity-time {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: var(--text-muted);
 }
 
 .project-card__top {
