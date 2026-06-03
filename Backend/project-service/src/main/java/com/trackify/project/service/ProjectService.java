@@ -6,7 +6,9 @@ import com.trackify.project.dto.ProjectResponse;
 import com.trackify.project.dto.ProjectStatsResponse;
 import com.trackify.project.entity.Project;
 import com.trackify.project.enums.IssueStatus;
+import com.trackify.project.repository.ActivityEventRepository;
 import com.trackify.project.repository.IssueRepository;
+import com.trackify.project.repository.ProjectMemberRepository;
 import com.trackify.project.repository.ProjectRepository;
 import com.trackify.project.util.ProjectKeyUtil;
 import java.util.List;
@@ -22,10 +24,18 @@ public class ProjectService {
 
   private final ProjectRepository projectRepository;
   private final IssueRepository issueRepository;
+  private final ActivityEventRepository activityEventRepository;
+  private final ProjectMemberRepository projectMemberRepository;
 
-  public ProjectService(ProjectRepository projectRepository, IssueRepository issueRepository) {
+  public ProjectService(
+      ProjectRepository projectRepository,
+      IssueRepository issueRepository,
+      ActivityEventRepository activityEventRepository,
+      ProjectMemberRepository projectMemberRepository) {
     this.projectRepository = projectRepository;
     this.issueRepository = issueRepository;
+    this.activityEventRepository = activityEventRepository;
+    this.projectMemberRepository = projectMemberRepository;
   }
 
   @Transactional
@@ -139,14 +149,39 @@ public class ProjectService {
   }
 
   private ProjectResponse mapToResponse(Project project) {
-    return ProjectResponse.builder()
-        .id(project.getId())
-        .key(project.getProjectKey())
-        .name(project.getName())
-        .description(project.getDescription())
-        .ownerId(project.getOwnerId())
-        .createdAt(project.getCreatedAt())
-        .updatedAt(project.getUpdatedAt())
-        .build();
+    ProjectResponse.ProjectResponseBuilder builder =
+        ProjectResponse.builder()
+            .id(project.getId())
+            .key(project.getProjectKey())
+            .name(project.getName())
+            .description(project.getDescription())
+            .ownerId(project.getOwnerId())
+            .createdAt(project.getCreatedAt())
+            .updatedAt(project.getUpdatedAt());
+
+    enrichWithSummary(builder, project.getId());
+    return builder.build();
+  }
+
+  private void enrichWithSummary(ProjectResponse.ProjectResponseBuilder builder, Long projectId) {
+    long todo = issueRepository.countByProjectIdAndStatus(projectId, IssueStatus.TODO);
+    long inProgress =
+        issueRepository.countByProjectIdAndStatus(projectId, IssueStatus.IN_PROGRESS);
+    long done = issueRepository.countByProjectIdAndStatus(projectId, IssueStatus.DONE);
+
+    builder
+        .todoCount(todo)
+        .inProgressCount(inProgress)
+        .doneCount(done)
+        .totalIssues(todo + inProgress + done)
+        .memberCount(projectMemberRepository.countByProjectId(projectId));
+
+    activityEventRepository
+        .findFirstByProjectIdOrderByCreatedAtDesc(projectId)
+        .ifPresent(
+            event -> {
+              builder.lastActivitySummary(event.getSummary());
+              builder.lastActivityAt(event.getCreatedAt());
+            });
   }
 }
