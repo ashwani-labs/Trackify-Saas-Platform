@@ -7,8 +7,12 @@ import static org.mockito.Mockito.*;
 import com.trackify.project.dto.ProjectRequest;
 import com.trackify.project.dto.ProjectResponse;
 import com.trackify.project.entity.Project;
+import com.trackify.project.enums.IssueStatus;
+import com.trackify.project.repository.ActivityEventRepository;
 import com.trackify.project.repository.IssueRepository;
+import com.trackify.project.repository.ProjectMemberRepository;
 import com.trackify.project.repository.ProjectRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +25,8 @@ class ProjectServiceTest {
 
   @Mock private ProjectRepository projectRepository;
   @Mock private IssueRepository issueRepository;
+  @Mock private ActivityEventRepository activityEventRepository;
+  @Mock private ProjectMemberRepository projectMemberRepository;
 
   @InjectMocks private ProjectService projectService;
 
@@ -44,6 +50,12 @@ class ProjectServiceTest {
             .build();
 
     when(projectRepository.save(any(Project.class))).thenReturn(savedProject);
+    when(issueRepository.countByProjectIdAndStatus(1L, IssueStatus.TODO)).thenReturn(0L);
+    when(issueRepository.countByProjectIdAndStatus(1L, IssueStatus.IN_PROGRESS)).thenReturn(0L);
+    when(issueRepository.countByProjectIdAndStatus(1L, IssueStatus.DONE)).thenReturn(0L);
+    when(projectMemberRepository.countByProjectId(1L)).thenReturn(0L);
+    when(activityEventRepository.findFirstByProjectIdOrderByCreatedAtDesc(1L))
+        .thenReturn(Optional.empty());
 
     ProjectResponse response = projectService.createProject(projectRequest, 10L);
 
