@@ -128,7 +128,7 @@ Trackify is a multi-tenant project management SaaS with:
 
 ### Phase 3: Product Polish
 
-- [ ] Improve onboarding empty state for first project/team.
+- [x] Improve onboarding empty state for first project/team.
 - [ ] Add richer project cards with status and activity hints.
 - [ ] Add issue detail activity timeline.
 - [ ] Add quick filters for assignee, priority, sprint, and status.
