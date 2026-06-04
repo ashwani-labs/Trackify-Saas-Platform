@@ -10,6 +10,7 @@ import {
   addAttachment,
   deleteAttachment,
 } from '../../features/issues/issueSlice';
+import IssueActivityTimeline from './IssueActivityTimeline';
 import { useFocusTrap, useEscapeKey } from '@trackify/shared';
 import {
   X,
@@ -76,7 +77,10 @@ const IssueDetailPanel = () => {
   const handleCommentSubmit = (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
-    dispatch(addComment({ issueId: selectedIssue.id, content: commentText }));
+    dispatch(addComment({ issueId: selectedIssue.id, content: commentText }))
+      .unwrap()
+      .then(() => dispatch(fetchIssueActivity(selectedIssue.id)))
+      .catch(() => {});
     setCommentText('');
   };
 
@@ -91,7 +95,10 @@ const IssueDetailPanel = () => {
           assigneeId: selectedIssue.assigneeId,
         },
       })
-    );
+    )
+      .unwrap()
+      .then(() => dispatch(fetchIssueActivity(selectedIssue.id)))
+      .catch(() => {});
     setIsEditing(false);
   };
 
@@ -389,41 +396,7 @@ const IssueDetailPanel = () => {
             </div>
           </div>
 
-          {/* Activity */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h4
-              style={{
-                fontSize: '0.875rem',
-                color: 'var(--text-muted)',
-                marginBottom: '0.75rem',
-              }}
-            >
-              Activity
-            </h4>
-            {isActivityLoading && (
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Loading activity…</p>
-            )}
-            {!isActivityLoading && issueActivity.length === 0 && (
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>No activity yet.</p>
-            )}
-            <ul className="activity-timeline" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {issueActivity.map((event) => (
-                <li
-                  key={event.id}
-                  style={{
-                    padding: '0.5rem 0',
-                    borderBottom: '1px solid var(--border-main)',
-                    fontSize: '0.8125rem',
-                  }}
-                >
-                  <div style={{ color: 'var(--text-main)' }}>{event.summary}</div>
-                  <div style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                    {event.createdAt ? new Date(event.createdAt).toLocaleString() : ''}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <IssueActivityTimeline events={issueActivity} isLoading={isActivityLoading} />
 
           {/* Comments */}
           <div style={{ marginBottom: '1rem' }}>
