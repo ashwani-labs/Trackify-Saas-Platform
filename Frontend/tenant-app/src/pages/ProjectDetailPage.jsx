@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProjectById } from '../features/projects/projectSlice';
+import { fetchProjectById, fetchProjectMembers } from '../features/projects/projectSlice';
 import {
   fetchIssuesByProject,
   fetchIssueByKey,
@@ -17,6 +17,7 @@ import BacklogView from '../components/sprints/BacklogView';
 import CreateSprintModal from '../components/sprints/CreateSprintModal';
 import { Users, LayoutDashboard, ListTodo, Plus, Calendar } from 'lucide-react';
 import { Button, PageHeader, Alert } from '@trackify/shared';
+import { applyIssueFilters } from '../utils/issueFilters';
 
 const STAT_CONFIG = [
   { label: 'To Do', status: 'TODO', pillClass: 'stat-pill--todo' },
@@ -46,6 +47,7 @@ const ProjectDetailPage = () => {
     dispatch(fetchProjectById(id));
     dispatch(fetchIssuesByProject(id));
     dispatch(fetchSprintsByProject(id));
+    dispatch(fetchProjectMembers(id));
 
     return () => {
       dispatch(clearIssues());
@@ -66,13 +68,7 @@ const ProjectDetailPage = () => {
 
   const activeSprint = sprints.find((s) => s.status === 'ACTIVE');
 
-  const filteredIssues = issues.filter((issue) => {
-    const statusMatch =
-      !filters.status || filters.status === 'ALL' || issue.status === filters.status;
-    const priorityMatch =
-      !filters.priority || filters.priority === 'ALL' || issue.priority === filters.priority;
-    return statusMatch && priorityMatch;
-  });
+  const filteredIssues = applyIssueFilters(issues, filters);
 
   const boardIssues =
     viewMode === 'BOARD' && activeSprint
@@ -173,10 +169,11 @@ const ProjectDetailPage = () => {
         </div>
       )}
 
+      <IssueFilterBar />
+
       <div className="project-detail-body">
         {viewMode === 'BOARD' && (
           <>
-            <IssueFilterBar />
             {activeSprint ? (
               <KanbanBoard
                 filteredIssues={boardIssues}

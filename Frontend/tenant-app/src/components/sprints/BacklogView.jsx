@@ -1,9 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateIssue, fetchBacklogIssuesPaged } from '../../features/issues/issueSlice';
 import { startSprint, completeSprint } from '../../features/sprints/sprintSlice';
 import Pagination from '../common/Pagination';
 import toast from 'react-hot-toast';
+import {
+  applyIssueFilters,
+  shouldShowBacklogSection,
+  shouldShowSprintSection,
+} from '../../utils/issueFilters';
 
 const IssueListItem = ({ issue, sprints, dispatch }) => {
   const handleSprintChange = (e) => {
@@ -82,8 +87,20 @@ const SkeletonRow = () => (
 const BacklogView = ({ projectId, issues, onCreateSprint }) => {
   const dispatch = useDispatch();
   const { list: sprints } = useSelector((s) => s.sprints);
-  const { backlogIssues, backlogPage, backlogTotalPages, backlogTotalElements, isBacklogLoading } =
+  const { filters, backlogIssues, backlogPage, backlogTotalPages, backlogTotalElements, isBacklogLoading } =
     useSelector((s) => s.issues);
+
+  const visibleSprints = useMemo(
+    () => sprints.filter((s) => s.status !== 'COMPLETED' && shouldShowSprintSection(s.id, filters)),
+    [sprints, filters]
+  );
+
+  const filteredBacklogIssues = useMemo(
+    () => applyIssueFilters(backlogIssues, filters),
+    [backlogIssues, filters]
+  );
+
+  const showBacklog = shouldShowBacklogSection(filters);
 
   useEffect(() => {
     dispatch(fetchBacklogIssuesPaged({ projectId, page: 0, size: 20 }));
@@ -136,10 +153,11 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
         {/* Planned / Active Sprints */}
-        {sprints
-          .filter((s) => s.status !== 'COMPLETED')
-          .map((sprint) => {
-            const sprintIssues = issues.filter((i) => i.sprintId === sprint.id);
+        {visibleSprints.map((sprint) => {
+            const sprintIssues = applyIssueFilters(
+              issues.filter((i) => i.sprintId === sprint.id),
+              { ...filters, sprintId: 'ALL' }
+            );
             return (
               <div key={sprint.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 <div
@@ -232,6 +250,7 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
           })}
 
         {/* Paginated Backlog */}
+        {showBacklog && (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div
             style={{
@@ -266,7 +285,7 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
                   <SkeletonRow key={i} />
                 ))}
               </>
-            ) : backlogIssues.length === 0 ? (
+            ) : filteredBacklogIssues.length === 0 ? (
               <p
                 style={{
                   padding: '16px',
@@ -279,7 +298,7 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
                 Your backlog is empty.
               </p>
             ) : (
-              backlogIssues.map((issue) => (
+              filteredBacklogIssues.map((issue) => (
                 <IssueListItem key={issue.id} issue={issue} sprints={sprints} dispatch={dispatch} />
               ))
             )}
@@ -294,6 +313,7 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );
