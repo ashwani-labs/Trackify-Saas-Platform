@@ -23,7 +23,7 @@ Trackify is a multi-tenant project management SaaS with:
 | P0 | Service configs still include a fallback JWT secret | `Backend/*/src/main/resources/application.yml` | Remove default JWT secrets and require `JWT_SECRET` through env/config |
 | P0 | No schema migration tool | No `db/migration` files | Add Flyway migrations for master schema and tenant schema provisioning |
 | P0 | Backend test coverage is thin | 5 test files under `Backend/**/src/test` | Add focused tests for issue transitions, tenant provisioning, auth, and gateway auth |
-| P0 | No frontend tests | No `*.test.*` files under `Frontend/` | Add Vitest + React Testing Library smoke tests |
+| P0 | ~~No frontend tests~~ | Vitest + RTL in `tenant-app/src/test` | Expand smoke coverage for shared components and key pages |
 | P1 | API gateway has duplicate application packages | `com.trackify.gateway` and `com.trackify.apigateway` | Remove duplicate gateway package/classes and keep one application package |
 | P1 | ~~Gateway proxy is generic and logs full headers~~ | `GatewayController` correlation ID logging | Consider Spring Cloud Gateway routing |
 | P1 | Assignment emails are synchronous best-effort REST calls | `IssueService.sendAssignmentEmail` | Move notification dispatch behind a notification client or async queue abstraction |
@@ -131,7 +131,7 @@ Trackify is a multi-tenant project management SaaS with:
 - [x] Improve onboarding empty state for first project/team.
 - [x] Add richer project cards with status and activity hints.
 - [x] Add issue detail activity timeline.
-- [ ] Add quick filters for assignee, priority, sprint, and status.
+- [x] Add quick filters for assignee, priority, sprint, and status.
 - [ ] Add dashboard widgets backed by real APIs.
 
 ## Suggested Next 10 Tasks
@@ -141,12 +141,13 @@ Trackify is a multi-tenant project management SaaS with:
 3. Extract tenant schema SQL from `TenantService`.
 4. Remove duplicate `api-gateway` package/classes.
 5. Add `IssueService` unit tests.
-6. Add Vitest + React Testing Library setup and smoke tests.
+6. ~~Add Vitest + React Testing Library setup and smoke tests.~~
 7. ~~Migrate `TeamPage.jsx` to shared UI components and token classes.~~
 8. ~~Replace master dashboard fake growth chart.~~
 9. Add keyboard navigation to `GlobalSearch.jsx` (arrow keys / Enter).
 10. ~~Add OpenAPI generation at the gateway or service level.~~
-11. Migrate `DashboardPage.jsx` to shared UI components and token classes.
+11. ~~Migrate `DashboardPage.jsx` to shared UI components and token classes.~~
+12. Add dashboard widgets backed by real APIs.
 
 ## Tracking Notes
 
