@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFilters, clearFilters } from '../../features/issues/issueSlice';
 import { SlidersHorizontal, X } from 'lucide-react';
+import { hasActiveIssueFilters, SPRINT_BACKLOG } from '../../utils/issueFilters';
 
 const STATUS_OPTIONS = ['ALL', 'TODO', 'IN_PROGRESS', 'DONE'];
 const PRIORITY_OPTIONS = ['ALL', 'LOW', 'MEDIUM', 'HIGH', 'URGENT'];
@@ -23,36 +24,33 @@ const PRIORITY_LABELS = {
 const IssueFilterBar = () => {
   const dispatch = useDispatch();
   const { filters } = useSelector((s) => s.issues);
-  const hasActiveFilters = filters.status !== 'ALL' || filters.priority !== 'ALL';
+  const { list: sprints } = useSelector((s) => s.sprints);
+  const { members } = useSelector((s) => s.projects);
 
-  const handleStatus = (e) => dispatch(setFilters({ status: e.target.value }));
-  const handlePriority = (e) => dispatch(setFilters({ priority: e.target.value }));
+  const assigneeOptions = useMemo(() => {
+    return [...members]
+      .map((member) => ({
+        id: member.userId,
+        name: member.userName || member.userEmail || 'Unknown',
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [members]);
+
+  const sprintOptions = useMemo(() => {
+    return [...sprints].sort((a, b) => a.name.localeCompare(b.name));
+  }, [sprints]);
+
+  const hasActiveFilters = hasActiveIssueFilters(filters);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem',
-        padding: '0.75rem 1rem',
-        backgroundColor: 'var(--bg-input)',
-        borderRadius: 'var(--radius-md)',
-        marginBottom: '1.5rem',
-        flexWrap: 'wrap',
-      }}
-    >
-      <SlidersHorizontal size={18} style={{ color: 'var(--text-muted)' }} />
+    <div className="issue-filter-bar" role="group" aria-label="Issue filters">
+      <SlidersHorizontal size={18} className="issue-filter-bar__icon" aria-hidden />
 
       <select
-        className="input-field"
-        style={{
-          width: 'auto',
-          padding: '0.4rem 2rem 0.4rem 1rem',
-          height: 'auto',
-          fontSize: '0.85rem',
-        }}
+        className="input-field issue-filter-bar__select"
         value={filters.status || 'ALL'}
-        onChange={handleStatus}
+        onChange={(e) => dispatch(setFilters({ status: e.target.value }))}
+        aria-label="Filter by status"
       >
         {STATUS_OPTIONS.map((s) => (
           <option key={s} value={s}>
@@ -62,15 +60,10 @@ const IssueFilterBar = () => {
       </select>
 
       <select
-        className="input-field"
-        style={{
-          width: 'auto',
-          padding: '0.4rem 2rem 0.4rem 1rem',
-          height: 'auto',
-          fontSize: '0.85rem',
-        }}
+        className="input-field issue-filter-bar__select"
         value={filters.priority || 'ALL'}
-        onChange={handlePriority}
+        onChange={(e) => dispatch(setFilters({ priority: e.target.value }))}
+        aria-label="Filter by priority"
       >
         {PRIORITY_OPTIONS.map((p) => (
           <option key={p} value={p}>
@@ -79,18 +72,43 @@ const IssueFilterBar = () => {
         ))}
       </select>
 
+      <select
+        className="input-field issue-filter-bar__select"
+        value={filters.assigneeId || 'ALL'}
+        onChange={(e) => dispatch(setFilters({ assigneeId: e.target.value }))}
+        aria-label="Filter by assignee"
+      >
+        <option value="ALL">All Assignees</option>
+        <option value="UNASSIGNED">Unassigned</option>
+        {assigneeOptions.map((assignee) => (
+          <option key={assignee.id} value={String(assignee.id)}>
+            {assignee.name}
+          </option>
+        ))}
+      </select>
+
+      <select
+        className="input-field issue-filter-bar__select"
+        value={filters.sprintId || 'ALL'}
+        onChange={(e) => dispatch(setFilters({ sprintId: e.target.value }))}
+        aria-label="Filter by sprint"
+      >
+        <option value="ALL">All Sprints</option>
+        <option value={SPRINT_BACKLOG}>Backlog only</option>
+        {sprintOptions.map((sprint) => (
+          <option key={sprint.id} value={String(sprint.id)}>
+            {sprint.name} ({sprint.status})
+          </option>
+        ))}
+      </select>
+
       {hasActiveFilters && (
         <button
-          className="btn btn-secondary"
-          style={{
-            padding: '0.4rem 0.8rem',
-            fontSize: '0.8rem',
-            color: 'var(--danger)',
-            borderColor: 'rgba(239, 68, 68, 0.2)',
-          }}
+          type="button"
+          className="btn btn-secondary issue-filter-bar__clear"
           onClick={() => dispatch(clearFilters())}
         >
-          <X size={14} /> Clear
+          <X size={14} aria-hidden /> Clear filters
         </button>
       )}
     </div>
