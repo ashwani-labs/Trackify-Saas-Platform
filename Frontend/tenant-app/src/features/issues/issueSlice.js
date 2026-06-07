@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getApiErrorPayload } from '@trackify/shared';
 import api from '../../utils/axios';
+import { DEFAULT_ISSUE_FILTERS } from '../../utils/issueFilters';
 
 export const fetchIssuesByProject = createAsyncThunk(
   'issues/fetchByProject',
@@ -156,10 +157,7 @@ const initialState = {
   activity: {},
   selectedIssue: null,
   isActivityLoading: false,
-  filters: {
-    status: 'ALL',
-    priority: 'ALL',
-  },
+  filters: { ...DEFAULT_ISSUE_FILTERS },
   backlogIssues: [],
   backlogPage: 0,
   backlogTotalPages: 0,
@@ -199,7 +197,7 @@ const issueSlice = createSlice({
       state.filters = { ...state.filters, ...action.payload };
     },
     clearFilters: (state) => {
-      state.filters = { status: 'ALL', priority: 'ALL' };
+      state.filters = { ...DEFAULT_ISSUE_FILTERS };
     },
     optimisticStatusUpdate: (state, action) => {
       const { id, status } = action.payload;
