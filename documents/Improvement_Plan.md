@@ -132,7 +132,7 @@ Trackify is a multi-tenant project management SaaS with:
 - [x] Add richer project cards with status and activity hints.
 - [x] Add issue detail activity timeline.
 - [x] Add quick filters for assignee, priority, sprint, and status.
-- [ ] Add dashboard widgets backed by real APIs.
+- [x] Add dashboard widgets backed by real APIs.
 
 ## Suggested Next 10 Tasks
 
@@ -147,7 +147,7 @@ Trackify is a multi-tenant project management SaaS with:
 9. Add keyboard navigation to `GlobalSearch.jsx` (arrow keys / Enter).
 10. ~~Add OpenAPI generation at the gateway or service level.~~
 11. ~~Migrate `DashboardPage.jsx` to shared UI components and token classes.~~
-12. Add dashboard widgets backed by real APIs.
+12. ~~Add dashboard widgets backed by real APIs.~~
 
 ## Tracking Notes
 
