@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "preview": "vite preview",
-    "format": "prettier --write \"src/**/*.{js,jsx,css}\""
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@trackify/shared": "*",
