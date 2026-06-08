@@ -32,14 +32,7 @@ const Button = forwardRef(
 
     return (
       <button ref={ref} type={type} disabled={isDisabled} className={classes} {...rest}>
-        {isLoading ? (
-          <Loader2
-            size={size === 'lg' ? 18 : 16}
-            className="btn-spinner"
-          />
-        ) : (
-          leftIcon
-        )}
+        {isLoading ? <Loader2 size={size === 'lg' ? 18 : 16} className="btn-spinner" /> : leftIcon}
         {children != null && children !== '' && <span>{children}</span>}
         {!isLoading && rightIcon}
       </button>

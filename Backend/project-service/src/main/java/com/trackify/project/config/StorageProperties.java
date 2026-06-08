@@ -22,8 +22,10 @@ public class StorageProperties {
   public static class S3 {
     private String bucket;
     private String region = "us-east-1";
+
     /** Optional custom endpoint for MinIO or LocalStack */
     private String endpoint;
+
     private String accessKey;
     private String secretKey;
     private String keyPrefix = "attachments";

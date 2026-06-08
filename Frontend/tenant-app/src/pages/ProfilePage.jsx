@@ -134,12 +134,7 @@ const ProfilePage = () => {
               <label className="form-label" htmlFor="profile-email">
                 Email address
               </label>
-              <input
-                id="profile-email"
-                className="input"
-                value={user?.email || ''}
-                disabled
-              />
+              <input id="profile-email" className="input" value={user?.email || ''} disabled />
               <p className="field-hint">Your identity is managed by your organization.</p>
             </div>
 

@@ -192,9 +192,7 @@ const GlobalSearch = () => {
           aria-label="Search projects, issues, and people"
           aria-expanded={open && Boolean(q)}
           aria-controls="global-search-results"
-          aria-activedescendant={
-            activeIndex >= 0 ? `search-option-${activeIndex}` : undefined
-          }
+          aria-activedescendant={activeIndex >= 0 ? `search-option-${activeIndex}` : undefined}
           role="combobox"
           aria-autocomplete="list"
           value={query}
@@ -238,9 +236,7 @@ const GlobalSearch = () => {
                     <FolderKanban size={16} color="var(--primary)" aria-hidden />
                     <div>
                       <div className="search-result__title">{p.name}</div>
-                      {p.description && (
-                        <div className="search-result__meta">{p.description}</div>
-                      )}
+                      {p.description && <div className="search-result__meta">{p.description}</div>}
                     </div>
                   </button>
                 );

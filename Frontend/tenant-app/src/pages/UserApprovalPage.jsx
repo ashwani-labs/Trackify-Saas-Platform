@@ -54,45 +54,43 @@ const UserApprovalPage = () => {
       )}
 
       <div className="approval-list">
-        {isLoading && pendingUsers.length === 0 ? (
-          [...Array(3)].map((_, i) => (
-            <div key={`skel-${i}`} className="card skeleton skeleton-card" />
-          ))
-        ) : (
-          pendingUsers.map((user) => (
-            <div key={user.id} className="card approval-card">
-              <div className="approval-card__user">
-                <div className="avatar-lg avatar-lg--muted" aria-hidden>
-                  {user.fullName?.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="approval-card__name">{user.fullName}</h3>
-                  <div className="approval-card__meta">
-                    <span className="meta-inline">
-                      <Mail size={12} aria-hidden /> {user.email}
-                    </span>
-                    <span className="meta-inline">
-                      <Clock size={12} aria-hidden /> Requested{' '}
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </span>
-                    <Badge variant="warning">PENDING</Badge>
+        {isLoading && pendingUsers.length === 0
+          ? [...Array(3)].map((_, i) => (
+              <div key={`skel-${i}`} className="card skeleton skeleton-card" />
+            ))
+          : pendingUsers.map((user) => (
+              <div key={user.id} className="card approval-card">
+                <div className="approval-card__user">
+                  <div className="avatar-lg avatar-lg--muted" aria-hidden>
+                    {user.fullName?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="approval-card__name">{user.fullName}</h3>
+                    <div className="approval-card__meta">
+                      <span className="meta-inline">
+                        <Mail size={12} aria-hidden /> {user.email}
+                      </span>
+                      <span className="meta-inline">
+                        <Clock size={12} aria-hidden /> Requested{' '}
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </span>
+                      <Badge variant="warning">PENDING</Badge>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="approval-card__actions">
-                <Button
-                  variant="secondary"
-                  className="btn--danger-text"
-                  onClick={() => handleAction(user.id, 'INACTIVE')}
-                >
-                  Reject
-                </Button>
-                <Button onClick={() => handleAction(user.id, 'ACTIVE')}>Approve Access</Button>
+                <div className="approval-card__actions">
+                  <Button
+                    variant="secondary"
+                    className="btn--danger-text"
+                    onClick={() => handleAction(user.id, 'INACTIVE')}
+                  >
+                    Reject
+                  </Button>
+                  <Button onClick={() => handleAction(user.id, 'ACTIVE')}>Approve Access</Button>
+                </div>
               </div>
-            </div>
-          ))
-        )}
+            ))}
 
         {pendingUsers.length === 0 && !isLoading && (
           <EmptyState

@@ -40,8 +40,7 @@ public class NotificationService {
     }
 
     String displayName = fullName != null && !fullName.isBlank() ? fullName : email;
-    String message =
-        displayName + " (" + email + ") registered and is waiting for approval.";
+    String message = displayName + " (" + email + ") registered and is waiting for approval.";
 
     for (Long adminId : adminIds) {
       Notification notification =
@@ -110,11 +109,13 @@ public class NotificationService {
   @Transactional
   public void markAllAsRead(Long userId) {
     LocalDateTime now = LocalDateTime.now();
-    notificationRepository.findAllByUserIdAndReadAtIsNull(userId).forEach(
-        notification -> {
-          notification.setReadAt(now);
-          notificationRepository.save(notification);
-        });
+    notificationRepository
+        .findAllByUserIdAndReadAtIsNull(userId)
+        .forEach(
+            notification -> {
+              notification.setReadAt(now);
+              notificationRepository.save(notification);
+            });
   }
 
   private Notification findOwnedNotification(Long notificationId, Long userId) {

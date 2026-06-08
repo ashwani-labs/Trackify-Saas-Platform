@@ -119,7 +119,8 @@ class IssueServiceTest {
 
     when(issueRepository.findById(201L)).thenReturn(Optional.of(existing));
     when(sprintRepository.findById(300L)).thenReturn(Optional.of(sprint));
-    when(issueRepository.save(any(Issue.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(issueRepository.save(any(Issue.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     IssueResponse response = issueService.updateIssue(201L, updateRequest, 1L);
 
@@ -155,7 +156,8 @@ class IssueServiceTest {
             .build();
 
     when(issueRepository.findById(301L)).thenReturn(Optional.of(existing));
-    when(issueRepository.save(any(Issue.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(issueRepository.save(any(Issue.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     IssueResponse response = issueService.updateIssue(301L, updateRequest, 1L);
 
@@ -167,14 +169,11 @@ class IssueServiceTest {
   void updateIssue_updatesAssignee_whenProvided() {
     Issue existing = Issue.builder().id(302L).title("Assignee issue").project(project).build();
     IssueRequest updateRequest =
-        IssueRequest.builder()
-            .title("Assignee issue")
-            .projectId(10L)
-            .assigneeId(77L)
-            .build();
+        IssueRequest.builder().title("Assignee issue").projectId(10L).assigneeId(77L).build();
 
     when(issueRepository.findById(302L)).thenReturn(Optional.of(existing));
-    when(issueRepository.save(any(Issue.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(issueRepository.save(any(Issue.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     IssueResponse response = issueService.updateIssue(302L, updateRequest, 1L);
 

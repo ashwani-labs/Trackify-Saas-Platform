@@ -63,7 +63,10 @@ const ActivityTimelineSkeleton = () => (
         <div className="skeleton activity-timeline__skeleton-dot" />
         <div className="activity-timeline__content">
           <div className="skeleton" style={{ height: '0.75rem', width: '40%' }} />
-          <div className="skeleton" style={{ height: '0.875rem', width: '85%', marginTop: '0.5rem' }} />
+          <div
+            className="skeleton"
+            style={{ height: '0.875rem', width: '85%', marginTop: '0.5rem' }}
+          />
         </div>
       </li>
     ))}

@@ -120,52 +120,52 @@ const TenantManagementPage = () => {
                 </tr>
               ) : (
                 tenants.map((tenant) => (
-                <tr key={tenant.id}>
-                  <td>
-                    <div className="org-row">
-                      <div className="org-avatar" aria-hidden>
-                        {tenant.name.charAt(0)}
+                  <tr key={tenant.id}>
+                    <td>
+                      <div className="org-row">
+                        <div className="org-avatar" aria-hidden>
+                          {tenant.name.charAt(0)}
+                        </div>
+                        <span className="org-name">{tenant.name}</span>
                       </div>
-                      <span className="org-name">{tenant.name}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <code className="domain-code">{tenant.domain}.trackify.io</code>
-                  </td>
-                  <td>
-                    <Badge variant="primary">{tenant.plan}</Badge>
-                  </td>
-                  <td>
-                    <Badge variant={tenant.status === 'ACTIVE' ? 'success' : 'danger'}>
-                      {tenant.status}
-                    </Badge>
-                  </td>
-                  <td className="member-email">
-                    {new Date(tenant.createdAt).toLocaleDateString()}
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div className="table-actions">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleToggleStatus(tenant.id, tenant.status)}
-                      >
-                        {tenant.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                      </Button>
-
-                      {tenant.status === 'INACTIVE' && (
+                    </td>
+                    <td>
+                      <code className="domain-code">{tenant.domain}.trackify.io</code>
+                    </td>
+                    <td>
+                      <Badge variant="primary">{tenant.plan}</Badge>
+                    </td>
+                    <td>
+                      <Badge variant={tenant.status === 'ACTIVE' ? 'success' : 'danger'}>
+                        {tenant.status}
+                      </Badge>
+                    </td>
+                    <td className="member-email">
+                      {new Date(tenant.createdAt).toLocaleDateString()}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="table-actions">
                         <Button
-                          variant="ghost"
-                          className="icon-btn btn--danger-text"
-                          aria-label={`Delete ${tenant.name}`}
-                          onClick={() => handleDeleteTenant(tenant.id, tenant.name)}
-                          leftIcon={<Trash2 size={14} />}
-                        />
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleToggleStatus(tenant.id, tenant.status)}
+                        >
+                          {tenant.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                        </Button>
+
+                        {tenant.status === 'INACTIVE' && (
+                          <Button
+                            variant="ghost"
+                            className="icon-btn btn--danger-text"
+                            aria-label={`Delete ${tenant.name}`}
+                            onClick={() => handleDeleteTenant(tenant.id, tenant.name)}
+                            leftIcon={<Trash2 size={14} />}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
               {tenants.length === 0 && !isLoading && (
                 <tr>

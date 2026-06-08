@@ -4,7 +4,9 @@
 export function getApiErrorMessage(error, fallback = 'Something went wrong') {
   const data = error?.response?.data;
   if (!data) {
-    return error?.message === 'Network Error' ? 'Network error. Please check your connection.' : fallback;
+    return error?.message === 'Network Error'
+      ? 'Network error. Please check your connection.'
+      : fallback;
   }
   if (typeof data === 'string') return data;
   if (typeof data.message === 'string' && data.message.length > 0) return data.message;

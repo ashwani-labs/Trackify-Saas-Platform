@@ -87,8 +87,14 @@ const SkeletonRow = () => (
 const BacklogView = ({ projectId, issues, onCreateSprint }) => {
   const dispatch = useDispatch();
   const { list: sprints } = useSelector((s) => s.sprints);
-  const { filters, backlogIssues, backlogPage, backlogTotalPages, backlogTotalElements, isBacklogLoading } =
-    useSelector((s) => s.issues);
+  const {
+    filters,
+    backlogIssues,
+    backlogPage,
+    backlogTotalPages,
+    backlogTotalElements,
+    isBacklogLoading,
+  } = useSelector((s) => s.issues);
 
   const visibleSprints = useMemo(
     () => sprints.filter((s) => s.status !== 'COMPLETED' && shouldShowSprintSection(s.id, filters)),
@@ -154,165 +160,170 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
         {/* Planned / Active Sprints */}
         {visibleSprints.map((sprint) => {
-            const sprintIssues = applyIssueFilters(
-              issues.filter((i) => i.sprintId === sprint.id),
-              { ...filters, sprintId: 'ALL' }
-            );
-            return (
-              <div key={sprint.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div
-                  style={{
-                    padding: '16px',
-                    background: 'var(--bg-input)',
-                    borderBottom: '1px solid var(--border-main)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div>
-                    <h3
-                      style={{
-                        margin: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: 'var(--text-main)',
-                      }}
+          const sprintIssues = applyIssueFilters(
+            issues.filter((i) => i.sprintId === sprint.id),
+            { ...filters, sprintId: 'ALL' }
+          );
+          return (
+            <div key={sprint.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div
+                style={{
+                  padding: '16px',
+                  background: 'var(--bg-input)',
+                  borderBottom: '1px solid var(--border-main)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  <h3
+                    style={{
+                      margin: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      color: 'var(--text-main)',
+                    }}
+                  >
+                    {sprint.name}
+                    <span
+                      className={`badge badge-${sprint.status === 'ACTIVE' ? 'success' : 'primary'}`}
+                      style={{ fontSize: '11px' }}
                     >
-                      {sprint.name}
-                      <span
-                        className={`badge badge-${sprint.status === 'ACTIVE' ? 'success' : 'primary'}`}
-                        style={{ fontSize: '11px' }}
-                      >
-                        {sprint.status}
-                      </span>
-                    </h3>
-                    {sprint.goal && (
-                      <p
-                        style={{
-                          margin: '4px 0 0 0',
-                          fontSize: '13px',
-                          color: 'var(--text-muted)',
-                        }}
-                      >
-                        {sprint.goal}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    {sprint.status === 'PLANNED' && (
-                      <button
-                        onClick={() => handleStart(sprint.id)}
-                        className="btn btn-primary"
-                        style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                      >
-                        Start Sprint
-                      </button>
-                    )}
-                    {sprint.status === 'ACTIVE' && (
-                      <button
-                        onClick={() => handleComplete(sprint.id)}
-                        className="btn btn-secondary"
-                        style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                      >
-                        Complete
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div style={{ minHeight: '60px' }}>
-                  {sprintIssues.length === 0 ? (
+                      {sprint.status}
+                    </span>
+                  </h3>
+                  {sprint.goal && (
                     <p
                       style={{
-                        padding: '16px',
-                        margin: 0,
+                        margin: '4px 0 0 0',
+                        fontSize: '13px',
                         color: 'var(--text-muted)',
-                        fontSize: '14px',
-                        textAlign: 'center',
                       }}
                     >
-                      No issues planned in this sprint.
+                      {sprint.goal}
                     </p>
-                  ) : (
-                    sprintIssues.map((issue) => (
-                      <IssueListItem
-                        key={issue.id}
-                        issue={issue}
-                        sprints={sprints}
-                        dispatch={dispatch}
-                      />
-                    ))
+                  )}
+                </div>
+                <div>
+                  {sprint.status === 'PLANNED' && (
+                    <button
+                      onClick={() => handleStart(sprint.id)}
+                      className="btn btn-primary"
+                      style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                    >
+                      Start Sprint
+                    </button>
+                  )}
+                  {sprint.status === 'ACTIVE' && (
+                    <button
+                      onClick={() => handleComplete(sprint.id)}
+                      className="btn btn-secondary"
+                      style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                    >
+                      Complete
+                    </button>
                   )}
                 </div>
               </div>
-            );
-          })}
+              <div style={{ minHeight: '60px' }}>
+                {sprintIssues.length === 0 ? (
+                  <p
+                    style={{
+                      padding: '16px',
+                      margin: 0,
+                      color: 'var(--text-muted)',
+                      fontSize: '14px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    No issues planned in this sprint.
+                  </p>
+                ) : (
+                  sprintIssues.map((issue) => (
+                    <IssueListItem
+                      key={issue.id}
+                      issue={issue}
+                      sprints={sprints}
+                      dispatch={dispatch}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
 
         {/* Paginated Backlog */}
         {showBacklog && (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div
-            style={{
-              padding: '16px',
-              background: 'var(--bg-input)',
-              borderBottom: '1px solid var(--border-main)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <h3 style={{ margin: 0, color: 'var(--text-main)' }}>
-              Backlog
-              {backlogTotalElements > 0 && (
-                <span
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <div
+              style={{
+                padding: '16px',
+                background: 'var(--bg-input)',
+                borderBottom: '1px solid var(--border-main)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3 style={{ margin: 0, color: 'var(--text-main)' }}>
+                Backlog
+                {backlogTotalElements > 0 && (
+                  <span
+                    style={{
+                      fontSize: '0.8rem',
+                      fontWeight: '400',
+                      color: 'var(--text-muted)',
+                      marginLeft: '0.75rem',
+                    }}
+                  >
+                    {backlogTotalElements} issue{backlogTotalElements !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </h3>
+            </div>
+            <div style={{ minHeight: '100px' }}>
+              {isBacklogLoading ? (
+                <>
+                  {[...Array(5)].map((_, i) => (
+                    <SkeletonRow key={i} />
+                  ))}
+                </>
+              ) : filteredBacklogIssues.length === 0 ? (
+                <p
                   style={{
-                    fontSize: '0.8rem',
-                    fontWeight: '400',
+                    padding: '16px',
+                    margin: 0,
                     color: 'var(--text-muted)',
-                    marginLeft: '0.75rem',
+                    fontSize: '14px',
+                    textAlign: 'center',
                   }}
                 >
-                  {backlogTotalElements} issue{backlogTotalElements !== 1 ? 's' : ''}
-                </span>
+                  Your backlog is empty.
+                </p>
+              ) : (
+                filteredBacklogIssues.map((issue) => (
+                  <IssueListItem
+                    key={issue.id}
+                    issue={issue}
+                    sprints={sprints}
+                    dispatch={dispatch}
+                  />
+                ))
               )}
-            </h3>
-          </div>
-          <div style={{ minHeight: '100px' }}>
-            {isBacklogLoading ? (
-              <>
-                {[...Array(5)].map((_, i) => (
-                  <SkeletonRow key={i} />
-                ))}
-              </>
-            ) : filteredBacklogIssues.length === 0 ? (
-              <p
-                style={{
-                  padding: '16px',
-                  margin: 0,
-                  color: 'var(--text-muted)',
-                  fontSize: '14px',
-                  textAlign: 'center',
-                }}
-              >
-                Your backlog is empty.
-              </p>
-            ) : (
-              filteredBacklogIssues.map((issue) => (
-                <IssueListItem key={issue.id} issue={issue} sprints={sprints} dispatch={dispatch} />
-              ))
+            </div>
+            {backlogTotalPages > 1 && (
+              <div style={{ padding: '1rem', borderTop: '1px solid var(--border-main)' }}>
+                <Pagination
+                  currentPage={backlogPage}
+                  totalPages={backlogTotalPages}
+                  onPageChange={handlePageChange}
+                />
+              </div>
             )}
           </div>
-          {backlogTotalPages > 1 && (
-            <div style={{ padding: '1rem', borderTop: '1px solid var(--border-main)' }}>
-              <Pagination
-                currentPage={backlogPage}
-                totalPages={backlogTotalPages}
-                onPageChange={handlePageChange}
-              />
-            </div>
-          )}
-        </div>
         )}
       </div>
     </div>

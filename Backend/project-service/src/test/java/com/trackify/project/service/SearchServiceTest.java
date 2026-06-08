@@ -44,7 +44,8 @@ class SearchServiceTest {
   @Test
   void search_returnsAdminProjectMatches() {
     Project project = Project.builder().id(1L).name("Alpha").description("Core").build();
-    when(projectRepository.searchAllByTerm(eq("alp"), any(Pageable.class))).thenReturn(List.of(project));
+    when(projectRepository.searchAllByTerm(eq("alp"), any(Pageable.class)))
+        .thenReturn(List.of(project));
     when(issueRepository.searchAllByTerm(eq("alp"), any(Pageable.class))).thenReturn(List.of());
     when(jdbcTemplate.query(contains("users u"), any(RowMapper.class), any(), any(), anyInt()))
         .thenReturn(List.of());

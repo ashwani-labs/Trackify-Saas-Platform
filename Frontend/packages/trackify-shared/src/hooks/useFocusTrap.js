@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 
-const FOCUSABLE =
-  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 export function useFocusTrap(containerRef, isActive) {
   useEffect(() => {
@@ -12,9 +11,10 @@ export function useFocusTrap(containerRef, isActive) {
     const container = containerRef.current;
     const previouslyFocused = document.activeElement;
 
-    const focusables = () => Array.from(container.querySelectorAll(FOCUSABLE)).filter(
-      (el) => !el.disabled && el.offsetParent !== null
-    );
+    const focusables = () =>
+      Array.from(container.querySelectorAll(FOCUSABLE)).filter(
+        (el) => !el.disabled && el.offsetParent !== null
+      );
 
     const first = focusables()[0];
     first?.focus();

@@ -18,7 +18,10 @@ const OnboardingChecklist = ({
   }
 
   return (
-    <section className={`card onboarding-checklist ${className}`.trim()} aria-label="Workspace setup">
+    <section
+      className={`card onboarding-checklist ${className}`.trim()}
+      aria-label="Workspace setup"
+    >
       <div className="onboarding-checklist__header">
         <div>
           <h2 className="onboarding-checklist__title">{title}</h2>

@@ -55,12 +55,8 @@ describe('issueFilters', () => {
 
   it('controls sprint section visibility', () => {
     expect(shouldShowSprintSection(100, DEFAULT_ISSUE_FILTERS)).toBe(true);
-    expect(shouldShowSprintSection(100, { ...DEFAULT_ISSUE_FILTERS, sprintId: '100' })).toBe(
-      true
-    );
-    expect(shouldShowSprintSection(200, { ...DEFAULT_ISSUE_FILTERS, sprintId: '100' })).toBe(
-      false
-    );
+    expect(shouldShowSprintSection(100, { ...DEFAULT_ISSUE_FILTERS, sprintId: '100' })).toBe(true);
+    expect(shouldShowSprintSection(200, { ...DEFAULT_ISSUE_FILTERS, sprintId: '100' })).toBe(false);
     expect(shouldShowSprintSection(100, { ...DEFAULT_ISSUE_FILTERS, sprintId: 'BACKLOG' })).toBe(
       false
     );

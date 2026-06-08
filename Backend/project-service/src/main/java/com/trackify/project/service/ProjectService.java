@@ -165,8 +165,7 @@ public class ProjectService {
 
   private void enrichWithSummary(ProjectResponse.ProjectResponseBuilder builder, Long projectId) {
     long todo = issueRepository.countByProjectIdAndStatus(projectId, IssueStatus.TODO);
-    long inProgress =
-        issueRepository.countByProjectIdAndStatus(projectId, IssueStatus.IN_PROGRESS);
+    long inProgress = issueRepository.countByProjectIdAndStatus(projectId, IssueStatus.IN_PROGRESS);
     long done = issueRepository.countByProjectIdAndStatus(projectId, IssueStatus.DONE);
 
     builder

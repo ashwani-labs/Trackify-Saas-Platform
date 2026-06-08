@@ -42,16 +42,12 @@ public class ActivityService {
 
   @Transactional
   public void recordCommentAdded(Long projectId, Long issueId, Long actorUserId) {
-    record(
-        projectId,
-        issueId,
-        actorUserId,
-        ActivityEventType.COMMENT_ADDED,
-        "Comment added");
+    record(projectId, issueId, actorUserId, ActivityEventType.COMMENT_ADDED, "Comment added");
   }
 
   @Transactional
-  public void recordSprintStarted(Long projectId, Long sprintId, Long actorUserId, String sprintName) {
+  public void recordSprintStarted(
+      Long projectId, Long sprintId, Long actorUserId, String sprintName) {
     record(
         projectId,
         null,
@@ -78,11 +74,7 @@ public class ActivityService {
   }
 
   private void record(
-      Long projectId,
-      Long issueId,
-      Long actorUserId,
-      ActivityEventType type,
-      String summary) {
+      Long projectId, Long issueId, Long actorUserId, ActivityEventType type, String summary) {
     activityEventRepository.save(
         ActivityEvent.builder()
             .projectId(projectId)

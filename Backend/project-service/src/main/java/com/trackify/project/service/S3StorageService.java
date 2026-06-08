@@ -66,7 +66,8 @@ public class S3StorageService implements StorageService {
               .contentType(file.getContentType())
               .contentLength(file.getSize())
               .build();
-      s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+      s3Client.putObject(
+          request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
     } catch (IOException e) {
       throw AppException.internalError("Failed to upload file to S3: " + e.getMessage());
     }

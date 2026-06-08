@@ -22,7 +22,8 @@ class FileUploadValidatorTest {
 
   @Test
   void validate_rejectsEmptyFile() {
-    MockMultipartFile file = new MockMultipartFile("file", "doc.pdf", "application/pdf", new byte[0]);
+    MockMultipartFile file =
+        new MockMultipartFile("file", "doc.pdf", "application/pdf", new byte[0]);
     assertThrows(AppException.class, () -> validator.validate(file));
   }
 

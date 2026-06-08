@@ -1,9 +1,9 @@
 package com.trackify.project.controller;
 
 import com.trackify.common.dto.ApiResponse;
+import com.trackify.common.security.JwtUtil;
 import com.trackify.project.dto.SprintRequest;
 import com.trackify.project.dto.SprintResponse;
-import com.trackify.common.security.JwtUtil;
 import com.trackify.project.service.SprintService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -51,7 +51,8 @@ public class SprintController {
       @PathVariable Long projectId,
       @PathVariable Long id) {
     Long userId = jwtUtil.extractUserId(authHeader.substring(7));
-    return ResponseEntity.ok(ApiResponse.ok("Sprint started", sprintService.startSprint(id, userId)));
+    return ResponseEntity.ok(
+        ApiResponse.ok("Sprint started", sprintService.startSprint(id, userId)));
   }
 
   @PutMapping("/{id}/complete")

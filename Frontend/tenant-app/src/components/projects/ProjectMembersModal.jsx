@@ -108,7 +108,10 @@ const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
         {memberLoading && members.length === 0 ? (
           <div className="skeleton" style={{ height: '60px', width: '100%' }} />
         ) : members.length === 0 ? (
-          <EmptyState title="No members yet" description="Add team members to collaborate on this project." />
+          <EmptyState
+            title="No members yet"
+            description="Add team members to collaborate on this project."
+          />
         ) : (
           members.map((member) => (
             <div

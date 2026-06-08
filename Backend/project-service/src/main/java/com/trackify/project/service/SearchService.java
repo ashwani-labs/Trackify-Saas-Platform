@@ -79,9 +79,12 @@ public class SearchService {
             : searchIssuesForMember(term, userId, pageable);
     primary.forEach(issue -> merged.put(issue.getId(), issue));
 
-    List<Long> assigneeMatchIds = findIssueIdsByAssignee(term, userId, elevated, pageable.getPageSize());
+    List<Long> assigneeMatchIds =
+        findIssueIdsByAssignee(term, userId, elevated, pageable.getPageSize());
     if (!assigneeMatchIds.isEmpty()) {
-      issueRepository.findAllById(assigneeMatchIds).forEach(issue -> merged.put(issue.getId(), issue));
+      issueRepository
+          .findAllById(assigneeMatchIds)
+          .forEach(issue -> merged.put(issue.getId(), issue));
     }
 
     return merged.values().stream()
@@ -98,8 +101,7 @@ public class SearchService {
     return issueRepository.searchByTermAndProjectIds(projectIds, term, pageable);
   }
 
-  private List<Long> findIssueIdsByAssignee(
-      String term, Long userId, boolean elevated, int limit) {
+  private List<Long> findIssueIdsByAssignee(String term, Long userId, boolean elevated, int limit) {
     String pattern = "%" + term.toLowerCase() + "%";
     if (elevated) {
       return jdbcTemplate.query(

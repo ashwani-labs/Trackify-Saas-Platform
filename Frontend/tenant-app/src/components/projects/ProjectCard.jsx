@@ -61,9 +61,7 @@ const ProjectCard = ({ project, onOpen }) => {
 
       <div>
         <h3 className="project-card__title">{project.name}</h3>
-        <p className="project-card__desc">
-          {project.description || 'No description provided.'}
-        </p>
+        <p className="project-card__desc">{project.description || 'No description provided.'}</p>
       </div>
 
       <div className="project-card__stats" aria-label="Issue status breakdown">

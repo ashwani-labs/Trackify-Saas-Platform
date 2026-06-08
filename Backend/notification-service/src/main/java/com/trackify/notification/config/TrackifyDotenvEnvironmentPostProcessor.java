@@ -16,8 +16,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 
 /**
- * Loads the repo-root {@code .env} by walking up from {@code user.dir}, so SMTP works regardless
- * of IntelliJ/Maven working directory (repo root, {@code Backend}, or {@code notification-service}).
+ * Loads the repo-root {@code .env} by walking up from {@code user.dir}, so SMTP works regardless of
+ * IntelliJ/Maven working directory (repo root, {@code Backend}, or {@code notification-service}).
  */
 public class TrackifyDotenvEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
@@ -49,9 +49,7 @@ public class TrackifyDotenvEnvironmentPostProcessor implements EnvironmentPostPr
       return;
     }
 
-    environment
-        .getPropertySources()
-        .addFirst(new MapPropertySource(PROPERTY_SOURCE_NAME, source));
+    environment.getPropertySources().addFirst(new MapPropertySource(PROPERTY_SOURCE_NAME, source));
 
     boolean mailConfigured =
         source.containsKey("MAIL_USERNAME") && source.containsKey("MAIL_PASSWORD");

@@ -203,8 +203,7 @@ public class IssueService {
         IssueComment.builder().issue(issue).userId(userId).content(request.getContent()).build();
 
     comment = commentRepository.save(comment);
-    activityService.recordCommentAdded(
-        issue.getProject().getId(), issue.getId(), userId);
+    activityService.recordCommentAdded(issue.getProject().getId(), issue.getId(), userId);
     return mapToCommentResponse(comment);
   }
 

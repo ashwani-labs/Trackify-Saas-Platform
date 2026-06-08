@@ -163,7 +163,9 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
           value={formData.logoUrl}
           onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
         />
-        <span className="field-hint--sm">Paste a direct link to your organization&apos;s logo.</span>
+        <span className="field-hint--sm">
+          Paste a direct link to your organization&apos;s logo.
+        </span>
 
         <div className="form-group">
           <label className="form-label" htmlFor="tenant-plan">

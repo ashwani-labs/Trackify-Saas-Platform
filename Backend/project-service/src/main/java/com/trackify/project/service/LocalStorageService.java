@@ -4,7 +4,6 @@ import com.trackify.common.exception.AppException;
 import com.trackify.project.config.StorageProperties;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,8 +45,7 @@ public class LocalStorageService implements StorageService {
     try {
       if (originalFilename.contains("..")) {
         throw AppException.badRequest(
-            "Cannot store file with relative path outside current directory "
-                + originalFilename);
+            "Cannot store file with relative path outside current directory " + originalFilename);
       }
       try (InputStream inputStream = file.getInputStream()) {
         Files.copy(

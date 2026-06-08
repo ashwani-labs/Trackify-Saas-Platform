@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjectById, fetchProjectMembers } from '../features/projects/projectSlice';
-import {
-  fetchIssuesByProject,
-  fetchIssueByKey,
-  clearIssues,
-} from '../features/issues/issueSlice';
+import { fetchIssuesByProject, fetchIssueByKey, clearIssues } from '../features/issues/issueSlice';
 import { fetchSprintsByProject } from '../features/sprints/sprintSlice';
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import CreateIssueModal from '../components/issues/CreateIssueModal';
@@ -30,9 +26,11 @@ const ProjectDetailPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
 
-  const { currentProject, isLoading: projectLoading, error: projectError } = useSelector(
-    (s) => s.projects
-  );
+  const {
+    currentProject,
+    isLoading: projectLoading,
+    error: projectError,
+  } = useSelector((s) => s.projects);
   const { selectedIssue, issues, filters } = useSelector((s) => s.issues);
   const { list: sprints } = useSelector((s) => s.sprints);
 

@@ -7,7 +7,6 @@ import com.trackify.common.enums.TenantStatus;
 import com.trackify.tenant.dto.TenantDashboardStatsResponse;
 import com.trackify.tenant.entity.Tenant;
 import com.trackify.tenant.repository.TenantRepository;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,5 @@
 package com.trackify.gateway.config;
 
-import com.trackify.common.web.CorrelationIdFilter;
 import com.trackify.gateway.filter.JwtGatewayFilter;
 import com.trackify.gateway.filter.RateLimitFilter;
 import lombok.RequiredArgsConstructor;

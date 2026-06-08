@@ -31,8 +31,7 @@ public class NotificationController {
       @RequestParam(value = "unreadOnly", defaultValue = "false") boolean unreadOnly,
       Pageable pageable) {
     Long userId = jwtUtil.extractUserId(authHeader.substring(7));
-    Page<NotificationResponse> page =
-        notificationService.listForUser(userId, unreadOnly, pageable);
+    Page<NotificationResponse> page = notificationService.listForUser(userId, unreadOnly, pageable);
     return ResponseEntity.ok(ApiResponse.ok("Notifications fetched", page));
   }
 
@@ -49,8 +48,7 @@ public class NotificationController {
       @RequestHeader("Authorization") String authHeader, @PathVariable Long id) {
     Long userId = jwtUtil.extractUserId(authHeader.substring(7));
     return ResponseEntity.ok(
-        ApiResponse.ok(
-            "Notification marked as read", notificationService.markAsRead(id, userId)));
+        ApiResponse.ok("Notification marked as read", notificationService.markAsRead(id, userId)));
   }
 
   @PatchMapping("/{id}/unread")

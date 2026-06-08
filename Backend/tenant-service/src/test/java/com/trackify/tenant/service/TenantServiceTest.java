@@ -128,8 +128,7 @@ class TenantServiceTest {
     AppException ex =
         assertThrows(AppException.class, () -> tenantService.createTenant(createRequest));
 
-    assertEquals(
-        "Failed to provision tenant database: provisioning exploded", ex.getMessage());
+    assertEquals("Failed to provision tenant database: provisioning exploded", ex.getMessage());
     verify(tenantRepository).delete(savedTenant);
     verify(userLookupRepository, never()).save(any());
   }

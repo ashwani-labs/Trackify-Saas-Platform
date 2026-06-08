@@ -44,8 +44,14 @@ const STATUS_LABELS = { TODO: 'To Do', IN_PROGRESS: 'In Progress', DONE: 'Done' 
 const IssueDetailPanel = () => {
   const dispatch = useDispatch();
   const panelRef = useRef(null);
-  const { selectedIssue, comments, activity, isCommentLoading, isActivityLoading, isAttachmentLoading } =
-    useSelector((s) => s.issues);
+  const {
+    selectedIssue,
+    comments,
+    activity,
+    isCommentLoading,
+    isActivityLoading,
+    isAttachmentLoading,
+  } = useSelector((s) => s.issues);
 
   const [commentText, setCommentText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -140,8 +146,7 @@ const IssueDetailPanel = () => {
       >
         <div className="issue-detail-panel__header">
           <span className="issue-detail-panel__key">
-            {selectedIssue.issueKey ||
-              `${selectedIssue.projectHeaderName}-${selectedIssue.id}`}
+            {selectedIssue.issueKey || `${selectedIssue.projectHeaderName}-${selectedIssue.id}`}
           </span>
           <div className="issue-detail-panel__actions">
             {!isEditing ? (
