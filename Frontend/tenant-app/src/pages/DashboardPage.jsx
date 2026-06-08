@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { fetchProjectStats } from '../features/projects/projectSlice';
+import { fetchDashboard } from '../features/dashboard/dashboardSlice';
 import { fetchAllUsers } from '../features/users/userSlice';
 import {
   FolderKanban,
@@ -11,6 +11,9 @@ import {
   Users,
   Copy,
   Globe,
+  ListTodo,
+  Bell,
+  Zap,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -21,10 +24,14 @@ import {
   BarChart,
   Bar,
   XAxis,
+  YAxis,
   Tooltip,
   Legend,
 } from 'recharts';
 import { PageHeader, Button, Alert, OnboardingChecklist, ROLES } from '@trackify/shared';
+import MyOpenIssuesWidget from '../components/dashboard/MyOpenIssuesWidget';
+import RecentActivityWidget from '../components/dashboard/RecentActivityWidget';
+import RecentProjectsWidget from '../components/dashboard/RecentProjectsWidget';
 
 const CHART_TOOLTIP_STYLE = {
   background: 'var(--bg-surface)',
@@ -34,14 +41,22 @@ const CHART_TOOLTIP_STYLE = {
   boxShadow: 'var(--shadow-md)',
 };
 
+const PRIORITY_COLORS = {
+  LOW: 'var(--text-muted)',
+  MEDIUM: 'var(--primary)',
+  HIGH: 'var(--warning)',
+  URGENT: 'var(--danger)',
+};
+
 const DashboardPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, tenantId, tenantDomain } = useSelector((s) => s.auth);
-  const { stats, statsLoading, statsError } = useSelector((s) => s.projects);
+  const { data: dashboard, isLoading, error } = useSelector((s) => s.dashboard);
   const { allUsersTotalElements, isLoading: usersLoading } = useSelector((s) => s.users);
   const isAdmin = user?.role === ROLES.ADMIN;
 
+  const stats = dashboard?.summary;
   const tenantUrl = `http://${tenantDomain}.trackify.com:5174`;
 
   const copyToClipboard = (text, label) => {
@@ -50,7 +65,7 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchProjectStats());
+    dispatch(fetchDashboard());
   }, [dispatch]);
 
   useEffect(() => {
@@ -84,8 +99,7 @@ const DashboardPage = () => {
     [hasProject, hasTeam, navigate]
   );
 
-  const showOnboarding =
-    isAdmin && !statsLoading && !usersLoading && (!hasProject || !hasTeam);
+  const showOnboarding = isAdmin && !isLoading && !usersLoading && (!hasProject || !hasTeam);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -125,20 +139,41 @@ const DashboardPage = () => {
     },
   ];
 
+  const insightCards = [
+    {
+      label: 'Assigned to me',
+      value: dashboard?.assignedToMeCount ?? 0,
+      icon: <ListTodo size={18} />,
+      accent: 'primary',
+    },
+    {
+      label: 'Active sprints',
+      value: dashboard?.activeSprintCount ?? 0,
+      icon: <Zap size={18} />,
+      accent: 'warning',
+    },
+    {
+      label: 'Unread alerts',
+      value: dashboard?.unreadNotifications ?? 0,
+      icon: <Bell size={18} />,
+      accent: 'accent',
+    },
+  ];
+
   const issueDistributionData = [
     { name: 'To Do', value: stats?.todoCount || 0, color: 'var(--chart-todo)' },
     { name: 'In Progress', value: stats?.inProgressCount || 0, color: 'var(--chart-progress)' },
     { name: 'Done', value: stats?.doneCount || 0, color: 'var(--chart-done)' },
   ];
 
-  const workloadData = [
-    {
-      name: 'Status',
-      todo: stats?.todoCount || 0,
-      inProgress: stats?.inProgressCount || 0,
-      done: stats?.doneCount || 0,
-    },
-  ];
+  const priorityData = (dashboard?.priorityBreakdown ?? []).map((item) => ({
+    name: item.priority,
+    count: item.count,
+    color: PRIORITY_COLORS[item.priority] || 'var(--primary)',
+  }));
+
+  const hasIssueChartData = issueDistributionData.some((item) => item.value > 0);
+  const hasPriorityChartData = priorityData.some((item) => item.count > 0);
 
   return (
     <div className="page">
@@ -162,7 +197,7 @@ const DashboardPage = () => {
         }
       />
 
-      {statsError && <Alert className="page-alert">{statsError}</Alert>}
+      {error && <Alert className="page-alert">{error}</Alert>}
 
       {showOnboarding && (
         <OnboardingChecklist
@@ -217,7 +252,7 @@ const DashboardPage = () => {
               <span className={`stat-card__icon--${card.accent}`}>{card.icon}</span>
             </div>
             <div className="stat-value stat-value--lg">
-              {statsLoading ? (
+              {isLoading ? (
                 <div className="skeleton" style={{ height: '2rem', width: '40%' }} />
               ) : (
                 card.value
@@ -228,67 +263,116 @@ const DashboardPage = () => {
         ))}
       </div>
 
+      <div className="stats-grid stats-grid--compact">
+        {insightCards.map((card) => {
+          const content = (
+            <>
+              <div className="stat-header stat-header--between">
+                <span className="stat-label">{card.label}</span>
+                <span className={`stat-card__icon--${card.accent}`}>{card.icon}</span>
+              </div>
+              <div className="stat-value">
+                {isLoading ? (
+                  <div className="skeleton" style={{ height: '1.75rem', width: '30%' }} />
+                ) : (
+                  card.value
+                )}
+              </div>
+            </>
+          );
+
+          if (card.onClick) {
+            return (
+              <button
+                key={card.label}
+                type="button"
+                className={`stat-card stat-card--${card.accent} stat-card--interactive`}
+                onClick={card.onClick}
+              >
+                {content}
+              </button>
+            );
+          }
+
+          return (
+            <div key={card.label} className={`stat-card stat-card--${card.accent}`}>
+              {content}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="dashboard-grid dashboard-grid--widgets">
+        <MyOpenIssuesWidget issues={dashboard?.myOpenIssues} isLoading={isLoading} />
+        <RecentActivityWidget activity={dashboard?.recentActivity} isLoading={isLoading} />
+      </div>
+
       <div className="dashboard-grid">
         <div className="card chart-card">
           <h3 className="chart-title">Issue Status Distribution</h3>
           <div className="chart-container">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={issueDistributionData}
-                  innerRadius={70}
-                  outerRadius={90}
-                  paddingAngle={4}
-                  dataKey="value"
-                >
-                  {issueDistributionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
-                <Legend
-                  verticalAlign="bottom"
-                  iconType="circle"
-                  wrapperStyle={{ fontSize: '0.8rem', paddingTop: '1rem' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            {isLoading ? (
+              <div className="skeleton chart-empty" />
+            ) : !hasIssueChartData ? (
+              <div className="chart-empty">No issues yet.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={issueDistributionData}
+                    innerRadius={70}
+                    outerRadius={90}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {issueDistributionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
+                  <Legend
+                    verticalAlign="bottom"
+                    iconType="circle"
+                    wrapperStyle={{ fontSize: '0.8rem', paddingTop: '1rem' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
         <div className="card chart-card">
-          <h3 className="chart-title">Workspace Health</h3>
+          <h3 className="chart-title">Issues by Priority</h3>
           <div className="chart-container">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={workloadData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                <XAxis dataKey="name" hide />
-                <Tooltip cursor={{ fill: 'transparent' }} contentStyle={CHART_TOOLTIP_STYLE} />
-                <Bar
-                  dataKey="todo"
-                  name="To Do"
-                  fill="var(--chart-todo)"
-                  radius={[2, 2, 0, 0]}
-                  barSize={40}
-                />
-                <Bar
-                  dataKey="inProgress"
-                  name="In Progress"
-                  fill="var(--chart-progress)"
-                  radius={[2, 2, 0, 0]}
-                  barSize={40}
-                />
-                <Bar
-                  dataKey="done"
-                  name="Completed"
-                  fill="var(--chart-done)"
-                  radius={[2, 2, 0, 0]}
-                  barSize={40}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {isLoading ? (
+              <div className="skeleton chart-empty" />
+            ) : !hasPriorityChartData ? (
+              <div className="chart-empty">No priority data yet.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={priorityData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
+                  <XAxis
+                    dataKey="name"
+                    stroke="var(--text-muted)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis hide allowDecimals={false} />
+                  <Tooltip cursor={{ fill: 'transparent' }} contentStyle={CHART_TOOLTIP_STYLE} />
+                  <Bar dataKey="count" name="Issues" radius={[4, 4, 0, 0]} barSize={36}>
+                    {priorityData.map((entry) => (
+                      <Cell key={entry.name} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>
+
+      <RecentProjectsWidget projects={dashboard?.recentProjects} isLoading={isLoading} />
 
       <section>
         <h2 className="section-title">Quick Access</h2>
@@ -298,9 +382,7 @@ const DashboardPage = () => {
               <FolderKanban size={24} />
             </div>
             <span className="action-card__title">Projects</span>
-            <p className="action-card__desc">
-              Manage project boards and track team velocity.
-            </p>
+            <p className="action-card__desc">Manage project boards and track team velocity.</p>
           </div>
 
           {user?.role === 'ADMIN' && (

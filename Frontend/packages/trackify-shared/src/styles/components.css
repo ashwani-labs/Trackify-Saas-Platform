@@ -297,6 +297,28 @@
   border-left: 3px solid var(--success);
 }
 
+.stat-card--accent {
+  border-left: 3px solid var(--accent, var(--primary));
+}
+
+.stat-card--interactive {
+  width: 100%;
+  text-align: left;
+  cursor: default;
+}
+
+.stat-card--interactive:not(:disabled) {
+  cursor: pointer;
+}
+
+.stats-grid--compact {
+  margin-bottom: 2rem;
+}
+
+.stat-card__icon--accent {
+  color: var(--accent, var(--primary));
+}
+
 .stat-header {
   display: flex;
   align-items: center;
@@ -669,6 +691,131 @@
 
 .dashboard-grid--compact {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.dashboard-grid--widgets {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.dashboard-widget {
+  padding: 0;
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-widget__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-main);
+  background: var(--bg-input);
+}
+
+.dashboard-widget__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.dashboard-widget__meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.dashboard-widget__body {
+  padding: 1rem 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.dashboard-widget__skeleton {
+  height: 3rem;
+  width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.dashboard-widget__empty {
+  padding: 2rem 1.25rem;
+}
+
+.dashboard-activity {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.dashboard-issue-list,
+.dashboard-project-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-issue-list__item,
+.dashboard-project-list__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  border: none;
+  border-bottom: 1px solid var(--border-main);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dashboard-issue-list__item:hover,
+.dashboard-project-list__item:hover {
+  background: var(--surface-overlay);
+}
+
+.dashboard-issue-list__main,
+.dashboard-project-list__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dashboard-issue-list__key,
+.dashboard-project-list__name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+}
+
+.dashboard-issue-list__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.dashboard-issue-list__project,
+.dashboard-project-list__meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.dashboard-project-list__activity {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-project-list__stats {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 .org-row {
@@ -1299,7 +1446,9 @@
   min-width: 280px;
   display: flex;
   flex-direction: column;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .kanban-column--drag-over {

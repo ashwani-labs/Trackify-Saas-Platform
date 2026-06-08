@@ -5,6 +5,7 @@ import projectReducer from '../features/projects/projectSlice';
 import issueReducer from '../features/issues/issueSlice';
 import sprintReducer from '../features/sprints/sprintSlice';
 import notificationReducer from '../features/notifications/notificationSlice';
+import dashboardReducer from '../features/dashboard/dashboardSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +15,6 @@ export const store = configureStore({
     issues: issueReducer,
     sprints: sprintReducer,
     notifications: notificationReducer,
+    dashboard: dashboardReducer,
   },
 });
