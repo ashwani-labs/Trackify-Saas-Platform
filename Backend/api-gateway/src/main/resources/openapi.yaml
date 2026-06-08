@@ -231,6 +231,15 @@ paths:
       responses:
         '200':
           description: Stats payload
+  /dashboard:
+    get:
+      tags: [Projects]
+      summary: Tenant dashboard widgets (summary, activity, assigned issues, recent projects)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard payload
   /projects/{id}:
     get:
       tags: [Projects]

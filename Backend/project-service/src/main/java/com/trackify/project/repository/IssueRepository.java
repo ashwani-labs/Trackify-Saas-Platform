@@ -1,6 +1,7 @@
 package com.trackify.project.repository;
 
 import com.trackify.project.entity.Issue;
+import com.trackify.project.enums.IssuePriority;
 import com.trackify.project.enums.IssueStatus;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,21 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
   long countByProjectId(Long projectId);
 
   long countByProjectIdAndStatus(Long projectId, IssueStatus status);
+
+  long countByAssigneeIdAndStatusNot(Long assigneeId, IssueStatus status);
+
+  long countByPriority(IssuePriority priority);
+
+  @Query(
+      "SELECT COUNT(i) FROM Issue i WHERE i.priority = :priority AND i.project.id IN :projectIds")
+  long countByPriorityAndProjectIds(
+      @Param("priority") IssuePriority priority, @Param("projectIds") List<Long> projectIds);
+
+  @Query(
+      "SELECT i FROM Issue i JOIN FETCH i.project p WHERE i.assigneeId = :userId "
+          + "AND i.status <> :doneStatus ORDER BY i.updatedAt DESC")
+  List<Issue> findMyOpenIssues(
+      @Param("userId") Long userId, @Param("doneStatus") IssueStatus doneStatus, Pageable pageable);
 
   @Query(
       "SELECT DISTINCT i FROM Issue i JOIN FETCH i.project p WHERE "

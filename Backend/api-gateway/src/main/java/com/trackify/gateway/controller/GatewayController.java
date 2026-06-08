@@ -49,7 +49,8 @@ public class GatewayController {
     } else if (path.startsWith("/projects")
         || path.startsWith("/issues")
         || path.startsWith("/search")
-        || path.startsWith("/notifications")) {
+        || path.startsWith("/notifications")
+        || path.startsWith("/dashboard")) {
       targetBaseUrl = projectUrl;
     } else {
       return ResponseEntity.notFound().build();
@@ -113,7 +114,6 @@ public class GatewayController {
   }
 
   private boolean shouldSkipRequestHeader(String headerName) {
-    return headerName.equalsIgnoreCase("Content-Length")
-        || headerName.equalsIgnoreCase("Host");
+    return headerName.equalsIgnoreCase("Content-Length") || headerName.equalsIgnoreCase("Host");
   }
 }
