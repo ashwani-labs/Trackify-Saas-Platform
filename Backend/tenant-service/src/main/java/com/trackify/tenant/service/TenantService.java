@@ -4,12 +4,12 @@ import com.trackify.common.enums.Role;
 import com.trackify.common.enums.TenantStatus;
 import com.trackify.common.enums.UserStatus;
 import com.trackify.common.exception.AppException;
+import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantDashboardStatsResponse;
 import com.trackify.tenant.dto.TenantGrowthPoint;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
-import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.UserRegistrationRequest;
 import com.trackify.tenant.dto.UserResponse;
 import com.trackify.tenant.entity.Tenant;
@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -180,14 +180,15 @@ public class TenantService {
     DateTimeFormatter labelFormat = DateTimeFormatter.ofPattern("MMM yy");
     List<TenantGrowthPoint> growth = new ArrayList<>();
 
-    for (YearMonth cursor = start; !cursor.isAfter(YearMonth.now()); cursor = cursor.plusMonths(1)) {
+    for (YearMonth cursor = start;
+        !cursor.isAfter(YearMonth.now());
+        cursor = cursor.plusMonths(1)) {
       LocalDateTime endOfMonth = cursor.atEndOfMonth().atTime(23, 59, 59);
       long cumulative =
           tenants.stream()
               .filter(
                   tenant ->
-                      tenant.getCreatedAt() != null
-                          && !tenant.getCreatedAt().isAfter(endOfMonth))
+                      tenant.getCreatedAt() != null && !tenant.getCreatedAt().isAfter(endOfMonth))
               .count();
       growth.add(
           TenantGrowthPoint.builder().label(cursor.format(labelFormat)).count(cumulative).build());
@@ -510,7 +511,7 @@ public class TenantService {
 
       jdbcTemplate.execute("FLUSH PRIVILEGES");
 
-      // 2. Create schema (V1 is the full current schema; V2–V4 are legacy upgrade scripts only)
+      // 2. Create schema (V1 is the full current schema; V2–V5 are legacy upgrade scripts only)
       String schemaSql = loadSqlTemplate("db/tenant/V1__tenant_schema.sql", dbName);
       executeSqlStatements(schemaSql);
 
@@ -548,8 +549,7 @@ public class TenantService {
   private String loadSqlTemplate(String classpathLocation, String dbName) {
     try {
       ClassPathResource resource = new ClassPathResource(classpathLocation);
-      String rawSql =
-          StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+      String rawSql = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
       return rawSql.replace("{{DB_NAME}}", dbName);
     } catch (IOException e) {
       throw AppException.internalError(

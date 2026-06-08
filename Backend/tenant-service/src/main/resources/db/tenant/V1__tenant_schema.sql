@@ -22,6 +22,19 @@ CREATE TABLE IF NOT EXISTS {{DB_NAME}}.projects (
   UNIQUE KEY uq_project_key (project_key)
 );
 
+CREATE TABLE IF NOT EXISTS {{DB_NAME}}.sprints (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  goal TEXT,
+  start_date DATE,
+  end_date DATE,
+  status VARCHAR(50) NOT NULL DEFAULT 'PLANNED',
+  project_id BIGINT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (project_id) REFERENCES {{DB_NAME}}.projects(id)
+);
+
 CREATE TABLE IF NOT EXISTS {{DB_NAME}}.issues (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   issue_key VARCHAR(20),
@@ -32,10 +45,12 @@ CREATE TABLE IF NOT EXISTS {{DB_NAME}}.issues (
   project_id BIGINT NOT NULL,
   reporter_id BIGINT,
   assignee_id BIGINT,
+  sprint_id BIGINT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_issue_key (issue_key),
-  FOREIGN KEY (project_id) REFERENCES {{DB_NAME}}.projects(id)
+  FOREIGN KEY (project_id) REFERENCES {{DB_NAME}}.projects(id),
+  FOREIGN KEY (sprint_id) REFERENCES {{DB_NAME}}.sprints(id)
 );
 
 CREATE TABLE IF NOT EXISTS {{DB_NAME}}.issue_comments (

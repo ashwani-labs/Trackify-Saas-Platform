@@ -23,6 +23,7 @@ public class DataSourceConfig implements WebMvcConfigurer {
   private static final Logger log = LoggerFactory.getLogger(DataSourceConfig.class);
 
   private final TenantInterceptor tenantInterceptor;
+  private final TenantSchemaUpgrader tenantSchemaUpgrader;
 
   @Value(
       "${spring.datasource.url:jdbc:mysql://localhost:3306/trackify_master?useSSL=false&allowPublicKeyRetrieval=true}")
@@ -34,8 +35,10 @@ public class DataSourceConfig implements WebMvcConfigurer {
   @Value("${spring.datasource.password:root}")
   private String masterPass;
 
-  public DataSourceConfig(TenantInterceptor tenantInterceptor) {
+  public DataSourceConfig(
+      TenantInterceptor tenantInterceptor, TenantSchemaUpgrader tenantSchemaUpgrader) {
     this.tenantInterceptor = tenantInterceptor;
+    this.tenantSchemaUpgrader = tenantSchemaUpgrader;
   }
 
   /** 1. Register the Tenant Interceptor to detect the tenant_id from JWT. */
@@ -72,8 +75,12 @@ public class DataSourceConfig implements WebMvcConfigurer {
           @Override
           protected Object determineCurrentLookupKey() {
             Long tenantId = TenantContext.get();
-            if (tenantId != null && !this.hasTenant(tenantId)) {
-              initializeTenantDataSource(tenantId, masterJdbcTemplate, this);
+            if (tenantId != null) {
+              if (!this.hasTenant(tenantId)) {
+                initializeTenantDataSource(tenantId, masterJdbcTemplate, this);
+              } else {
+                tenantSchemaUpgrader.upgradeIfNeeded(tenantId, this.getTenantDataSource(tenantId));
+              }
             }
             return tenantId;
           }
@@ -117,6 +124,7 @@ public class DataSourceConfig implements WebMvcConfigurer {
       ds.setMaximumPoolSize(5);
 
       routingDataSource.registerTenantDataSource(tenantId, ds);
+      tenantSchemaUpgrader.upgradeIfNeeded(tenantId, ds);
 
       log.info("Successfully added tenant database: {}", dbName);
     } catch (Exception e) {

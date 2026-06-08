@@ -256,13 +256,14 @@ High-priority next work:
 - Remove duplicate gateway package/classes (done — keep docs in sync)
 - Replace remaining inline UI styles with shared tokens/components
 - Set `INTERNAL_API_KEY` on `tenant-service` and `project-service` for admin approval notifications
-- Run tenant SQL migrations `V3__activity_events.sql` and `V4__issue_keys.sql` on existing tenant databases
+- Run tenant SQL migrations `V3__activity_events.sql`, `V4__issue_keys.sql`, and `V5__sprints.sql` on existing tenant databases (or restart `project-service` to auto-apply sprints schema on first tenant request)
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
 | JWT validation fails | Ensure every backend service uses the same `JWT_SECRET` |
+| `/dashboard` fails with missing `sprints` table | Restart `project-service` so tenant schema upgrades run, or apply `Backend/tenant-service/src/main/resources/db/tenant/V5__sprints.sql` manually |
 | Frontend cannot reach API | Check `VITE_API_BASE_URL`, rebuild Docker frontend images after changing it |
 | Email does not send | Start with `--profile full` and configure SMTP env vars |
 | Tenant app subdomain does not resolve locally | Use direct dev URL (`localhost:5174`) or configure local DNS/hosts as needed |

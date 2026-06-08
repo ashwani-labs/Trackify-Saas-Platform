@@ -27,4 +27,8 @@ public class TenantRoutingDataSource extends AbstractRoutingDataSource {
   public boolean hasTenant(Long tenantId) {
     return targetDataSources.containsKey(tenantId);
   }
+
+  public DataSource getTenantDataSource(Long tenantId) {
+    return (DataSource) targetDataSources.get(tenantId);
+  }
 }
