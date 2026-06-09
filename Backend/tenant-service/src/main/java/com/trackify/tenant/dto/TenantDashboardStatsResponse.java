@@ -15,4 +15,5 @@ public class TenantDashboardStatsResponse {
   private long activeTenants;
   private long inactiveTenants;
   private List<TenantGrowthPoint> growth;
+  private List<TenantGrowthPoint> provisioning;
 }

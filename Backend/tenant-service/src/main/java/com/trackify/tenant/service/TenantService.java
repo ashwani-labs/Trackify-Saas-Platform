@@ -179,10 +179,12 @@ public class TenantService {
     YearMonth start = YearMonth.now().minusMonths(effectiveMonths - 1L);
     DateTimeFormatter labelFormat = DateTimeFormatter.ofPattern("MMM yy");
     List<TenantGrowthPoint> growth = new ArrayList<>();
+    List<TenantGrowthPoint> provisioning = new ArrayList<>();
 
     for (YearMonth cursor = start;
         !cursor.isAfter(YearMonth.now());
         cursor = cursor.plusMonths(1)) {
+      LocalDateTime startOfMonth = cursor.atDay(1).atStartOfDay();
       LocalDateTime endOfMonth = cursor.atEndOfMonth().atTime(23, 59, 59);
       long cumulative =
           tenants.stream()
@@ -190,8 +192,17 @@ public class TenantService {
                   tenant ->
                       tenant.getCreatedAt() != null && !tenant.getCreatedAt().isAfter(endOfMonth))
               .count();
-      growth.add(
-          TenantGrowthPoint.builder().label(cursor.format(labelFormat)).count(cumulative).build());
+      long newTenants =
+          tenants.stream()
+              .filter(
+                  tenant ->
+                      tenant.getCreatedAt() != null
+                          && !tenant.getCreatedAt().isBefore(startOfMonth)
+                          && !tenant.getCreatedAt().isAfter(endOfMonth))
+              .count();
+      String label = cursor.format(labelFormat);
+      growth.add(TenantGrowthPoint.builder().label(label).count(cumulative).build());
+      provisioning.add(TenantGrowthPoint.builder().label(label).count(newTenants).build());
     }
 
     return TenantDashboardStatsResponse.builder()
@@ -199,6 +210,7 @@ public class TenantService {
         .activeTenants(active)
         .inactiveTenants(inactive)
         .growth(growth)
+        .provisioning(provisioning)
         .build();
   }
 

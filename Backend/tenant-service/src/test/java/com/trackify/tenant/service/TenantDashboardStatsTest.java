@@ -59,5 +59,8 @@ class TenantDashboardStatsTest {
     assertEquals(2, stats.getGrowth().size());
     assertEquals(1L, stats.getGrowth().get(0).getCount());
     assertEquals(2L, stats.getGrowth().get(1).getCount());
+    assertEquals(2, stats.getProvisioning().size());
+    assertEquals(1L, stats.getProvisioning().get(0).getCount());
+    assertEquals(1L, stats.getProvisioning().get(1).getCount());
   }
 }
