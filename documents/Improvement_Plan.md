@@ -140,7 +140,7 @@ Trackify is a multi-tenant project management SaaS with:
 ## Suggested Next 10 Tasks
 
 1. Remove fallback JWT secrets from backend `application.yml` files.
-2. Add Flyway master schema migration from `Backend/master.sql`.
+2. ~~Add Flyway master schema migration from `Backend/master.sql`.~~
 3. Extract tenant schema SQL from `TenantService`.
 4. Remove duplicate `api-gateway` package/classes.
 5. Add `IssueService` unit tests.

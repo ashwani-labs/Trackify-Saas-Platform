@@ -44,7 +44,7 @@ Docker Compose uses `/actuator/health/liveness` for backend healthchecks.
 
 ## API Documentation
 
-- Static spec: `GET /openapi.yaml` (also in `documents/openapi.yaml`)
+- Static spec: `GET /openapi.yaml` (source: `Backend/api-gateway/src/main/resources/openapi.yaml`)
 - Swagger UI: `GET /swagger-ui.html`
 - OpenAPI JSON: `GET /v3/api-docs`
 

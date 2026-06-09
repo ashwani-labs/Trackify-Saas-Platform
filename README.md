@@ -68,16 +68,14 @@ trackify-saas-platform/
 │   ├── tenant-service/
 │   ├── project-service/
 │   ├── notification-service/
-│   ├── common-lib/
-│   └── master.sql
+│   └── common-lib/
 ├── Frontend/
 │   ├── packages/trackify-shared/
 │   ├── master-app/
 │   └── tenant-app/
 ├── documents/
 │   ├── Improvement_Plan.md
-│   ├── DOCKER_PRODUCTION.md
-│   └── openapi.yaml
+│   └── DOCKER_PRODUCTION.md
 ├── docker-compose.yml
 ├── docker-compose.override.yml.example
 ├── nginx.conf
@@ -194,11 +192,7 @@ Docker is recommended for the full stack. For Java-only development:
 docker compose up db
 ```
 
-2. Apply or import the master schema from:
-
-```text
-Backend/master.sql
-```
+2. Start `auth-service` (or any service with Flyway enabled) so it applies `Backend/auth-service/src/main/resources/db/migration/V1__master_schema.sql` to `trackify_master` on first boot.
 
 3. Run services from separate terminals, or from the IDE:
 

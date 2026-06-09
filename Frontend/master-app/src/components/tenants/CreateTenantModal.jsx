@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { createTenantAsync } from '../../features/tenants/tenantSlice';
 import { Globe, Mail, Briefcase } from 'lucide-react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import { Alert } from '@trackify/shared';
+import { Alert, Button, Input, Modal } from '@trackify/shared';
 
 const CreateTenantModal = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
