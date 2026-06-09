@@ -10,6 +10,13 @@ import {
 } from '../../features/notifications/notificationSlice';
 import { setSelectedIssue } from '../../features/issues/issueSlice';
 
+const NOTIFICATION_TYPE_LABELS = {
+  ISSUE_ASSIGNED: 'Assignment',
+  ISSUE_COMMENT: 'Comment',
+  ISSUE_STATUS_CHANGED: 'Status update',
+  USER_APPROVAL: 'User approval',
+};
+
 const NotificationBell = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -127,6 +134,9 @@ const NotificationBell = () => {
               >
                 <div style={{ flex: 1, textAlign: 'left' }}>
                   <div className="search-result__title">{n.title}</div>
+                  {NOTIFICATION_TYPE_LABELS[n.type] && (
+                    <div className="notification-item__type">{NOTIFICATION_TYPE_LABELS[n.type]}</div>
+                  )}
                   {n.message && <div className="search-result__meta">{n.message}</div>}
                 </div>
               </button>
