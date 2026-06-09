@@ -62,6 +62,18 @@ export const fetchProjectMembers = createAsyncThunk(
   }
 );
 
+export const fetchProjectActivity = createAsyncThunk(
+  'projects/fetchActivity',
+  async ({ projectId, page = 0, size = 30 }, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/projects/${projectId}/activity?page=${page}&size=${size}`);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(getApiErrorPayload(error, 'Failed to fetch project activity'));
+    }
+  }
+);
+
 export const addProjectMember = createAsyncThunk(
   'projects/addMember',
   async ({ projectId, memberData }, { rejectWithValue }) => {
@@ -96,6 +108,10 @@ const initialState = {
   stats: null,
   statsLoading: false,
   statsError: null,
+  activity: [],
+  activityTotal: 0,
+  activityLoading: false,
+  activityError: null,
   isLoading: false,
   memberLoading: false,
   error: null,
@@ -110,6 +126,9 @@ const projectSlice = createSlice({
     },
     clearCurrentProject: (state) => {
       state.currentProject = null;
+      state.activity = [];
+      state.activityTotal = 0;
+      state.activityError = null;
     },
   },
   extraReducers: (builder) => {
@@ -184,6 +203,24 @@ const projectSlice = createSlice({
       })
       .addCase(removeProjectMember.fulfilled, (state, action) => {
         state.members = state.members.filter((m) => m.userId !== action.payload);
+      })
+      .addCase(fetchProjectActivity.pending, (state) => {
+        state.activityLoading = true;
+        state.activityError = null;
+      })
+      .addCase(fetchProjectActivity.fulfilled, (state, action) => {
+        state.activityLoading = false;
+        if (action.payload?.content !== undefined) {
+          state.activity = action.payload.content;
+          state.activityTotal = action.payload.totalElements;
+        } else {
+          state.activity = action.payload || [];
+          state.activityTotal = state.activity.length;
+        }
+      })
+      .addCase(fetchProjectActivity.rejected, (state, action) => {
+        state.activityLoading = false;
+        state.activityError = action.payload;
       });
   },
 });

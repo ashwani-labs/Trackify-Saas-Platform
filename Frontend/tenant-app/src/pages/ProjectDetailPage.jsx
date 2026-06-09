@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProjectById, fetchProjectMembers } from '../features/projects/projectSlice';
+import { fetchProjectById, fetchProjectMembers, fetchProjectActivity } from '../features/projects/projectSlice';
 import { fetchIssuesByProject, fetchIssueByKey, clearIssues } from '../features/issues/issueSlice';
 import { fetchSprintsByProject } from '../features/sprints/sprintSlice';
 import KanbanBoard from '../components/kanban/KanbanBoard';
@@ -9,9 +9,10 @@ import CreateIssueModal from '../components/issues/CreateIssueModal';
 import IssueDetailPanel from '../components/issues/IssueDetailPanel';
 import IssueFilterBar from '../components/issues/IssueFilterBar';
 import ProjectMembersModal from '../components/projects/ProjectMembersModal';
+import ProjectActivityFeed from '../components/projects/ProjectActivityFeed';
 import BacklogView from '../components/sprints/BacklogView';
 import CreateSprintModal from '../components/sprints/CreateSprintModal';
-import { Users, LayoutDashboard, ListTodo, Plus, Calendar } from 'lucide-react';
+import { Users, LayoutDashboard, ListTodo, Plus, Calendar, Activity } from 'lucide-react';
 import { Button, PageHeader, Alert } from '@trackify/shared';
 import { applyIssueFilters } from '../utils/issueFilters';
 
@@ -30,6 +31,10 @@ const ProjectDetailPage = () => {
     currentProject,
     isLoading: projectLoading,
     error: projectError,
+    activity,
+    activityTotal,
+    activityLoading,
+    activityError,
   } = useSelector((s) => s.projects);
   const { selectedIssue, issues, filters } = useSelector((s) => s.issues);
   const { list: sprints } = useSelector((s) => s.sprints);
@@ -51,6 +56,12 @@ const ProjectDetailPage = () => {
       dispatch(clearIssues());
     };
   }, [id, dispatch]);
+
+  useEffect(() => {
+    if (viewMode === 'ACTIVITY') {
+      dispatch(fetchProjectActivity({ projectId: id }));
+    }
+  }, [id, viewMode, dispatch]);
 
   useEffect(() => {
     if (issueKey) {
@@ -96,7 +107,13 @@ const ProjectDetailPage = () => {
         breadcrumb={
           <>
             Projects / {currentProject?.name} /{' '}
-            <strong>{viewMode === 'BOARD' ? 'Kanban Board' : 'Backlog'}</strong>
+            <strong>
+              {viewMode === 'BOARD'
+                ? 'Kanban Board'
+                : viewMode === 'BACKLOG'
+                  ? 'Backlog'
+                  : 'Activity'}
+            </strong>
           </>
         }
         title={
@@ -143,6 +160,13 @@ const ProjectDetailPage = () => {
         >
           <ListTodo size={16} /> Backlog
         </button>
+        <button
+          type="button"
+          className={`tab ${viewMode === 'ACTIVITY' ? 'tab--active' : ''}`}
+          onClick={() => setViewMode('ACTIVITY')}
+        >
+          <Activity size={16} /> Activity
+        </button>
       </div>
 
       {viewMode === 'BOARD' && activeSprint && (
@@ -167,7 +191,7 @@ const ProjectDetailPage = () => {
         </div>
       )}
 
-      <IssueFilterBar />
+      {viewMode !== 'ACTIVITY' && <IssueFilterBar />}
 
       <div className="project-detail-body">
         {viewMode === 'BOARD' && (
@@ -197,6 +221,16 @@ const ProjectDetailPage = () => {
             projectId={Number(id)}
             issues={filteredIssues}
             onCreateSprint={() => setIsSprintModalOpen(true)}
+          />
+        )}
+
+        {viewMode === 'ACTIVITY' && (
+          <ProjectActivityFeed
+            projectId={Number(id)}
+            events={activity}
+            totalElements={activityTotal}
+            isLoading={activityLoading}
+            error={activityError}
           />
         )}
       </div>

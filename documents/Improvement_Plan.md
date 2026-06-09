@@ -31,7 +31,7 @@ Trackify is a multi-tenant project management SaaS with:
 | P1 | ~~Master dashboard growth chart is derived fake history~~ | `GET /tenants/dashboard-stats` + master-app chart | Add provisioning rate (new per month) view |
 | P1 | Attachments use local storage | `LocalStorageService`, optional S3 via `STORAGE_PROVIDER=s3` | Use S3 in multi-node deployments |
 | P2 | ~~In-app notifications missing~~ | Full inbox + user-approval admin alerts | Add more notification event types |
-| P2 | ~~Activity/audit log is missing~~ | `GET /issues/{id}/activity` + issue detail timeline | Add project-level activity feed |
+| P2 | ~~Activity/audit log is missing~~ | `GET /issues/{id}/activity` + issue detail timeline | ~~Add project-level activity feed~~ |
 | P2 | ~~Issue keys are missing~~ | `project_key`, `issue_key`, deep link routes | Backfill keys for legacy tenants |
 | P2 | ~~OpenAPI is missing~~ | `GET /openapi.yaml`, Swagger UI at gateway | Keep spec updated when routes change |
 
@@ -78,6 +78,7 @@ Trackify is a multi-tenant project management SaaS with:
   - [x] assignee changed
   - [x] comment added
   - [x] sprint started/completed
+  - [x] project-level activity feed on project detail
 - [x] Add Jira-style issue keys:
   - [x] project key + sequence
   - [x] display key on cards and detail panel

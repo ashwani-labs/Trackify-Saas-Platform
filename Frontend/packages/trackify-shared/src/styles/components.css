@@ -2101,6 +2101,53 @@
   flex-shrink: 0;
 }
 
+.project-activity {
+  padding: 1.25rem 1.5rem;
+}
+
+.project-activity__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.project-activity__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.project-activity__count {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.project-activity__timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-activity__issue-key {
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.project-activity__issue-key:hover {
+  text-decoration: underline;
+}
+
+.project-activity__empty {
+  padding: 2rem 1rem;
+}
+
 /* Mobile layout */
 @media (max-width: 767px) {
   .search-panel {
