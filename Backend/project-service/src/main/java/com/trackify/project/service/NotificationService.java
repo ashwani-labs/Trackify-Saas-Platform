@@ -8,7 +8,9 @@ import com.trackify.project.enums.NotificationReferenceType;
 import com.trackify.project.enums.NotificationType;
 import com.trackify.project.repository.NotificationRepository;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -78,6 +80,42 @@ public class NotificationService {
     log.debug("Created assignment notification for user {} issue {}", assigneeId, issue.getId());
   }
 
+  @Transactional
+  public void notifyIssueComment(Issue issue, Long actorUserId) {
+    if (issue == null || actorUserId == null) {
+      return;
+    }
+
+    String issueLabel = formatIssueLabel(issue);
+    String projectName = issue.getProject() != null ? issue.getProject().getName() : "a project";
+    notifyIssueStakeholders(
+        issue,
+        actorUserId,
+        NotificationType.ISSUE_COMMENT,
+        "New comment on " + issueLabel,
+        "A comment was added to \"" + issue.getTitle() + "\" in " + projectName);
+  }
+
+  @Transactional
+  public void notifyIssueStatusChanged(
+      Issue issue, Long actorUserId, String fromStatus, String toStatus) {
+    if (issue == null || actorUserId == null || fromStatus == null || toStatus == null) {
+      return;
+    }
+    if (fromStatus.equals(toStatus)) {
+      return;
+    }
+
+    String issueLabel = formatIssueLabel(issue);
+    String projectName = issue.getProject() != null ? issue.getProject().getName() : "a project";
+    notifyIssueStakeholders(
+        issue,
+        actorUserId,
+        NotificationType.ISSUE_STATUS_CHANGED,
+        issueLabel + " status updated",
+        "Status changed from " + fromStatus + " to " + toStatus + " in " + projectName);
+  }
+
   public Page<NotificationResponse> listForUser(
       Long userId, boolean unreadOnly, Pageable pageable) {
     Page<Notification> page =
@@ -116,6 +154,47 @@ public class NotificationService {
               notification.setReadAt(now);
               notificationRepository.save(notification);
             });
+  }
+
+  private void notifyIssueStakeholders(
+      Issue issue,
+      Long actorUserId,
+      NotificationType type,
+      String title,
+      String message) {
+    for (Long recipientId : resolveIssueStakeholderIds(issue, actorUserId)) {
+      Notification notification =
+          Notification.builder()
+              .userId(recipientId)
+              .type(type)
+              .title(title)
+              .message(message)
+              .referenceType(NotificationReferenceType.ISSUE)
+              .referenceId(issue.getId())
+              .projectId(issue.getProject() != null ? issue.getProject().getId() : null)
+              .build();
+      notificationRepository.save(notification);
+    }
+  }
+
+  private Set<Long> resolveIssueStakeholderIds(Issue issue, Long actorUserId) {
+    Set<Long> recipients = new LinkedHashSet<>();
+    if (issue.getAssigneeId() != null && !issue.getAssigneeId().equals(actorUserId)) {
+      recipients.add(issue.getAssigneeId());
+    }
+    if (issue.getReporterId() != null
+        && !issue.getReporterId().equals(actorUserId)
+        && !issue.getReporterId().equals(issue.getAssigneeId())) {
+      recipients.add(issue.getReporterId());
+    }
+    return recipients;
+  }
+
+  private String formatIssueLabel(Issue issue) {
+    if (issue.getIssueKey() != null && !issue.getIssueKey().isBlank()) {
+      return issue.getIssueKey();
+    }
+    return "Issue #" + issue.getId();
   }
 
   private Notification findOwnedNotification(Long notificationId, Long userId) {

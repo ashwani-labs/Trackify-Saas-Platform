@@ -167,8 +167,10 @@ public class IssueService {
 
     if (request.getStatus() != null && !Objects.equals(request.getStatus(), previousStatus)) {
       String fromStatus = previousStatus != null ? previousStatus.name() : "UNSET";
+      String toStatus = issue.getStatus().name();
       activityService.recordStatusChanged(
-          projectId, issue.getId(), actorUserId, fromStatus, issue.getStatus().name());
+          projectId, issue.getId(), actorUserId, fromStatus, toStatus);
+      notificationService.notifyIssueStatusChanged(issue, actorUserId, fromStatus, toStatus);
     }
 
     Long newAssignee = request.getAssigneeId();
@@ -204,6 +206,7 @@ public class IssueService {
 
     comment = commentRepository.save(comment);
     activityService.recordCommentAdded(issue.getProject().getId(), issue.getId(), userId);
+    notificationService.notifyIssueComment(issue, userId);
     return mapToCommentResponse(comment);
   }
 
