@@ -286,6 +286,32 @@ paths:
       responses:
         '204':
           description: Deleted
+  /projects/{id}/activity:
+    get:
+      tags: [Projects]
+      summary: List recent activity for a project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: Paginated project activity events
   /issues:
     post:
       tags: [Issues]
