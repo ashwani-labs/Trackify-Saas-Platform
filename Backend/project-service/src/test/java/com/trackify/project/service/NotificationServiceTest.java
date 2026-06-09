@@ -85,6 +85,63 @@ class NotificationServiceTest {
   }
 
   @Test
+  void notifyIssueComment_notifiesAssigneeAndReporterExcludingActor() {
+    Project project = Project.builder().id(3L).name("Alpha").build();
+    Issue issue =
+        Issue.builder()
+            .id(9L)
+            .issueKey("ALP-1")
+            .title("Fix login")
+            .project(project)
+            .assigneeId(7L)
+            .reporterId(8L)
+            .build();
+
+    notificationService.notifyIssueComment(issue, 10L);
+
+    verify(notificationRepository, times(2)).save(any(Notification.class));
+  }
+
+  @Test
+  void notifyIssueComment_skipsActorWhenTheyAreAssignee() {
+    Project project = Project.builder().id(3L).name("Alpha").build();
+    Issue issue =
+        Issue.builder()
+            .id(9L)
+            .issueKey("ALP-1")
+            .title("Fix login")
+            .project(project)
+            .assigneeId(7L)
+            .reporterId(8L)
+            .build();
+
+    notificationService.notifyIssueComment(issue, 7L);
+
+    ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+    verify(notificationRepository, times(1)).save(captor.capture());
+    assertEquals(8L, captor.getValue().getUserId());
+    assertEquals(NotificationType.ISSUE_COMMENT, captor.getValue().getType());
+  }
+
+  @Test
+  void notifyIssueStatusChanged_notifiesStakeholders() {
+    Project project = Project.builder().id(3L).name("Alpha").build();
+    Issue issue =
+        Issue.builder()
+            .id(9L)
+            .issueKey("ALP-2")
+            .title("Deploy fix")
+            .project(project)
+            .assigneeId(7L)
+            .reporterId(8L)
+            .build();
+
+    notificationService.notifyIssueStatusChanged(issue, 10L, "TODO", "IN_PROGRESS");
+
+    verify(notificationRepository, times(2)).save(any(Notification.class));
+  }
+
+  @Test
   void listForUser_unreadOnly_usesUnreadQuery() {
     Notification unread =
         Notification.builder()

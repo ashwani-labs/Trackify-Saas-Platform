@@ -9,9 +9,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.trackify.common.exception.AppException;
+import com.trackify.project.dto.CommentRequest;
 import com.trackify.project.dto.IssueRequest;
 import com.trackify.project.dto.IssueResponse;
 import com.trackify.project.entity.Issue;
+import com.trackify.project.entity.IssueComment;
 import com.trackify.project.entity.Project;
 import com.trackify.project.entity.Sprint;
 import com.trackify.project.enums.IssuePriority;
@@ -163,6 +165,34 @@ class IssueServiceTest {
 
     assertEquals(IssueStatus.DONE, response.getStatus());
     verify(issueRepository).save(existing);
+    verify(notificationService)
+        .notifyIssueStatusChanged(existing, 1L, IssueStatus.TODO.name(), IssueStatus.DONE.name());
+  }
+
+  @Test
+  void addComment_notifiesStakeholders() {
+    Issue existing =
+        Issue.builder()
+            .id(401L)
+            .title("Comment target")
+            .project(project)
+            .assigneeId(50L)
+            .reporterId(51L)
+            .build();
+    CommentRequest commentRequest = new CommentRequest("Looks good");
+
+    when(issueRepository.findById(401L)).thenReturn(Optional.of(existing));
+    when(commentRepository.save(any(IssueComment.class)))
+        .thenAnswer(
+            invocation -> {
+              IssueComment comment = invocation.getArgument(0);
+              comment.setId(900L);
+              return comment;
+            });
+
+    issueService.addComment(401L, commentRequest, 52L);
+
+    verify(notificationService).notifyIssueComment(existing, 52L);
   }
 
   @Test
