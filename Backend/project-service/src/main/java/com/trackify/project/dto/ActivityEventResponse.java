@@ -15,6 +15,7 @@ public class ActivityEventResponse {
   private Long id;
   private Long projectId;
   private Long issueId;
+  private String issueKey;
   private Long actorUserId;
   private ActivityEventType eventType;
   private String summary;

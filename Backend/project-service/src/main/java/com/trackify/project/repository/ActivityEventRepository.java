@@ -13,6 +13,8 @@ public interface ActivityEventRepository extends JpaRepository<ActivityEvent, Lo
 
   List<ActivityEvent> findAllByIssueIdOrderByCreatedAtDesc(Long issueId);
 
+  Page<ActivityEvent> findAllByProjectIdOrderByCreatedAtDesc(Long projectId, Pageable pageable);
+
   Optional<ActivityEvent> findFirstByProjectIdOrderByCreatedAtDesc(Long projectId);
 
   Page<ActivityEvent> findAllByOrderByCreatedAtDesc(Pageable pageable);

@@ -2,9 +2,11 @@ package com.trackify.project.controller;
 
 import com.trackify.common.dto.ApiResponse;
 import com.trackify.common.security.JwtUtil;
+import com.trackify.project.dto.ActivityEventResponse;
 import com.trackify.project.dto.ProjectRequest;
 import com.trackify.project.dto.ProjectResponse;
 import com.trackify.project.dto.ProjectStatsResponse;
+import com.trackify.project.service.ActivityService;
 import com.trackify.project.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProjectController {
 
   private final ProjectService projectService;
+  private final ActivityService activityService;
   private final JwtUtil jwtUtil;
 
   @GetMapping("/stats")
@@ -60,6 +63,19 @@ public class ProjectController {
     String role = jwtUtil.extractRole(token);
     ProjectResponse response = projectService.getProjectById(id, userId, role);
     return ResponseEntity.ok(ApiResponse.ok("Project fetched successfully", response));
+  }
+
+  @GetMapping("/{id}/activity")
+  public ResponseEntity<ApiResponse<Page<ActivityEventResponse>>> getProjectActivity(
+      @RequestHeader("Authorization") String authHeader,
+      @PathVariable("id") Long id,
+      Pageable pageable) {
+    String token = authHeader.substring(7);
+    Long userId = jwtUtil.extractUserId(token);
+    String role = jwtUtil.extractRole(token);
+    projectService.getProjectById(id, userId, role);
+    Page<ActivityEventResponse> response = activityService.getProjectActivity(id, pageable);
+    return ResponseEntity.ok(ApiResponse.ok("Project activity fetched", response));
   }
 
   @PutMapping("/{id}")

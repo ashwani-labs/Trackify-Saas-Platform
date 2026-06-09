@@ -2,11 +2,19 @@ package com.trackify.project.service;
 
 import com.trackify.project.dto.ActivityEventResponse;
 import com.trackify.project.entity.ActivityEvent;
+import com.trackify.project.entity.Issue;
 import com.trackify.project.enums.ActivityEventType;
 import com.trackify.project.repository.ActivityEventRepository;
+import com.trackify.project.repository.IssueRepository;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ActivityService {
 
   private final ActivityEventRepository activityEventRepository;
+  private final IssueRepository issueRepository;
 
   @Transactional
   public void recordStatusChanged(
@@ -69,8 +78,28 @@ public class ActivityService {
 
   public List<ActivityEventResponse> getIssueActivity(Long issueId) {
     return activityEventRepository.findAllByIssueIdOrderByCreatedAtDesc(issueId).stream()
-        .map(this::mapToResponse)
+        .map(event -> mapToResponse(event, null))
         .collect(Collectors.toList());
+  }
+
+  public Page<ActivityEventResponse> getProjectActivity(Long projectId, Pageable pageable) {
+    Page<ActivityEvent> page =
+        activityEventRepository.findAllByProjectIdOrderByCreatedAtDesc(projectId, pageable);
+    Map<Long, String> issueKeys = loadIssueKeys(page.getContent());
+    return page.map(event -> mapToResponse(event, issueKeys.get(event.getIssueId())));
+  }
+
+  private Map<Long, String> loadIssueKeys(List<ActivityEvent> events) {
+    Set<Long> issueIds =
+        events.stream()
+            .map(ActivityEvent::getIssueId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+    if (issueIds.isEmpty()) {
+      return Collections.emptyMap();
+    }
+    return issueRepository.findAllById(issueIds).stream()
+        .collect(Collectors.toMap(Issue::getId, Issue::getIssueKey));
   }
 
   private void record(
@@ -85,11 +114,12 @@ public class ActivityService {
             .build());
   }
 
-  private ActivityEventResponse mapToResponse(ActivityEvent event) {
+  private ActivityEventResponse mapToResponse(ActivityEvent event, String issueKey) {
     return ActivityEventResponse.builder()
         .id(event.getId())
         .projectId(event.getProjectId())
         .issueId(event.getIssueId())
+        .issueKey(issueKey)
         .actorUserId(event.getActorUserId())
         .eventType(event.getEventType())
         .summary(event.getSummary())
