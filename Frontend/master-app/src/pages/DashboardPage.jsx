@@ -63,6 +63,16 @@ const DashboardPage = () => {
     }));
   }, [dashboardStats]);
 
+  const provisioningData = useMemo(() => {
+    if (!dashboardStats?.provisioning?.length) {
+      return [];
+    }
+    return dashboardStats.provisioning.map((point) => ({
+      month: point.label,
+      count: point.count,
+    }));
+  }, [dashboardStats]);
+
   const statCards = [
     {
       label: 'Organizations',
@@ -141,7 +151,7 @@ const DashboardPage = () => {
         </div>
 
         <div className="card chart-card">
-          <h3 className="chart-title">Provisioning Growth</h3>
+          <h3 className="chart-title">Total Workspaces</h3>
           <div className="chart-container--sm">
             {statsLoading ? (
               <div className="skeleton chart-empty" />
@@ -160,9 +170,38 @@ const DashboardPage = () => {
                   <Tooltip
                     cursor={{ fill: 'color-mix(in srgb, var(--text-main) 5%, transparent)' }}
                     contentStyle={CHART_TOOLTIP_STYLE}
-                    formatter={(value) => [`${value} tenants`, 'Total']}
+                    formatter={(value) => [`${value} workspaces`, 'Cumulative']}
                   />
                   <Bar dataKey="count" fill="var(--primary)" radius={[2, 2, 0, 0]} barSize={32} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        <div className="card chart-card">
+          <h3 className="chart-title">New Provisioning</h3>
+          <div className="chart-container--sm">
+            {statsLoading ? (
+              <div className="skeleton chart-empty" />
+            ) : provisioningData.length === 0 ? (
+              <div className="chart-empty">No provisioning data yet.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={provisioningData}>
+                  <XAxis
+                    dataKey="month"
+                    stroke="var(--text-muted)"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: 'color-mix(in srgb, var(--text-main) 5%, transparent)' }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
+                    formatter={(value) => [`${value} new`, 'Provisioned']}
+                  />
+                  <Bar dataKey="count" fill="var(--success)" radius={[2, 2, 0, 0]} barSize={32} />
                 </BarChart>
               </ResponsiveContainer>
             )}
