@@ -29,6 +29,8 @@ jobs:
           cache: maven
 
       - name: Run tests
+        env:
+          JWT_SECRET: ci-test-jwt-secret-minimum-32-characters-long
         run: mvn -B test
 
   frontend:

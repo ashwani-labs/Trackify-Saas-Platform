@@ -104,11 +104,16 @@ Set at least:
 
 ```env
 JWT_SECRET=replace-with-a-long-random-secret
+INTERNAL_API_KEY=change-me-internal-api-key
 MYSQL_ROOT_PASSWORD=root
 SPRING_DATASOURCE_USERNAME=root
 SPRING_DATASOURCE_PASSWORD=root
 VITE_API_BASE_URL=http://localhost:8080
 ```
+
+`JWT_SECRET` is **required** for every backend service (no inline default in `application.yml`). Copy from `.env.example` for local dev or set in your IDE run configuration.
+
+`INTERNAL_API_KEY` must match on `tenant-service` and `project-service` so admin user-approval in-app notifications work.
 
 Email is optional for basic local development. To send real mail, set Gmail App Password values in `.env` (no spaces in the password). `notification-service` loads the root `.env` automatically on startup.
 
@@ -192,7 +197,7 @@ Docker is recommended for the full stack. For Java-only development:
 docker compose up db
 ```
 
-2. Start `auth-service` (or any service with Flyway enabled) so it applies `Backend/auth-service/src/main/resources/db/migration/V1__master_schema.sql` to `trackify_master` on first boot.
+2. Start `auth-service` so Flyway applies `Backend/auth-service/src/main/resources/db/migration/V1__master_schema.sql` to `trackify_master` on first boot. Export `JWT_SECRET` in the shell or IDE before starting any service.
 
 3. Run services from separate terminals, or from the IDE:
 
@@ -238,26 +243,25 @@ npm run build
 
 ## Current Improvement Tracker
 
-The code scan and task roadmap live in:
+Roadmap and scan notes live in `documents/Improvement_Plan.md`. **Phases 1–3 are complete.**
 
-```text
-documents/Improvement_Plan.md
-```
+Optional next work (Phase 4):
 
-High-priority next work:
+- Set `STORAGE_PROVIDER=s3` for multi-node production deployments
+- Expand `master-app` Vitest smoke coverage
+- Keep gateway OpenAPI spec updated when adding routes
 
-- Replace master dashboard fake growth chart (done — `GET /tenants/dashboard-stats`)
-- Remove duplicate gateway package/classes (done — keep docs in sync)
-- Replace remaining inline UI styles with shared tokens/components
-- Set `INTERNAL_API_KEY` on `tenant-service` and `project-service` for admin approval notifications
-- Run tenant SQL migrations `V3__activity_events.sql`, `V4__issue_keys.sql`, and `V5__sprints.sql` on existing tenant databases (or restart `project-service` to auto-apply sprints schema on first tenant request)
+Operational reminders:
+
+- Set `INTERNAL_API_KEY` on `tenant-service` and `project-service` for user-approval notifications
+- Legacy tenant DBs: restart `project-service` to auto-apply schema upgrades (sprints, issue keys) via `TenantSchemaUpgrader`
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| JWT validation fails | Ensure every backend service uses the same `JWT_SECRET` |
-| `/dashboard` fails with missing `sprints` table | Restart `project-service` so tenant schema upgrades run, or apply `Backend/tenant-service/src/main/resources/db/tenant/V5__sprints.sql` manually |
+| JWT validation fails | Set the same `JWT_SECRET` in `.env` / IDE env for every backend service |
+| Missing `sprints` or `issue_key` on legacy tenant DB | Restart `project-service`; `TenantSchemaUpgrader` runs on first tenant request |
 | Frontend cannot reach API | Check `VITE_API_BASE_URL`, rebuild Docker frontend images after changing it |
 | Email does not send | Start with `--profile full` and configure SMTP env vars |
 | Tenant app subdomain does not resolve locally | Use direct dev URL (`localhost:5174`) or configure local DNS/hosts as needed |
@@ -265,7 +269,7 @@ High-priority next work:
 
 ## Project Status
 
-Active development. The repository is portfolio-ready but not production-complete. The improvement tracker lists the remaining functionality, quality, security, and UI work.
+Active development. Core product and UI roadmaps (Phases 1–3) are complete; see `documents/Improvement_Plan.md` Phase 4 for optional production hardening.
 
 ## License
 
