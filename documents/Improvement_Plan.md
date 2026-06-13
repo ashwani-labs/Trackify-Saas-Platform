@@ -1,6 +1,6 @@
 # Trackify Functionality and UI Improvement Plan
 
-Last updated: May 2026
+Last updated: June 2026
 
 This file tracks practical improvements found during a repository scan. It is intentionally implementation-oriented: each item should become a small PR or commit.
 
@@ -20,32 +20,32 @@ Trackify is a multi-tenant project management SaaS with:
 
 | Priority | Finding | Evidence | Improvement |
 |----------|---------|----------|-------------|
-| P0 | Service configs still include a fallback JWT secret | `Backend/*/src/main/resources/application.yml` | Remove default JWT secrets and require `JWT_SECRET` through env/config |
-| P0 | No schema migration tool | No `db/migration` files | Add Flyway migrations for master schema and tenant schema provisioning |
-| P0 | Backend test coverage is thin | 5 test files under `Backend/**/src/test` | Add focused tests for issue transitions, tenant provisioning, auth, and gateway auth |
-| P0 | ~~No frontend tests~~ | Vitest + RTL in `tenant-app/src/test` | Expand smoke coverage for shared components and key pages |
-| P1 | API gateway has duplicate application packages | `com.trackify.gateway` and `com.trackify.apigateway` | Remove duplicate gateway package/classes and keep one application package |
-| P1 | ~~Gateway proxy is generic and logs full headers~~ | `GatewayController` correlation ID logging | Consider Spring Cloud Gateway routing |
-| P1 | Assignment emails are synchronous best-effort REST calls | `IssueService.sendAssignmentEmail` | Move notification dispatch behind a notification client or async queue abstraction |
-| P1 | ~~Global search is client-only~~ | `GET /search` in `project-service`, `GlobalSearch.jsx` calls API | Add issue keys to search results when Jira-style keys ship |
-| P1 | ~~Master dashboard growth chart is derived fake history~~ | `GET /tenants/dashboard-stats` + master-app chart | ~~Add provisioning rate (new per month) view~~ |
-| P1 | Attachments use local storage | `LocalStorageService`, optional S3 via `STORAGE_PROVIDER=s3` | Use S3 in multi-node deployments |
-| P2 | ~~In-app notifications missing~~ | Full inbox + user-approval admin alerts | ~~Add more notification event types~~ |
-| P2 | ~~Activity/audit log is missing~~ | `GET /issues/{id}/activity` + issue detail timeline | ~~Add project-level activity feed~~ |
-| P2 | ~~Issue keys are missing~~ | `project_key`, `issue_key`, deep link routes | Backfill keys for legacy tenants |
-| P2 | ~~OpenAPI is missing~~ | `GET /openapi.yaml`, Swagger UI at gateway | Keep spec updated when routes change |
+| P0 | ~~Service configs still include a fallback JWT secret~~ | `application.yml` uses `${JWT_SECRET}` | ~~Remove default JWT secrets and require `JWT_SECRET` through env/config~~ |
+| P0 | ~~No schema migration tool~~ | Flyway in `auth-service`, tenant SQL scripts | ~~Add Flyway migrations for master schema and tenant schema provisioning~~ |
+| P0 | ~~Backend test coverage is thin~~ | 14+ test files under `Backend/**/src/test` | ~~Add focused tests for issue transitions, tenant provisioning, auth, and gateway auth~~ |
+| P0 | ~~No frontend tests~~ | Vitest + RTL in `tenant-app/src/test` | Expand smoke coverage for shared components and key pages (ongoing) |
+| P1 | ~~API gateway has duplicate application packages~~ | `com.trackify.gateway` only | ~~Remove duplicate gateway package/classes~~ |
+| P1 | ~~Gateway proxy is generic~~ | `GatewayController` + correlation IDs | Consider Spring Cloud Gateway routing (optional) |
+| P1 | ~~Assignment emails are synchronous~~ | `NotificationEmailClient` + `@Async` | ~~Move notification dispatch behind a notification client~~ |
+| P1 | ~~Global search is client-only~~ | `GET /search`, issue keys in results | ~~Add issue keys to search results~~ |
+| P1 | ~~Master dashboard growth chart is fake~~ | `GET /tenants/dashboard-stats` | ~~Add provisioning rate (new per month) view~~ |
+| P1 | Attachments use local storage by default | `STORAGE_PROVIDER=local`, optional S3 | Use S3 in multi-node production deployments |
+| P2 | ~~In-app notifications missing~~ | Inbox + comment/status events | ~~Add more notification event types~~ |
+| P2 | ~~Activity/audit log is missing~~ | Issue + project activity feeds | ~~Add project-level activity feed~~ |
+| P2 | ~~Issue keys missing on legacy DBs~~ | `TenantSchemaUpgrader` backfill | ~~Backfill keys for legacy tenants~~ |
+| P2 | ~~OpenAPI is missing~~ | `GET /openapi.yaml` at gateway | Keep spec updated when routes change (ongoing) |
 
 ### UI and UX
 
 | Priority | Finding | Evidence | Improvement |
 |----------|---------|----------|-------------|
-| P0 | Several pages still use extensive inline styles | `TeamPage.jsx`, `DashboardPage.jsx`, master pages | Migrate to shared component classes and tokens |
-| P1 | Master app still has duplicated UI primitives | `Frontend/master-app/src/components/ui` | Replace with `@trackify/shared` components |
-| P1 | Accessibility pass is incomplete | Icon buttons and modals need review | Add labels, focus handling, Escape behavior, and keyboard search navigation |
-| P1 | Responsive states need full validation | Sidebar/search/cards use desktop-first patterns | Test and adjust mobile layouts for dashboard, team, project detail |
-| P1 | Empty states are inconsistent | Some pages use cards, others inline blocks | Standardize `EmptyState` with clear CTAs |
-| P2 | Theme tokens are not universal | Hardcoded hex values remain in pages | Replace page-level hex colors with semantic tokens |
-| P2 | Dashboard information hierarchy can improve | Master and tenant dashboards mix charts/cards/lists | Add consistent page headers, stat cards, and action sections |
+| P0 | ~~Several pages use extensive inline styles~~ | Shared tokens + `components.css` | ~~Migrate to shared component classes and tokens~~ |
+| P1 | ~~Master app duplicated UI primitives~~ | `@trackify/shared` imports | ~~Replace with `@trackify/shared` components~~ |
+| P1 | ~~Accessibility pass incomplete~~ | Labels, focus trap, keyboard search | Further audit as new UI ships (ongoing) |
+| P1 | ~~Responsive states need validation~~ | Mobile pass on key pages | Re-verify after major layout changes (ongoing) |
+| P1 | ~~Empty states inconsistent~~ | `EmptyState` on list pages | Standardize remaining edge pages as needed |
+| P2 | ~~Theme tokens not universal~~ | Semantic CSS variables | Replace stray hardcoded colors when touched |
+| P2 | Dashboard information hierarchy | Master + tenant dashboards | Optional polish: unify stat card patterns further |
 
 ## Functionality Roadmap
 
@@ -84,8 +84,10 @@ Trackify is a multi-tenant project management SaaS with:
   - [x] project key + sequence
   - [x] display key on cards and detail panel
   - [x] route support for issue key deep links
+  - [x] backfill keys for legacy tenant databases
 - [x] Replace master dashboard fake growth chart with real tenant growth data.
 - [x] Add master dashboard monthly provisioning rate chart (new tenants per month).
+- [x] Dispatch assignment emails asynchronously via `NotificationEmailClient`.
 
 ### Phase 3: Operational Readiness
 
@@ -95,6 +97,13 @@ Trackify is a multi-tenant project management SaaS with:
 - [x] Add S3-compatible attachment storage and upload validation.
 - [x] Add structured health checks and readiness checks.
 - [x] Add Docker production notes and environment matrix.
+
+### Phase 4: Production Hardening (optional / ongoing)
+
+- [ ] Migrate gateway to Spring Cloud Gateway (optional).
+- [ ] Default `STORAGE_PROVIDER=s3` in production compose profiles.
+- [ ] Expand frontend smoke tests for `master-app` and shared components.
+- [ ] Keep `Backend/api-gateway/src/main/resources/openapi.yaml` in sync with new routes.
 
 ## UI Improvement Roadmap
 
@@ -139,15 +148,15 @@ Trackify is a multi-tenant project management SaaS with:
 
 ## Suggested Next 10 Tasks
 
-1. Remove fallback JWT secrets from backend `application.yml` files.
-2. ~~Add Flyway master schema migration from `Backend/master.sql`.~~
-3. Extract tenant schema SQL from `TenantService`.
-4. Remove duplicate `api-gateway` package/classes.
-5. Add `IssueService` unit tests.
+1. ~~Remove fallback JWT secrets from backend `application.yml` files.~~
+2. ~~Add Flyway master schema migration.~~
+3. ~~Extract tenant schema SQL from `TenantService`.~~
+4. ~~Remove duplicate `api-gateway` package/classes.~~
+5. ~~Add `IssueService` unit tests.~~
 6. ~~Add Vitest + React Testing Library setup and smoke tests.~~
 7. ~~Migrate `TeamPage.jsx` to shared UI components and token classes.~~
 8. ~~Replace master dashboard fake growth chart.~~
-9. Add keyboard navigation to `GlobalSearch.jsx` (arrow keys / Enter).
+9. ~~Add keyboard navigation to `GlobalSearch.jsx` (arrow keys / Enter).~~
 10. ~~Add OpenAPI generation at the gateway or service level.~~
 11. ~~Migrate `DashboardPage.jsx` to shared UI components and token classes.~~
 12. ~~Add dashboard widgets backed by real APIs.~~
