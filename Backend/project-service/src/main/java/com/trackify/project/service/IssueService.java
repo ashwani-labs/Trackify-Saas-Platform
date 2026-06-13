@@ -1,6 +1,7 @@
 package com.trackify.project.service;
 
 import com.trackify.common.exception.AppException;
+import com.trackify.project.client.NotificationEmailClient;
 import com.trackify.project.dto.CommentRequest;
 import com.trackify.project.dto.CommentResponse;
 import com.trackify.project.dto.IssueAttachmentResponse;
@@ -25,7 +26,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -46,9 +46,7 @@ public class IssueService {
   private final SprintRepository sprintRepository;
   private final NotificationService notificationService;
   private final ActivityService activityService;
-
-  @Value("${services.notification-url}")
-  private String notificationUrl;
+  private final NotificationEmailClient notificationEmailClient;
 
   public IssueService(
       IssueRepository issueRepository,
@@ -60,7 +58,8 @@ public class IssueService {
       SprintRepository sprintRepository,
       NotificationService notificationService,
       ActivityService activityService,
-      FileUploadValidator fileUploadValidator) {
+      FileUploadValidator fileUploadValidator,
+      NotificationEmailClient notificationEmailClient) {
     this.issueRepository = issueRepository;
     this.projectRepository = projectRepository;
     this.commentRepository = commentRepository;
@@ -71,6 +70,7 @@ public class IssueService {
     this.sprintRepository = sprintRepository;
     this.notificationService = notificationService;
     this.activityService = activityService;
+    this.notificationEmailClient = notificationEmailClient;
   }
 
   @Transactional
@@ -272,23 +272,9 @@ public class IssueService {
       String email =
           jdbcTemplate.queryForObject(
               "SELECT email FROM users WHERE id = ?", String.class, assigneeId);
-      if (email != null) {
-        org.springframework.web.client.RestTemplate restTemplate =
-            new org.springframework.web.client.RestTemplate();
-        java.util.Map<String, String> request = new java.util.HashMap<>();
-        request.put("to", email);
-        request.put("subject", "Task Assigned: " + issueTitle);
-        request.put(
-            "body",
-            "You have been assigned to: "
-                + issueTitle
-                + "\n\nLog in to your dashboard to view details.");
-
-        restTemplate.postForEntity(
-            notificationUrl + "/api/notifications/email", request, String.class);
-      }
+      notificationEmailClient.sendAssignmentEmailAsync(email, issueTitle);
     } catch (Exception e) {
-      log.error("Failed to send assignment email: {}", e.getMessage());
+      log.error("Failed to queue assignment email: {}", e.getMessage());
     }
   }
 

@@ -44,6 +44,7 @@ class IssueServiceTest {
   @Mock private SprintRepository sprintRepository;
   @Mock private NotificationService notificationService;
   @Mock private ActivityService activityService;
+  @Mock private NotificationEmailClient notificationEmailClient;
   @Mock private FileUploadValidator fileUploadValidator;
 
   @InjectMocks private IssueService issueService;
