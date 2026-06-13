@@ -16,7 +16,7 @@ services:
   project-url: http://localhost:8083
 
 jwt:
-  secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
+  secret: ${JWT_SECRET}
   expiration: 86400000
 
 trackify:
