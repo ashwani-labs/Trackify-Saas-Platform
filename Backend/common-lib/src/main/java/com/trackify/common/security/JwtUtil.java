@@ -33,7 +33,17 @@ public class JwtUtil {
    */
   static byte[] resolveSecretKeyBytes(String secret) {
     if (secret == null || secret.isBlank()) {
-      throw new IllegalArgumentException("JWT secret must not be blank");
+      throw new IllegalArgumentException(
+          "JWT_SECRET is not set. Copy .env.example to .env in the repo root "
+              + "or set JWT_SECRET in your IDE run configuration (min 32 characters).");
+    }
+    if (!JwtSecretSupport.isStrongEnough(secret)) {
+      int bits = JwtSecretSupport.secretKeyByteLength(secret) * 8;
+      throw new IllegalArgumentException(
+          "JWT_SECRET must be at least 32 bytes for HS256 (plain text: 32+ characters, "
+              + "or use: openssl rand -base64 32). Current key is "
+              + bits
+              + " bits. Remove the short JWT_SECRET from your IDE run configuration.");
     }
     try {
       return Decoders.BASE64.decode(secret);
