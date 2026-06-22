@@ -5,7 +5,9 @@ spring:
   application:
     name: tenant-service
   config:
-    import: optional:classpath:trackify-management.yml
+    import:
+      - optional:classpath:trackify-management.yml
+      - optional:classpath:trackify-env-imports.yml
   datasource:
     url: jdbc:mysql://localhost:3306/trackify_master?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     username: root
@@ -29,5 +31,5 @@ tenant:
   app-url-pattern: http://%s.lvh.me:5174
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
   expiration: 86400000
