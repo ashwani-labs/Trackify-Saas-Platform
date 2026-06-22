@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.trackify.common.exception.AppException;
+import com.trackify.project.client.NotificationEmailClient;
 import com.trackify.project.dto.CommentRequest;
 import com.trackify.project.dto.IssueRequest;
 import com.trackify.project.dto.IssueResponse;
