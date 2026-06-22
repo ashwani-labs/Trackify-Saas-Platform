@@ -1,0 +1,8 @@
+# Imported by every backend service — walks up to the repo-root .env from any working directory.
+spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+      - optional:file:../../.env[.properties]
+      - optional:file:../../../.env[.properties]
