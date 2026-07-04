@@ -1,6 +1,16 @@
-# Docker Production Notes
+# Docker & Production Notes
 
-Operational guidance for running Trackify outside local development.
+Operational guidance for running Trackify outside local IDE development.
+
+## Spring profiles
+
+| Profile | Use case |
+|---------|----------|
+| `local` | Default for IDE runs (`localhost` endpoints) |
+| `dev` | Docker Compose (`SPRING_PROFILES_ACTIVE=dev` is set automatically) |
+| `prod` | Production — set `SPRING_PROFILES_ACTIVE=prod` and required secrets |
+
+See [SPRING_PROFILES.md](./SPRING_PROFILES.md) for full details.
 
 ## Environment Matrix
 
