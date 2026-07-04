@@ -40,7 +40,7 @@ const DashboardLayout = ({ children }) => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={18} /> },
+    { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
     { name: 'Projects', path: '/projects', icon: <ClipboardList size={18} /> },
     { name: 'Team', path: '/team', icon: <Users2 size={18} />, adminOnly: true },
     {
@@ -67,46 +67,15 @@ const DashboardLayout = ({ children }) => {
           <Menu size={20} />
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-            onClick={() => navigate('/')}
-          >
-            {tenantLogo ? (
-              <img src={tenantLogo} alt="Logo" style={{ height: '24px', borderRadius: '3px' }} />
-            ) : (
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  background: 'var(--primary)',
-                  borderRadius: '3px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <LayoutDashboard size={16} color="white" />
-              </div>
-            )}
-            <span
-              style={{
-                fontSize: '1.125rem',
-                fontWeight: '700',
-                color: 'var(--text-main)',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              Trackify
-            </span>
-          </div>
-
-          <nav
-            className="hide-mobile"
-            style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}
-          >
-            {/* Global navigation items could go here */}
-          </nav>
+        <div className="topbar-brand" onClick={() => navigate('/dashboard')} role="presentation">
+          {tenantLogo ? (
+            <img src={tenantLogo} alt="Logo" className="topbar-brand__logo-img" />
+          ) : (
+            <div className="topbar-brand__logo">
+              <LayoutDashboard size={16} color="white" />
+            </div>
+          )}
+          <span className="topbar-brand__name">Trackify</span>
         </div>
 
         <GlobalSearch />
