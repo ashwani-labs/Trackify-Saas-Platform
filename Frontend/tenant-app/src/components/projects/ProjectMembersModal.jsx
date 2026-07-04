@@ -91,7 +91,7 @@ const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
             disabled={!selectedUserId || memberLoading}
             leftIcon={
               memberLoading ? (
-                <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} />
+                <Loader2 size={18} className="btn-spinner" />
               ) : (
                 <UserPlus size={18} />
               )

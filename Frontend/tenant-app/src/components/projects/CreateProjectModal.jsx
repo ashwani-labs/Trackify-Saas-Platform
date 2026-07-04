@@ -51,7 +51,7 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
           </Button>
           <Button type="submit" form="create-project-form" disabled={isLoading}>
             {isLoading ? (
-              <Loader2 size={18} style={{ animation: 'loading 2s linear infinite' }} />
+              <Loader2 size={18} className="btn-spinner" />
             ) : (
               'Create Project'
             )}

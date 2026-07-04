@@ -63,7 +63,7 @@ class ErrorBoundary extends React.Component {
 
             <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: '1.6' }}>
               An unexpected error occurred. Our team has been notified. Please try refreshing the
-              page or return to the dashboard.
+              page or return to the home page.
             </p>
 
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>

@@ -326,7 +326,7 @@ const IssueDetailPanel = () => {
               />
               <div className="btn btn-secondary" style={{ width: '100%', borderStyle: 'dashed' }}>
                 {isAttachmentLoading ? (
-                  <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} />
+                  <Loader2 size={16} className="btn-spinner" />
                 ) : (
                   <Plus size={16} />
                 )}{' '}
@@ -445,7 +445,7 @@ const IssueDetailPanel = () => {
                   }}
                 >
                   {isCommentLoading ? (
-                    <Loader2 size={16} style={{ animation: 'loading 2s linear infinite' }} />
+                    <Loader2 size={16} className="btn-spinner" />
                   ) : (
                     <Send size={16} />
                   )}

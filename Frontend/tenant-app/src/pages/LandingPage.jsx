@@ -10,10 +10,11 @@ import {
   ArrowRight,
   CheckCircle2,
   Sparkles,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { Button } from '@trackify/shared';
 import { useTheme } from '../hooks/useTheme';
-import { Moon, Sun } from 'lucide-react';
 
 const FEATURES = [
   {

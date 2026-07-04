@@ -111,8 +111,8 @@ const RegisterPage = () => {
           Sign up
         </Button>
 
-        <div className="auth-divider">
-          <p className="auth-footer-text">
+        <div className="auth-footer">
+          <p className="auth-footer__text">
             Already have an account?{' '}
             <Link to="/login" className="auth-link">
               Log in

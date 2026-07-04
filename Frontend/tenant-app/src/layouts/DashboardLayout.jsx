@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { NavLink, useNavigate, useMatch } from 'react-router-dom';
 import CreateMenu from '../components/common/CreateMenu';
@@ -10,8 +10,6 @@ import { ROLES } from '@trackify/shared';
 import {
   LayoutDashboard,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
   ClipboardList,
   UserCheck,
   Users2,
@@ -55,7 +53,7 @@ const DashboardLayout = ({ children }) => {
   const filteredMenu = menuItems.filter((item) => !item.adminOnly || user?.role === ROLES.ADMIN);
 
   return (
-    <div className="layout-container" style={{ flexDirection: 'column' }}>
+    <div className="layout-container layout-container--stacked">
       {/* Top Navigation */}
       <header className="top-bar">
         <button
@@ -164,21 +162,8 @@ const DashboardLayout = ({ children }) => {
             ))}
           </nav>
 
-          <div
-            className="sidebar-footer"
-            style={{ marginTop: 'auto', borderTop: '1px solid var(--border-main)' }}
-          >
-            <button
-              className="nav-item"
-              onClick={handleLogout}
-              style={{
-                width: 'calc(100% - 1rem)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                margin: '0.5rem',
-              }}
-            >
+          <div className="sidebar-footer">
+            <button type="button" className="nav-item" onClick={handleLogout}>
               <span>
                 <LogOut size={18} />
               </span>
@@ -188,16 +173,8 @@ const DashboardLayout = ({ children }) => {
         </aside>
 
         {/* Main Content */}
-        <main className="main-content" style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-          <div
-            className="page-body"
-            style={{
-              width: '100%',
-              maxWidth: '100%',
-              overflowY: 'auto',
-              height: 'calc(100vh - var(--topbar-height))',
-            }}
-          >
+        <main className="main-content main-content--constrained">
+          <div className="page-body page-body--scroll">
             {children}
           </div>
         </main>
