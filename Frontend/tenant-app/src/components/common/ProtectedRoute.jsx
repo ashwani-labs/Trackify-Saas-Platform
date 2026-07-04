@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
     // If not authorized, redirect to home or a dedicated unauthorized page
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

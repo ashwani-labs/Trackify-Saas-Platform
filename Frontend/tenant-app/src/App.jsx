@@ -11,6 +11,7 @@ import { ROLES } from '@trackify/shared';
 import { ThemeProvider } from './context/ThemeContext';
 
 // ── Lazy-loaded pages ────────────────────────────────────────────────────────
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
@@ -34,7 +35,7 @@ function App() {
                 background: 'var(--bg-surface)',
                 color: 'var(--text-main)',
                 border: '1px solid var(--border-main)',
-                borderRadius: '3px',
+                borderRadius: 'var(--radius-lg)',
                 fontSize: '0.875rem',
                 boxShadow: 'var(--shadow-lg)',
               },
@@ -44,6 +45,7 @@ function App() {
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 {/* Public */}
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -51,7 +53,7 @@ function App() {
 
                 {/* Dashboard */}
                 <Route
-                  path="/"
+                  path="/dashboard"
                   element={
                     <ProtectedRoute>
                       <DashboardLayout>
