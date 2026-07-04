@@ -1,0 +1,11 @@
+jwt:
+  secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
+
+services:
+  auth-url: http://localhost:8081
+  tenant-url: http://localhost:8082
+  project-url: http://localhost:8083
+
+logging:
+  level:
+    com.trackify: DEBUG

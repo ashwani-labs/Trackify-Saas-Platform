@@ -2,3 +2,7 @@ services:
   auth-url: http://auth-service:8081
   tenant-url: http://tenant-service:8082
   project-url: http://project-service:8083
+
+logging:
+  level:
+    com.trackify: INFO

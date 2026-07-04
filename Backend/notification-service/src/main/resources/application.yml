@@ -4,22 +4,17 @@ server:
 spring:
   application:
     name: notification-service
+  profiles:
+    active: local
   config:
     import:
       - optional:classpath:trackify-management.yml
       - optional:classpath:trackify-env-imports.yml
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
-    # Sender; defaults to MAIL_USERNAME when MAIL_FROM is unset
-    from: ${MAIL_FROM:${MAIL_USERNAME:}}
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
       mail.smtp.starttls.required: true
 
 jwt:
-  secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
   expiration: 86400000

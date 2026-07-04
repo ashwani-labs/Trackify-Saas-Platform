@@ -1,3 +1,0 @@
-tenant:
-  datasource:
-    host-override: db

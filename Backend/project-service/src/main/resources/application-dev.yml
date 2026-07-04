@@ -1,16 +1,14 @@
 spring:
-  datasource:
-    url: jdbc:mysql://db:3306/trackify_master?useSSL=false&allowPublicKeyRetrieval=true
-  sql:
-    init:
-      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
 
 services:
   notification-url: http://notification-service:8084
 
 trackify:
   storage:
-    provider: ${STORAGE_PROVIDER:local}
     s3:
       endpoint: ${S3_ENDPOINT:http://minio:9000}
       bucket: ${S3_BUCKET:trackify-attachments}

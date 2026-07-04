@@ -1,0 +1,14 @@
+spring:
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    from: ${MAIL_FROM:${MAIL_USERNAME:}}
+
+jwt:
+  secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
+
+logging:
+  level:
+    com.trackify.notification: DEBUG

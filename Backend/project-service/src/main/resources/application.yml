@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: project-service
+  profiles:
+    active: local
   config:
     import:
       - optional:classpath:trackify-management.yml
@@ -11,14 +13,13 @@ spring:
   sql:
     init:
       mode: never
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
+jwt:
+  expiration: 86400000
 
 trackify:
   storage:
@@ -33,10 +34,3 @@ trackify:
       secret-key: ${S3_SECRET_KEY:}
       key-prefix: ${S3_KEY_PREFIX:attachments}
   internal-api-key: ${INTERNAL_API_KEY:}
-
-services:
-  notification-url: http://localhost:8084
-
-jwt:
-  secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
-  expiration: 86400000

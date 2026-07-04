@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+jwt:
+  secret: ${JWT_SECRET}
+
+trackify:
+  internal-api-key: ${INTERNAL_API_KEY}
+
+services:
+  notification-url: ${SERVICES_NOTIFICATION_URL:http://notification-service:8084}
+  project-url: ${SERVICES_PROJECT_URL:http://project-service:8083}
+
+tenant:
+  datasource:
+    default-host: ${TENANT_DATASOURCE_DEFAULT_HOST}
+  app-url-pattern: ${TENANT_APP_URL_PATTERN:https://%s.trackify.com}
+
+logging:
+  level:
+    root: WARN
+    com.trackify: INFO

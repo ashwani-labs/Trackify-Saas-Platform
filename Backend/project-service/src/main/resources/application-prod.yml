@@ -1,0 +1,22 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+jwt:
+  secret: ${JWT_SECRET}
+
+trackify:
+  internal-api-key: ${INTERNAL_API_KEY}
+  storage:
+    provider: ${STORAGE_PROVIDER:s3}
+    location: ${STORAGE_LOCAL_PATH:/data/uploads}
+
+services:
+  notification-url: ${SERVICES_NOTIFICATION_URL:http://notification-service:8084}
+
+logging:
+  level:
+    root: WARN
+    com.trackify: INFO

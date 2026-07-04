@@ -4,32 +4,15 @@ server:
 spring:
   application:
     name: tenant-service
+  profiles:
+    active: local
   config:
     import:
       - optional:classpath:trackify-management.yml
       - optional:classpath:trackify-env-imports.yml
-  datasource:
-    url: jdbc:mysql://localhost:3306/trackify_master?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
 
-services:
-  notification-url: http://localhost:8084
-  project-url: http://localhost:8083
+jwt:
+  expiration: 86400000
 
 trackify:
   internal-api-key: ${INTERNAL_API_KEY:}
-
-tenant:
-  datasource:
-    default-host: localhost
-  app-url-pattern: http://%s.lvh.me:5174
-
-jwt:
-  secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
-  expiration: 86400000

@@ -4,19 +4,13 @@ server:
 spring:
   application:
     name: auth-service
+  profiles:
+    active: local
   config:
     import:
       - optional:classpath:trackify-management.yml
       - optional:classpath:trackify-env-imports.yml
-  datasource:
-    url: jdbc:mysql://localhost:3306/trackify_master?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
@@ -24,15 +18,10 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
-    servlet:
-      multipart:
-        max-file-size: 10MB
-        max-request-size: 10MB
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 jwt:
-  secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
   expiration: 86400000
-
-tenant:
-  datasource:
-    host-override: localhost
