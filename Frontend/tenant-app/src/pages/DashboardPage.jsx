@@ -77,6 +77,8 @@ const DashboardPage = () => {
   const hasProject = (stats?.totalProjects ?? 0) > 0;
   const hasTeam = (allUsersTotalElements ?? 0) > 1;
 
+  const showOnboarding = isAdmin && !isLoading && !usersLoading && (!hasProject || !hasTeam || (stats?.totalIssues ?? 0) === 0);
+
   const onboardingSteps = useMemo(
     () => [
       {
@@ -88,6 +90,14 @@ const DashboardPage = () => {
         onAction: () => navigate('/projects', { state: { openCreate: true } }),
       },
       {
+        id: 'issue',
+        label: 'Create your first issue',
+        description: 'Add work items to your board and start tracking progress.',
+        done: (stats?.totalIssues ?? 0) > 0,
+        actionLabel: 'Go to projects',
+        onAction: () => navigate('/projects'),
+      },
+      {
         id: 'team',
         label: 'Invite your first teammate',
         description: 'Add colleagues or share your self-registration link so others can join.',
@@ -95,11 +105,17 @@ const DashboardPage = () => {
         actionLabel: 'Add member',
         onAction: () => navigate('/team', { state: { openAdd: true } }),
       },
+      {
+        id: 'sprint',
+        label: 'Plan your first sprint',
+        description: 'Group issues into a sprint and track burndown on the backlog view.',
+        done: (stats?.activeSprints ?? 0) > 0,
+        actionLabel: 'Open a project',
+        onAction: () => navigate('/projects'),
+      },
     ],
-    [hasProject, hasTeam, navigate]
+    [hasProject, hasTeam, navigate, stats?.totalIssues, stats?.activeSprints]
   );
-
-  const showOnboarding = isAdmin && !isLoading && !usersLoading && (!hasProject || !hasTeam);
 
   const greeting = () => {
     const h = new Date().getHours();

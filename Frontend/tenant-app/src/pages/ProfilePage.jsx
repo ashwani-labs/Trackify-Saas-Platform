@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Lock, AlertCircle, Camera, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '../utils/axios';
-import { PageHeader, Button, Input, Badge } from '@trackify/shared';
+import { PageHeader, Button, Input, Badge, PasswordStrength } from '@trackify/shared';
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -170,6 +170,7 @@ const ProfilePage = () => {
               value={passData.newPassword}
               onChange={(e) => setPassData({ ...passData, newPassword: e.target.value })}
             />
+            <PasswordStrength password={passData.newPassword} />
             <Input
               id="confirm-password"
               label="Confirm password"

@@ -5,10 +5,14 @@ import { Search, FolderKanban, Bug, Users } from 'lucide-react';
 import { setSelectedIssue } from '../../features/issues/issueSlice';
 import { fetchGlobalSearch } from '../../features/search/searchApi';
 
-const GlobalSearch = () => {
+const GlobalSearch = ({ inputRef: forwardedInputRef }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const inputRef = useRef(null);
+  const localInputRef = useRef(null);
+  const setInputNode = (node) => {
+    localInputRef.current = node;
+    if (forwardedInputRef) forwardedInputRef.current = node;
+  };
   const panelRef = useRef(null);
   const listRef = useRef(null);
 
@@ -77,7 +81,7 @@ const GlobalSearch = () => {
     const onKeyDown = (e) => {
       if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
         e.preventDefault();
-        inputRef.current?.focus();
+        localInputRef.current?.focus();
         setOpen(true);
       }
     };
@@ -109,11 +113,15 @@ const GlobalSearch = () => {
       try {
         const data = await fetchGlobalSearch(q);
         if (!cancelled) {
-          setResults({
+          const nextResults = {
             projects: data.projects ?? [],
             issues: data.issues ?? [],
             users: data.users ?? [],
-          });
+          };
+          setResults(nextResults);
+          const count =
+            nextResults.projects.length + nextResults.issues.length + nextResults.users.length;
+          setActiveIndex(count > 0 ? 0 : -1);
         }
       } catch {
         if (!cancelled) {
@@ -152,7 +160,7 @@ const GlobalSearch = () => {
     if (e.key === 'Escape') {
       e.preventDefault();
       closeSearch();
-      inputRef.current?.blur();
+      localInputRef.current?.blur();
       return;
     }
 
@@ -185,7 +193,7 @@ const GlobalSearch = () => {
       <div className="input-wrap">
         <Search className="input-wrap__icon" size={14} aria-hidden />
         <input
-          ref={inputRef}
+          ref={setInputNode}
           type="search"
           className="input input--with-icon topbar-search__input"
           placeholder="Search projects, issues, and people (/)"

@@ -3,9 +3,11 @@ package com.trackify.tenant.controller;
 import com.trackify.common.dto.ApiResponse;
 import com.trackify.common.enums.UserStatus;
 import com.trackify.tenant.dto.CreateTenantRequest;
+import com.trackify.tenant.dto.PlatformAuditLogResponse;
 import com.trackify.tenant.dto.TenantDashboardStatsResponse;
 import com.trackify.tenant.dto.TenantDetailResponse;
 import com.trackify.tenant.dto.TenantResponse;
+import com.trackify.tenant.dto.UpdateTenantBrandingRequest;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
 import com.trackify.tenant.dto.UserRegistrationRequest;
 import com.trackify.tenant.dto.UserResponse;
@@ -44,9 +46,22 @@ public class TenantController {
     return ResponseEntity.ok(ApiResponse.ok(tenantService.getDashboardStats(months)));
   }
 
+  @GetMapping("/audit-logs")
+  public ResponseEntity<ApiResponse<Page<PlatformAuditLogResponse>>> getAuditLogs(Pageable pageable) {
+    return ResponseEntity.ok(ApiResponse.ok(tenantService.getPlatformAuditLogs(pageable)));
+  }
+
   @GetMapping("/{id}")
   public ResponseEntity<ApiResponse<TenantDetailResponse>> getTenant(@PathVariable("id") Long id) {
     return ResponseEntity.ok(ApiResponse.ok(tenantService.getTenantDetail(id)));
+  }
+
+  @PatchMapping("/{id}/branding")
+  public ResponseEntity<ApiResponse<TenantResponse>> updateTenantBranding(
+      @PathVariable("id") Long id, @Valid @RequestBody UpdateTenantBrandingRequest request) {
+    return ResponseEntity.ok(
+        ApiResponse.ok(
+            "Workspace branding updated", tenantService.updateTenantBranding(id, request)));
   }
 
   @PatchMapping("/{id}/status")

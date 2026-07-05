@@ -6,6 +6,7 @@ import { MasterSearchProvider } from './context/MasterSearchContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import TenantManagementPage from './pages/TenantManagementPage';
+import PlatformAuditPage from './pages/PlatformAuditPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 import { ErrorBoundary } from '@trackify/shared';
@@ -47,6 +48,16 @@ function App() {
                 <ProtectedRoute>
                   <DashboardLayout>
                     <TenantManagementPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.AUDIT}
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <PlatformAuditPage />
                   </DashboardLayout>
                 </ProtectedRoute>
               }

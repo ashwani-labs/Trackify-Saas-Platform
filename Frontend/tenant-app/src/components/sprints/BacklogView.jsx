@@ -1,17 +1,18 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateIssue, fetchBacklogIssuesPaged } from '../../features/issues/issueSlice';
 import { startSprint, completeSprint } from '../../features/sprints/sprintSlice';
 import Pagination from '../common/Pagination';
+import SprintBurndownChart from './SprintBurndownChart';
 import toast from 'react-hot-toast';
-import { useConfirmDialog } from '@trackify/shared';
+import { useConfirmDialog, Button } from '@trackify/shared';
 import {
   applyIssueFilters,
   shouldShowBacklogSection,
   shouldShowSprintSection,
 } from '../../utils/issueFilters';
 
-const IssueListItem = ({ issue, sprints, dispatch }) => {
+const IssueListItem = ({ issue, sprints, dispatch, selected, onToggleSelect }) => {
   const handleSprintChange = (e) => {
     const sprintId = e.target.value === '' ? null : Number(e.target.value);
     dispatch(
@@ -34,6 +35,14 @@ const IssueListItem = ({ issue, sprints, dispatch }) => {
         transition: 'background 0.15s',
       }}
     >
+      {onToggleSelect && (
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={() => onToggleSelect(issue.id)}
+          aria-label={`Select issue ${issue.title}`}
+        />
+      )}
       <div style={{ flex: 1 }}>
         <div style={{ fontWeight: 500, color: 'var(--text-main)' }}>
           {issue.projectHeaderName}-{issue.id} : {issue.title}
@@ -88,6 +97,8 @@ const SkeletonRow = () => (
 const BacklogView = ({ projectId, issues, onCreateSprint }) => {
   const dispatch = useDispatch();
   const { confirm, dialog } = useConfirmDialog();
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkStatus, setBulkStatus] = useState('TODO');
   const { list: sprints } = useSelector((s) => s.sprints);
   const {
     filters,
@@ -142,6 +153,28 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
     } catch (e) {
       toast.error(e.message || 'Cannot complete sprint');
     }
+  };
+
+  const toggleSelect = (issueId) => {
+    setSelectedIds((prev) =>
+      prev.includes(issueId) ? prev.filter((id) => id !== issueId) : [...prev, issueId]
+    );
+  };
+
+  const handleBulkStatus = async () => {
+    if (!selectedIds.length) return;
+    await Promise.all(
+      selectedIds.map((id) =>
+        dispatch(
+          updateIssue({
+            id,
+            data: { status: bulkStatus, projectId },
+          })
+        )
+      )
+    );
+    toast.success(`Updated ${selectedIds.length} issue(s)`);
+    setSelectedIds([]);
   };
 
   return (
@@ -235,6 +268,11 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
                   )}
                 </div>
               </div>
+              {sprint.status === 'ACTIVE' && (
+                <div style={{ padding: '16px', borderBottom: '1px solid var(--border-main)' }}>
+                  <SprintBurndownChart sprint={sprint} issues={issues} />
+                </div>
+              )}
               <div style={{ minHeight: '60px' }}>
                 {sprintIssues.length === 0 ? (
                   <p
@@ -291,6 +329,27 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
                   </span>
                 )}
               </h3>
+              {selectedIds.length > 0 && (
+                <div className="bulk-actions-bar">
+                  <span>{selectedIds.length} selected</span>
+                  <select
+                    value={bulkStatus}
+                    onChange={(e) => setBulkStatus(e.target.value)}
+                    className="input-field"
+                    aria-label="Bulk status"
+                  >
+                    <option value="TODO">To Do</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="DONE">Done</option>
+                  </select>
+                  <Button size="sm" onClick={handleBulkStatus}>
+                    Apply status
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])}>
+                    Clear
+                  </Button>
+                </div>
+              )}
             </div>
             <div style={{ minHeight: '100px' }}>
               {isBacklogLoading ? (
@@ -318,6 +377,8 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
                     issue={issue}
                     sprints={sprints}
                     dispatch={dispatch}
+                    selected={selectedIds.includes(issue.id)}
+                    onToggleSelect={toggleSelect}
                   />
                 ))
               )}

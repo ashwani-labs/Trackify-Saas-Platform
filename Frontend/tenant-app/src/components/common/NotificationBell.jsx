@@ -27,7 +27,7 @@ const NotificationBell = () => {
 
   useEffect(() => {
     dispatch(fetchUnreadCount());
-    const interval = setInterval(() => dispatch(fetchUnreadCount()), 60000);
+    const interval = setInterval(() => dispatch(fetchUnreadCount()), 15000);
     return () => clearInterval(interval);
   }, [dispatch]);
 
@@ -59,6 +59,11 @@ const NotificationBell = () => {
       setOpen(false);
 
       if (notification.referenceType === 'ISSUE' && notification.projectId) {
+        const issueKey = notification.metadata?.issueKey || notification.issueKey;
+        if (issueKey) {
+          navigate(`/projects/${notification.projectId}/issue/${issueKey}`);
+          return;
+        }
         navigate(`/projects/${notification.projectId}`);
         if (notification.referenceId) {
           dispatch(

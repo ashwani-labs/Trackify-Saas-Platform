@@ -17,6 +17,7 @@ export const loginUser = createAsyncThunk(
         company_name: companyName,
         logo_url: logoUrl,
         primary_color: primaryColor,
+        plan,
       } = login;
 
       localStorage.setItem('tenantToken', token);
@@ -24,6 +25,8 @@ export const loginUser = createAsyncThunk(
       localStorage.setItem('tenantDomain', domain);
       localStorage.setItem('tenantLogo', logoUrl || '');
       localStorage.setItem('tenantColor', primaryColor || '#6366f1');
+      localStorage.setItem('tenantCompanyName', companyName || '');
+      localStorage.setItem('tenantPlan', plan || 'FREE');
       localStorage.setItem('tenantUserEmail', email || '');
       localStorage.setItem('tenantUserRole', role || '');
       localStorage.setItem('tenantUserProfilePhoto', profilePhotoUrl || '');
@@ -38,6 +41,7 @@ export const loginUser = createAsyncThunk(
         companyName,
         logoUrl,
         primaryColor,
+        plan,
       };
     } catch (error) {
       return rejectWithValue(getApiErrorPayload(error, 'Login failed'));
@@ -92,6 +96,8 @@ const initialState = {
   tenantDomain: localStorage.getItem('tenantDomain'),
   tenantLogo: localStorage.getItem('tenantLogo'),
   primaryColor: localStorage.getItem('tenantColor') || '#6366f1',
+  companyName: localStorage.getItem('tenantCompanyName') || '',
+  plan: localStorage.getItem('tenantPlan') || 'FREE',
   isAuthenticated: !!localStorage.getItem('tenantToken'),
   loading: false,
   error: null,
@@ -110,6 +116,8 @@ const authSlice = createSlice({
       localStorage.removeItem('tenantDomain');
       localStorage.removeItem('tenantLogo');
       localStorage.removeItem('tenantColor');
+      localStorage.removeItem('tenantCompanyName');
+      localStorage.removeItem('tenantPlan');
       localStorage.removeItem('tenantUserEmail');
       localStorage.removeItem('tenantUserRole');
       localStorage.removeItem('tenantUserProfilePhoto');
@@ -121,6 +129,21 @@ const authSlice = createSlice({
       if (state.user) {
         state.user.profilePhotoUrl = action.payload;
         localStorage.setItem('tenantUserProfilePhoto', action.payload);
+      }
+    },
+    setWorkspaceBranding: (state, action) => {
+      const { companyName, logoUrl, primaryColor } = action.payload;
+      if (companyName != null) {
+        state.companyName = companyName;
+        localStorage.setItem('tenantCompanyName', companyName);
+      }
+      if (logoUrl != null) {
+        state.tenantLogo = logoUrl;
+        localStorage.setItem('tenantLogo', logoUrl);
+      }
+      if (primaryColor != null) {
+        state.primaryColor = primaryColor;
+        localStorage.setItem('tenantColor', primaryColor);
       }
     },
   },
@@ -138,6 +161,10 @@ const authSlice = createSlice({
         state.tenantDomain = action.payload.domain;
         state.tenantLogo = action.payload.logoUrl;
         state.primaryColor = action.payload.primaryColor || '#6366f1';
+        state.companyName = action.payload.companyName || '';
+        state.plan = action.payload.plan || 'FREE';
+        localStorage.setItem('tenantCompanyName', state.companyName);
+        localStorage.setItem('tenantPlan', state.plan);
         state.user = {
           email: action.payload.email,
           role: action.payload.role,
@@ -172,5 +199,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError, updateProfilePhoto } = authSlice.actions;
+export const { logout, clearError, updateProfilePhoto, setWorkspaceBranding } = authSlice.actions;
 export default authSlice.reducer;

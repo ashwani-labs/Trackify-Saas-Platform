@@ -8,13 +8,17 @@ import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantDashboardStatsResponse;
 import com.trackify.tenant.dto.TenantGrowthPoint;
+import com.trackify.tenant.dto.PlatformAuditLogResponse;
 import com.trackify.tenant.dto.TenantDetailResponse;
 import com.trackify.tenant.dto.TenantResponse;
+import com.trackify.tenant.dto.UpdateTenantBrandingRequest;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
+import com.trackify.tenant.entity.PlatformAuditLog;
 import com.trackify.tenant.dto.UserRegistrationRequest;
 import com.trackify.tenant.dto.UserResponse;
 import com.trackify.tenant.entity.Tenant;
 import com.trackify.tenant.entity.UserLookup;
+import com.trackify.tenant.repository.PlatformAuditLogRepository;
 import com.trackify.tenant.repository.TenantRepository;
 import com.trackify.tenant.repository.UserLookupRepository;
 import java.io.IOException;
@@ -47,6 +51,7 @@ import org.springframework.util.StreamUtils;
 public class TenantService {
 
   private final TenantRepository tenantRepository;
+  private final PlatformAuditLogRepository platformAuditLogRepository;
   private final UserLookupRepository userLookupRepository;
   private final JdbcTemplate jdbcTemplate;
   private final PasswordEncoder passwordEncoder;
@@ -135,6 +140,63 @@ public class TenantService {
   }
 
   @Transactional
+  public TenantResponse updateTenantBranding(Long id, UpdateTenantBrandingRequest request) {
+    Tenant tenant =
+        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
+
+    if (request.getCompanyName() != null) {
+      tenant.setCompanyName(request.getCompanyName().trim());
+    }
+    if (request.getLogoUrl() != null) {
+      String logoUrl = request.getLogoUrl().trim();
+      if (!logoUrl.isEmpty()
+          && !logoUrl.startsWith("http://")
+          && !logoUrl.startsWith("https://")) {
+        throw AppException.badRequest("Logo URL must start with http:// or https://");
+      }
+      tenant.setLogoUrl(logoUrl.isEmpty() ? null : logoUrl);
+    }
+    if (request.getPrimaryColor() != null) {
+      String color = request.getPrimaryColor().trim();
+      if (!color.matches("^#[0-9A-Fa-f]{6}$")) {
+        throw AppException.badRequest("Primary color must be a hex value like #2563eb");
+      }
+      tenant.setPrimaryColor(color);
+    }
+
+    tenant = tenantRepository.save(tenant);
+    recordAudit("BRANDING_UPDATED", null, tenant, "Workspace branding updated");
+    return mapToResponse(tenant);
+  }
+
+  public Page<PlatformAuditLogResponse> getPlatformAuditLogs(Pageable pageable) {
+    return platformAuditLogRepository
+        .findAllByOrderByCreatedAtDesc(pageable)
+        .map(
+            log ->
+                PlatformAuditLogResponse.builder()
+                    .id(log.getId())
+                    .action(log.getAction())
+                    .actorEmail(log.getActorEmail())
+                    .tenantId(log.getTenantId())
+                    .tenantName(log.getTenantName())
+                    .details(log.getDetails())
+                    .createdAt(log.getCreatedAt())
+                    .build());
+  }
+
+  private void recordAudit(String action, String actorEmail, Tenant tenant, String details) {
+    platformAuditLogRepository.save(
+        PlatformAuditLog.builder()
+            .action(action)
+            .actorEmail(actorEmail)
+            .tenantId(tenant != null ? tenant.getId() : null)
+            .tenantName(tenant != null ? tenant.getName() : null)
+            .details(details)
+            .build());
+  }
+
+  @Transactional
   public void deleteTenant(Long id) {
     Tenant tenant =
         tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
@@ -162,6 +224,7 @@ public class TenantService {
 
     // 3. Delete tenant record
     tenantRepository.delete(tenant);
+    recordAudit("TENANT_DELETED", null, tenant, "Organization permanently deleted");
 
     log.info("Tenant {} deleted successfully", tenant.getName());
   }
@@ -272,6 +335,11 @@ public class TenantService {
 
     tenant.setStatus(request.getStatus());
     tenant = tenantRepository.save(tenant);
+    recordAudit(
+        "TENANT_STATUS_UPDATED",
+        null,
+        tenant,
+        "Status changed to " + request.getStatus().name());
     return mapToResponse(tenant);
   }
 

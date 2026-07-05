@@ -10,6 +10,11 @@ export const fetchTenantById = async (tenantId) => {
   return response.data;
 };
 
+export const fetchAuditLogs = async (page = 0, size = 15) => {
+  const response = await api.get(`/tenants/audit-logs?page=${page}&size=${size}`);
+  return response.data;
+};
+
 export const fetchDashboardStats = async (months = 6) => {
   const response = await api.get('/tenants/dashboard-stats', { params: { months } });
   return response.data;

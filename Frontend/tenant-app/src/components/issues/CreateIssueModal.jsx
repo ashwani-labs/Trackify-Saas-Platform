@@ -1,29 +1,45 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createIssue } from '../../features/issues/issueSlice';
-import { Modal, Button } from '@trackify/shared';
+import { Modal, Button, Input, Select, Textarea, Alert, useFormFields } from '@trackify/shared';
+
+const PRIORITY_OPTIONS = [
+  { value: 'HIGH', label: 'High' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'LOW', label: 'Low' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'TODO', label: 'To Do' },
+  { value: 'IN_PROGRESS', label: 'In Progress' },
+  { value: 'DONE', label: 'Done' },
+];
+
+const validators = {
+  title: (value) => (!value?.trim() ? 'Issue title is required' : undefined),
+};
 
 const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.issues);
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    priority: 'MEDIUM',
-    status: 'TODO',
-  });
+  const { values, handleChange, handleBlur, validateAll, getFieldError, reset } = useFormFields(
+    { title: '', description: '', priority: 'MEDIUM', status: 'TODO' },
+    validators
+  );
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleClose = () => {
+    reset();
+    onClose();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await dispatch(createIssue({ ...formData, projectId }));
+    if (!validateAll()) return;
+
+    const result = await dispatch(createIssue({ ...values, projectId }));
     if (createIssue.fulfilled.match(result)) {
-      setFormData({ title: '', description: '', priority: 'MEDIUM', status: 'TODO' });
+      reset();
       onClose();
     }
   };
@@ -31,11 +47,11 @@ const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="Create Issue"
       footer={
         <>
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
           <Button type="submit" form="create-issue-form" isLoading={isLoading}>
@@ -45,76 +61,49 @@ const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
       }
     >
       <form id="create-issue-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="issue-title">
-            Issue title *
-          </label>
-          <input
-            id="issue-title"
-            type="text"
-            name="title"
-            className="input-field"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="What needs to be done?"
-            required
-            autoFocus
-          />
-        </div>
+        <Input
+          id="issue-title"
+          name="title"
+          label="Issue title *"
+          value={values.title}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={getFieldError('title')}
+          placeholder="What needs to be done?"
+          autoFocus
+          required
+        />
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="issue-desc">
-            Description
-          </label>
-          <textarea
-            id="issue-desc"
-            name="description"
-            className="input-field"
-            value={formData.description}
-            onChange={handleChange}
-            rows="4"
-            placeholder="Add more detail..."
-            style={{ resize: 'vertical' }}
-          />
-        </div>
+        <Textarea
+          id="issue-desc"
+          name="description"
+          label="Description"
+          value={values.description}
+          onChange={handleChange}
+          rows={4}
+          placeholder="Add more detail..."
+        />
 
         <div className="form-row form-row--2">
-          <div className="form-group">
-            <label className="form-label" htmlFor="issue-priority">
-              Priority
-            </label>
-            <select
-              id="issue-priority"
-              name="priority"
-              className="input-field"
-              value={formData.priority}
-              onChange={handleChange}
-            >
-              <option value="HIGH">High</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="LOW">Low</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="issue-status">
-              Status
-            </label>
-            <select
-              id="issue-status"
-              name="status"
-              className="input-field"
-              value={formData.status}
-              onChange={handleChange}
-            >
-              <option value="TODO">To Do</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="DONE">Done</option>
-            </select>
-          </div>
+          <Select
+            id="issue-priority"
+            name="priority"
+            label="Priority"
+            value={values.priority}
+            onChange={handleChange}
+            options={PRIORITY_OPTIONS}
+          />
+          <Select
+            id="issue-status"
+            name="status"
+            label="Status"
+            value={values.status}
+            onChange={handleChange}
+            options={STATUS_OPTIONS}
+          />
         </div>
 
-        {error && <p className="form-error">{error}</p>}
+        {error && <Alert>{error}</Alert>}
       </form>
     </Modal>
   );

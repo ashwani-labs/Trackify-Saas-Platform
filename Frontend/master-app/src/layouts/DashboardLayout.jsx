@@ -22,6 +22,7 @@ const DashboardLayout = ({ children }) => {
   const navItems = [
     { name: 'Dashboard', path: ROUTES.DASHBOARD, icon: <LayoutDashboard size={18} /> },
     { name: 'Tenants', path: ROUTES.TENANTS, icon: <Users size={18} /> },
+    { name: 'Audit log', path: ROUTES.AUDIT, icon: <Search size={18} /> },
   ];
 
   return (

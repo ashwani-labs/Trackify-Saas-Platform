@@ -9,6 +9,7 @@ import { ErrorBoundary } from '@trackify/shared';
 import PageLoader from './components/common/PageLoader';
 import { ROLES } from '@trackify/shared';
 import { ThemeProvider } from './context/ThemeContext';
+import TenantBrandingEffect from './components/common/TenantBrandingEffect';
 
 // ── Lazy-loaded pages ────────────────────────────────────────────────────────
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -22,12 +23,14 @@ const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
 const TeamPage = lazy(() => import('./pages/TeamPage'));
 const UserApprovalPage = lazy(() => import('./pages/UserApprovalPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const WorkspaceSettingsPage = lazy(() => import('./pages/WorkspaceSettingsPage'));
 
 function App() {
   return (
     <Provider store={store}>
       <ErrorBoundary>
         <ThemeProvider>
+          <TenantBrandingEffect />
           <Toaster
             position="top-right"
             toastOptions={{
@@ -117,6 +120,18 @@ function App() {
                     <ProtectedRoute>
                       <DashboardLayout>
                         <ProjectDetailPage />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Workspace settings — Admin only */}
+                <Route
+                  path="/workspace-settings"
+                  element={
+                    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                      <DashboardLayout>
+                        <WorkspaceSettingsPage />
                       </DashboardLayout>
                     </ProtectedRoute>
                   }

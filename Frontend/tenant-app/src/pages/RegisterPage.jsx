@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../features/auth/authSlice';
 import AuthLayout from '../layouts/AuthLayout';
 import { CheckCircle2 } from 'lucide-react';
-import { Button, Input, Alert } from '@trackify/shared';
+import { Button, Input, Alert, PasswordStrength } from '@trackify/shared';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -100,6 +100,8 @@ const RegisterPage = () => {
           required
           size="lg"
         />
+
+        <PasswordStrength password={formData.password} />
 
         {error && (
           <Alert variant="danger" center className="auth-alert">

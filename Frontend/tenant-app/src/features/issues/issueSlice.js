@@ -156,6 +156,7 @@ const initialState = {
   comments: {},
   activity: {},
   selectedIssue: null,
+  isIssueDetailLoading: false,
   isActivityLoading: false,
   filters: { ...DEFAULT_ISSUE_FILTERS },
   backlogIssues: [],
@@ -248,8 +249,15 @@ const issueSlice = createSlice({
         state.issues = state.issues.filter((i) => i.id !== action.payload);
         if (state.selectedIssue?.id === action.payload) state.selectedIssue = null;
       })
+      .addCase(fetchIssueByKey.pending, (state) => {
+        state.isIssueDetailLoading = true;
+      })
       .addCase(fetchIssueByKey.fulfilled, (state, action) => {
+        state.isIssueDetailLoading = false;
         state.selectedIssue = action.payload;
+      })
+      .addCase(fetchIssueByKey.rejected, (state) => {
+        state.isIssueDetailLoading = false;
       })
       .addCase(fetchIssueActivity.pending, (state) => {
         state.isActivityLoading = true;

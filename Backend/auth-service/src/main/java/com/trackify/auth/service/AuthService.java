@@ -92,6 +92,7 @@ public class AuthService {
         .companyName(tenant.getCompanyName())
         .logoUrl(tenant.getLogoUrl())
         .primaryColor(tenant.getPrimaryColor())
+        .plan(tenant.getPlan() != null ? tenant.getPlan().name() : null)
         .build();
   }
 
