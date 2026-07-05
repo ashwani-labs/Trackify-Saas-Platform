@@ -17,7 +17,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "screenshots": "node ../scripts/capture-screenshots.mjs",
-    "postinstall": "node scripts/ensure-rolldown-binding.mjs"
+    "postinstall": "node scripts/ensure-native-bindings.mjs"
   },
   "devDependencies": {
     "prettier": "^3.8.3"

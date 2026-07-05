@@ -65,11 +65,11 @@ jobs:
           echo "npm ci failed after 3 attempts"
           exit 1
 
-      - name: Ensure Rolldown native bindings
+      - name: Ensure native bindings (Rolldown, Lightning CSS)
         run: |
           for attempt in 1 2 3; do
-            node scripts/ensure-rolldown-binding.mjs && exit 0
-            echo "ensure-rolldown-binding failed; waiting before retry..."
+            node scripts/ensure-native-bindings.mjs && exit 0
+            echo "ensure-native-bindings failed; waiting before retry..."
             sleep $((attempt * 10))
           done
           exit 1
