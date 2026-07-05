@@ -68,6 +68,9 @@ public class TenantService {
   @Value("${services.notification-url:http://localhost:8084}")
   private String notificationUrl;
 
+  @Value("${trackify.dev.fixed-admin-password:}")
+  private String fixedAdminPassword;
+
   @Transactional
   public TenantResponse createTenant(CreateTenantRequest request) {
     if (tenantRepository.existsByDomain(request.getCode())) {
@@ -85,7 +88,10 @@ public class TenantService {
     String dbUsername = request.getCode() + "_admin";
 
     String dbPassword = "pw_" + System.currentTimeMillis();
-    String adminPassword = UUID.randomUUID().toString().substring(0, 10);
+    String adminPassword =
+        org.springframework.util.StringUtils.hasText(fixedAdminPassword)
+            ? fixedAdminPassword
+            : UUID.randomUUID().toString().substring(0, 10);
 
     String brandTheme = TenantThemes.normalize(request.getTheme());
     Tenant tenant =

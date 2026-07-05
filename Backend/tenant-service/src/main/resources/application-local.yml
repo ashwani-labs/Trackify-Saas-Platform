@@ -20,3 +20,7 @@ tenant:
   datasource:
     default-host: localhost
   app-url-pattern: http://%s.lvh.me:5174
+
+trackify:
+  dev:
+    fixed-admin-password: ${TRACKIFY_DEV_FIXED_ADMIN_PASSWORD:}

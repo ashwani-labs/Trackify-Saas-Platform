@@ -1,8 +1,10 @@
 # Trackify SaaS Platform
 
-Trackify is a **personal multi-tenant SaaS platform** for project and issue management — inspired by Jira, built for isolated workspaces, Kanban workflows, and sprint planning.
+Trackify is a **multi-tenant SaaS platform** for project and issue management — inspired by Jira, built for isolated workspaces, Kanban workflows, and sprint planning.
 
 The platform combines a **Spring Boot microservices backend**, **per-tenant MySQL databases**, an **API gateway**, and **two React applications**: one for platform administrators and one for tenant users.
+
+![Trackify tenant landing page](./Docs/screenshots/tenant-landing.png)
 
 ## At a glance
 
@@ -10,7 +12,34 @@ The platform combines a **Spring Boot microservices backend**, **per-tenant MySQ
 |---|---|
 | **Backend** | Java 17, Spring Boot 3.3, MySQL, JWT, Flyway (master DB) |
 | **Frontend** | React 19, Vite 8, Redux Toolkit, shared design system |
+| **Status** | v1 feature-complete — see [Docs/PRODUCT_ROADMAP.md](./Docs/PRODUCT_ROADMAP.md) |
 | **Docs** | [`Docs/`](./Docs/) — codebase status, Spring profiles, env reference |
+
+## Screenshots
+
+All images below are **captured from the running application** (not generated). Re-capture anytime with `npm run screenshots` from `Frontend/` while the stack is running locally.
+
+### Tenant workspace
+
+| Landing | Login |
+|---------|-------|
+| ![Tenant landing](./Docs/screenshots/tenant-landing.png) | ![Tenant login](./Docs/screenshots/tenant-login.png) |
+
+Marketing landing page and split-panel auth for workspace users.
+
+### Master administration
+
+| Dashboard | Tenant management |
+|-----------|-------------------|
+| ![Master dashboard](./Docs/screenshots/master-dashboard.png) | ![Master tenants](./Docs/screenshots/master-tenants.png) |
+
+Platform overview with growth charts, plus centralized tenant provisioning and lifecycle controls.
+
+| Master login |
+|--------------|
+| ![Master login](./Docs/screenshots/master-login.png) |
+
+Dedicated master-panel sign-in with light/dark theme support.
 
 ## What it does
 
@@ -18,17 +47,16 @@ Trackify helps organizations onboard into **isolated workspaces**, manage teams,
 
 ### Core features
 
-- Platform tenant management from the master app
-- Tenant database provisioning and tenant-aware routing
-- JWT authentication and role-based access (`MASTER`, `ADMIN`, `USER`)
-- Tenant user registration and admin approval flow
-- Project creation, member management, and Kanban boards
-- Issue tracking with comments, attachments, and priority
-- Sprint/backlog planning and dashboard analytics
-- Email notifications (optional `notification-service`)
-- Marketing landing page and modern tenant UI
-- OpenAPI spec, Swagger UI, gateway rate limiting, health probes
-- Optional S3 attachment storage
+- **Platform admin** — tenant provisioning, audit log, dashboard analytics, plan/status management
+- **Per-tenant isolation** — dedicated MySQL database and JWT-scoped routing per workspace
+- **Authentication** — JWT auth, role-based access (`MASTER`, `ADMIN`, `USER`), password reset, change password
+- **Team onboarding** — user registration with admin approval flow
+- **Projects & Kanban** — boards with inline status quick-edit, comments (optimistic UI), attachments
+- **Sprints & backlog** — sprint planning tied to issues
+- **Dashboards** — date-filtered stats, chart drill-through, role-aware views (admin vs user)
+- **Notifications** — grouped in-app bell; optional email via `notification-service`
+- **Branding** — per-tenant theme presets (workspace settings)
+- **Ops** — OpenAPI/Swagger, gateway rate limiting, health probes, optional S3 attachments
 
 ## Architecture
 
@@ -36,7 +64,7 @@ Trackify helps organizations onboard into **isolated workspaces**, manage teams,
 trackify-saas-platform/
 ├── Backend/          # Spring Boot microservices
 ├── Frontend/         # React apps + shared package
-└── Docs/             # Documentation
+└── Docs/             # Documentation + screenshots
 ```
 
 | Layer | Components |
@@ -70,10 +98,13 @@ trackify-saas-platform/
 │   ├── master-app/
 │   └── tenant-app/
 ├── Docs/
-│   ├── README.md
+│   ├── screenshots/          # README captures (Playwright)
+│   ├── PRODUCT_ROADMAP.md
 │   ├── CODEBASE_STATUS.md
 │   ├── SPRING_PROFILES.md
 │   └── ENVIRONMENT.md
+├── scripts/
+│   └── capture-screenshots.mjs
 └── .env.example
 ```
 
@@ -136,12 +167,25 @@ Each app reads `VITE_API_BASE_URL` from `.env` or `.env.local` (default: `http:/
 
 ### 4. Open the apps
 
-| App | URL |
-|-----|-----|
-| Tenant app (landing) | http://localhost:5174 |
-| Master app | http://localhost:5173 |
-| API gateway | http://localhost:8080 |
-| Swagger UI | http://localhost:8080/swagger-ui.html |
+| App | URL | Default login |
+|-----|-----|---------------|
+| Tenant app (landing) | http://localhost:5174 | Tenant admin (set at provisioning) |
+| Master app | http://localhost:5173 | `master@trackify.com` / `admin123` |
+| API gateway | http://localhost:8080 | — |
+| Swagger UI | http://localhost:8080/swagger-ui.html | — |
+
+### 5. Capture README screenshots (optional)
+
+With the full stack running:
+
+```bash
+cd Frontend
+npm install --no-save playwright@1.52.0
+npx playwright install chromium
+npm run screenshots
+```
+
+Outputs land in `Docs/screenshots/`. For automated tenant dashboard captures, either set `TENANT_EMAIL` and `TENANT_PASSWORD`, or add `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD=admin123` to `.env` and restart `tenant-service` so the script can provision a demo workspace with a known password.
 
 ## Build and test
 
@@ -157,14 +201,14 @@ CI runs on every push/PR to `main` (`.github/workflows/ci.yml`).
 
 ## Project status
 
-**Active personal project.** Core features are implemented across backend and frontend.
+**v1 is feature-complete** for the scoped roadmap in [Docs/PRODUCT_ROADMAP.md](./Docs/PRODUCT_ROADMAP.md). Post-v1 items (Stripe billing, impersonation, integrations) are documented there as deferred.
 
-| Strengths | Gaps |
-|-----------|------|
-| Strong per-tenant DB isolation | Mixed schema strategy (Flyway vs Hibernate) |
-| Gateway auth, rate limiting, OpenAPI | No integration/E2E tests |
-| Good project-service unit tests | `master-app` and `notification-service` untested |
-| GitHub Actions CI | Custom gateway (no circuit breaking) |
+| Strengths | Notes |
+|-----------|-------|
+| Strong per-tenant DB isolation | Flyway on master; tenant schema via template + upgrader |
+| Gateway auth, rate limiting, OpenAPI | Custom gateway (no circuit breaking) |
+| Shared design system + dual apps | Playwright screenshot script for docs |
+| GitHub Actions CI | Integration/E2E tests planned post-v1 |
 
 Full merits/demerits: **[Docs/CODEBASE_STATUS.md](./Docs/CODEBASE_STATUS.md)**
 
@@ -176,7 +220,8 @@ Full merits/demerits: **[Docs/CODEBASE_STATUS.md](./Docs/CODEBASE_STATUS.md)**
 | MySQL connection refused | Start MySQL on `localhost:3306`; check credentials in `.env` |
 | Legacy tenant DB missing columns | Restart `project-service` (runs `TenantSchemaUpgrader`) |
 | Frontend cannot reach API | Set `VITE_API_BASE_URL=http://localhost:8080` in `Frontend/*/.env.local` |
-| Email does not send | Start `notification-service` and configure SMTP in `.env` |
+| Email does not send | Start `notification-service`; configure SMTP in `.env` (or read console logs locally) |
+| Theme picker missing | Apply Flyway migration `V2__add_tenant_brand_theme.sql`; restart `tenant-service` |
 
 ## License
 
