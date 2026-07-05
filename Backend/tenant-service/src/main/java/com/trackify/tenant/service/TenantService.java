@@ -523,7 +523,8 @@ public class TenantService {
 
       jdbcTemplate.execute("FLUSH PRIVILEGES");
 
-      // 2. Create schema (V1 is the full current schema; legacy DBs upgrade via TenantSchemaUpgrader on connect)
+      // 2. Create schema (V1 is the full current schema; legacy DBs upgrade via
+      // TenantSchemaUpgrader on connect)
       String schemaSql = loadSqlTemplate("db/tenant/V1__tenant_schema.sql", dbName);
       executeSqlStatements(schemaSql);
 

@@ -985,7 +985,9 @@
 
 .btn--primary:hover:not(:disabled) {
   filter: brightness(1.08);
-  box-shadow: var(--shadow-md), 0 0 20px color-mix(in srgb, var(--primary) 30%, transparent);
+  box-shadow:
+    var(--shadow-md),
+    0 0 20px color-mix(in srgb, var(--primary) 30%, transparent);
   transform: translateY(-1px);
 }
 

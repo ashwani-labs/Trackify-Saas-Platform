@@ -90,11 +90,7 @@ const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
             onClick={handleAddMember}
             disabled={!selectedUserId || memberLoading}
             leftIcon={
-              memberLoading ? (
-                <Loader2 size={18} className="btn-spinner" />
-              ) : (
-                <UserPlus size={18} />
-              )
+              memberLoading ? <Loader2 size={18} className="btn-spinner" /> : <UserPlus size={18} />
             }
           >
             Add

@@ -135,7 +135,9 @@ const NotificationBell = () => {
                 <div style={{ flex: 1, textAlign: 'left' }}>
                   <div className="search-result__title">{n.title}</div>
                   {NOTIFICATION_TYPE_LABELS[n.type] && (
-                    <div className="notification-item__type">{NOTIFICATION_TYPE_LABELS[n.type]}</div>
+                    <div className="notification-item__type">
+                      {NOTIFICATION_TYPE_LABELS[n.type]}
+                    </div>
                   )}
                   {n.message && <div className="search-result__meta">{n.message}</div>}
                 </div>

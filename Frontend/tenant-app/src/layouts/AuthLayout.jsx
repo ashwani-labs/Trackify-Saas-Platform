@@ -26,8 +26,8 @@ const AuthLayout = ({ children, title, subtitle }) => {
               <span className="auth-panel__gradient">built for modern teams</span>
             </h2>
             <p className="auth-panel__desc">
-              Plan sprints, track issues, and collaborate — all in one workspace designed for
-              speed and clarity.
+              Plan sprints, track issues, and collaborate — all in one workspace designed for speed
+              and clarity.
             </p>
 
             <ul className="auth-panel__highlights">
@@ -41,9 +41,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
             </ul>
           </div>
 
-          <p className="auth-panel__footer">
-            Trusted by teams who ship faster with Trackify
-          </p>
+          <p className="auth-panel__footer">Trusted by teams who ship faster with Trackify</p>
         </div>
       </aside>
 

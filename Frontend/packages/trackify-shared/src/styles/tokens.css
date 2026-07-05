@@ -51,7 +51,8 @@
     color-mix(in srgb, var(--primary) 8%, var(--bg-main)) 0%,
     color-mix(in srgb, var(--accent) 6%, var(--bg-main)) 100%
   );
-  --gradient-hero: radial-gradient(
+  --gradient-hero:
+    radial-gradient(
       ellipse 80% 60% at 50% -20%,
       color-mix(in srgb, var(--primary) 18%, transparent),
       transparent
@@ -106,7 +107,8 @@
     color-mix(in srgb, var(--primary) 12%, var(--bg-main)) 0%,
     color-mix(in srgb, var(--accent) 8%, var(--bg-main)) 100%
   );
-  --gradient-hero: radial-gradient(
+  --gradient-hero:
+    radial-gradient(
       ellipse 80% 60% at 50% -20%,
       color-mix(in srgb, var(--primary) 22%, transparent),
       transparent

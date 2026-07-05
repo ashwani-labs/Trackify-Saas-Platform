@@ -174,9 +174,7 @@ const DashboardLayout = ({ children }) => {
 
         {/* Main Content */}
         <main className="main-content main-content--constrained">
-          <div className="page-body page-body--scroll">
-            {children}
-          </div>
+          <div className="page-body page-body--scroll">{children}</div>
         </main>
       </div>
 

@@ -44,7 +44,9 @@ const ProjectActivityFeed = ({
   if (error) {
     return (
       <div className="card project-activity">
-        <Alert>{typeof error === 'string' ? error : error?.message || 'Failed to load activity'}</Alert>
+        <Alert>
+          {typeof error === 'string' ? error : error?.message || 'Failed to load activity'}
+        </Alert>
       </div>
     );
   }

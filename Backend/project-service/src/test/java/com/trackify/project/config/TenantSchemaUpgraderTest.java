@@ -36,7 +36,8 @@ class TenantSchemaUpgraderTest {
               eq(String.class)))
           .thenReturn(List.of("ALPHA"));
       when(jdbc.queryForList(
-              eq("SELECT id, name FROM projects WHERE project_key IS NULL OR project_key = '' ORDER BY id")))
+              eq(
+                  "SELECT id, name FROM projects WHERE project_key IS NULL OR project_key = '' ORDER BY id")))
           .thenReturn(List.of());
       when(jdbc.queryForList(
               eq(
@@ -61,10 +62,14 @@ class TenantSchemaUpgraderTest {
   void upgradeIfNeeded_createsSprintsAndAddsIssueColumnWhenMissing() {
     try (var jdbcTemplateMock = mockConstruction(JdbcTemplate.class)) {
       JdbcTemplate jdbc = jdbcTemplateMock.constructed().get(0);
-      when(jdbc.queryForObject(contains("information_schema.tables"), eq(Integer.class), eq("sprints")))
+      when(jdbc.queryForObject(
+              contains("information_schema.tables"), eq(Integer.class), eq("sprints")))
           .thenReturn(0, 1);
       when(jdbc.queryForObject(
-              contains("information_schema.columns"), eq(Integer.class), eq("issues"), eq("sprint_id")))
+              contains("information_schema.columns"),
+              eq(Integer.class),
+              eq("issues"),
+              eq("sprint_id")))
           .thenReturn(0);
       stubIssueKeyColumnsPresent(jdbc);
       when(jdbc.queryForList(
@@ -73,7 +78,8 @@ class TenantSchemaUpgraderTest {
               eq(String.class)))
           .thenReturn(List.of());
       when(jdbc.queryForList(
-              eq("SELECT id, name FROM projects WHERE project_key IS NULL OR project_key = '' ORDER BY id")))
+              eq(
+                  "SELECT id, name FROM projects WHERE project_key IS NULL OR project_key = '' ORDER BY id")))
           .thenReturn(List.of());
       when(jdbc.queryForList(
               eq(
@@ -98,7 +104,8 @@ class TenantSchemaUpgraderTest {
               eq(String.class)))
           .thenReturn(List.of());
       when(jdbc.queryForList(
-              eq("SELECT id, name FROM projects WHERE project_key IS NULL OR project_key = '' ORDER BY id")))
+              eq(
+                  "SELECT id, name FROM projects WHERE project_key IS NULL OR project_key = '' ORDER BY id")))
           .thenReturn(List.of(Map.of("id", 5L, "name", "Alpha Platform")));
       when(jdbc.queryForList(
               eq(
@@ -126,23 +133,36 @@ class TenantSchemaUpgraderTest {
   }
 
   private void stubSchemaPresent(JdbcTemplate jdbc) {
-    when(jdbc.queryForObject(contains("information_schema.tables"), eq(Integer.class), eq("sprints")))
+    when(jdbc.queryForObject(
+            contains("information_schema.tables"), eq(Integer.class), eq("sprints")))
         .thenReturn(1);
     when(jdbc.queryForObject(
-            contains("information_schema.columns"), eq(Integer.class), eq("issues"), eq("sprint_id")))
+            contains("information_schema.columns"),
+            eq(Integer.class),
+            eq("issues"),
+            eq("sprint_id")))
         .thenReturn(1);
     stubIssueKeyColumnsPresent(jdbc);
   }
 
   private void stubIssueKeyColumnsPresent(JdbcTemplate jdbc) {
     when(jdbc.queryForObject(
-            contains("information_schema.columns"), eq(Integer.class), eq("projects"), eq("project_key")))
+            contains("information_schema.columns"),
+            eq(Integer.class),
+            eq("projects"),
+            eq("project_key")))
         .thenReturn(1);
     when(jdbc.queryForObject(
-            contains("information_schema.columns"), eq(Integer.class), eq("projects"), eq("issue_counter")))
+            contains("information_schema.columns"),
+            eq(Integer.class),
+            eq("projects"),
+            eq("issue_counter")))
         .thenReturn(1);
     when(jdbc.queryForObject(
-            contains("information_schema.columns"), eq(Integer.class), eq("issues"), eq("issue_key")))
+            contains("information_schema.columns"),
+            eq(Integer.class),
+            eq("issues"),
+            eq("issue_key")))
         .thenReturn(1);
   }
 }

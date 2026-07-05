@@ -224,7 +224,9 @@ const LandingPage = () => {
           </span>
           <span>Trackify</span>
         </div>
-        <p className="landing-footer__copy">&copy; {new Date().getFullYear()} Trackify. All rights reserved.</p>
+        <p className="landing-footer__copy">
+          &copy; {new Date().getFullYear()} Trackify. All rights reserved.
+        </p>
         <div className="landing-footer__links">
           <Link to="/login">Log in</Link>
           <Link to="/register">Sign up</Link>

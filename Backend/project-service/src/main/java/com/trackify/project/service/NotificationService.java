@@ -157,11 +157,7 @@ public class NotificationService {
   }
 
   private void notifyIssueStakeholders(
-      Issue issue,
-      Long actorUserId,
-      NotificationType type,
-      String title,
-      String message) {
+      Issue issue, Long actorUserId, NotificationType type, String title, String message) {
     for (Long recipientId : resolveIssueStakeholderIds(issue, actorUserId)) {
       Notification notification =
           Notification.builder()

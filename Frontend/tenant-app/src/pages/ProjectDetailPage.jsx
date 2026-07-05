@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProjectById, fetchProjectMembers, fetchProjectActivity } from '../features/projects/projectSlice';
+import {
+  fetchProjectById,
+  fetchProjectMembers,
+  fetchProjectActivity,
+} from '../features/projects/projectSlice';
 import { fetchIssuesByProject, fetchIssueByKey, clearIssues } from '../features/issues/issueSlice';
 import { fetchSprintsByProject } from '../features/sprints/sprintSlice';
 import KanbanBoard from '../components/kanban/KanbanBoard';

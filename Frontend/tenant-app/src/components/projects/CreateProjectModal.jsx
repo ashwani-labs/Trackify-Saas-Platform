@@ -50,11 +50,7 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
             Cancel
           </Button>
           <Button type="submit" form="create-project-form" disabled={isLoading}>
-            {isLoading ? (
-              <Loader2 size={18} className="btn-spinner" />
-            ) : (
-              'Create Project'
-            )}
+            {isLoading ? <Loader2 size={18} className="btn-spinner" /> : 'Create Project'}
           </Button>
         </>
       }
