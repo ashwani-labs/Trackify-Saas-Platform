@@ -205,6 +205,12 @@ const issueSlice = createSlice({
       if (issue) issue.status = status;
       if (state.selectedIssue?.id === id) state.selectedIssue.status = status;
     },
+    optimisticPriorityUpdate: (state, action) => {
+      const { id, priority } = action.payload;
+      const issue = state.issues.find((i) => i.id === id);
+      if (issue) issue.priority = priority;
+      if (state.selectedIssue?.id === id) state.selectedIssue.priority = priority;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -332,6 +338,7 @@ export const {
   setFilters,
   clearFilters,
   optimisticStatusUpdate,
+  optimisticPriorityUpdate,
 } = issueSlice.actions;
 
 export default issueSlice.reducer;

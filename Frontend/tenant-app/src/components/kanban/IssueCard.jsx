@@ -1,59 +1,102 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { setSelectedIssue } from '../../features/issues/issueSlice';
-import { Badge } from '@trackify/shared';
+import { GripVertical } from 'lucide-react';
 
-const PRIORITY_VARIANT = {
-  HIGH: 'HIGH',
-  MEDIUM: 'MEDIUM',
-  LOW: 'LOW',
+const PRIORITY_OPTIONS = ['HIGH', 'MEDIUM', 'LOW'];
+
+const PRIORITY_CLASS = {
+  HIGH: 'issue-card__priority--high',
+  MEDIUM: 'issue-card__priority--medium',
+  LOW: 'issue-card__priority--low',
 };
 
-const IssueCard = ({ issue }) => {
+const IssueCard = ({ issue, isDragging, onDragStart, onDragEnd, onPriorityChange }) => {
   const dispatch = useDispatch();
-  const [isDragging, setIsDragging] = React.useState(false);
-
-  const handleClick = () => {
-    dispatch(setSelectedIssue(issue));
-  };
+  const skipClickRef = useRef(false);
 
   const issueKey =
     issue.issueKey ||
     (issue.projectHeaderName ? `${issue.projectHeaderName}-${issue.id}` : `ISSUE-${issue.id}`);
 
+  const handleClick = () => {
+    if (skipClickRef.current) {
+      skipClickRef.current = false;
+      return;
+    }
+    dispatch(setSelectedIssue(issue));
+  };
+
+  const handleDragStart = (e) => {
+    skipClickRef.current = true;
+    onDragStart?.(issue.id);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('issueId', String(issue.id));
+    e.dataTransfer.setData('currentStatus', issue.status);
+
+    const card = e.currentTarget.closest('.issue-card');
+    if (card) {
+      e.dataTransfer.setDragImage(card, 24, 20);
+    }
+  };
+
+  const handleDragEnd = () => {
+    onDragEnd?.();
+    window.setTimeout(() => {
+      skipClickRef.current = false;
+    }, 0);
+  };
+
   return (
-    <div
+    <article
       className={`issue-card ${isDragging ? 'issue-card--dragging' : ''}`}
-      draggable
-      onDragStart={(e) => {
-        setIsDragging(true);
-        e.dataTransfer.setData('issueId', String(issue.id));
-        e.dataTransfer.setData('currentStatus', issue.status);
-        setTimeout(() => {
-          e.target.style.opacity = '0.5';
-        }, 0);
-      }}
-      onDragEnd={(e) => {
-        setIsDragging(false);
-        e.target.style.opacity = '1';
-      }}
       onClick={handleClick}
     >
-      <h4 className="issue-title">{issue.title}</h4>
+      <div className="issue-card__top">
+        <button
+          type="button"
+          className="issue-card__drag-handle"
+          draggable
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          aria-label={`Drag ${issue.title}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical size={14} aria-hidden />
+        </button>
+
+        <h4 className="issue-title">{issue.title}</h4>
+      </div>
 
       <div className="issue-meta">
         <span className="issue-key">{issueKey}</span>
         <div className="issue-footer">
-          <Badge
-            variant={PRIORITY_VARIANT[issue.priority] || 'primary'}
-            className="badge--priority"
+          <label className="issue-card__priority-label">
+            <span className="sr-only">Priority for {issue.title}</span>
+            <select
+              className={`issue-card__priority ${PRIORITY_CLASS[issue.priority] || ''}`}
+              value={issue.priority}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => onPriorityChange?.(issue, e.target.value)}
+              aria-label={`Priority for ${issue.title}`}
+            >
+              {PRIORITY_OPTIONS.map((priority) => (
+                <option key={priority} value={priority}>
+                  {priority}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div
+            className="avatar-sm"
+            title={issue.assigneeName || 'Unassigned'}
+            aria-label={issue.assigneeName ? `Assigned to ${issue.assigneeName}` : 'Unassigned'}
           >
-            {issue.priority}
-          </Badge>
-          <div className="avatar-sm">{(issue.assigneeName || 'U').charAt(0).toUpperCase()}</div>
+            {(issue.assigneeName || 'U').charAt(0).toUpperCase()}
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

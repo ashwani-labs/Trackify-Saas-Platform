@@ -19,7 +19,7 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 | 5 | Master app toast notifications | Done | `react-hot-toast` + tenant provision success toast |
 | 6 | Master tenant search | Done | Top-bar search filters tenant table |
 | 7 | Theme `prefers-color-scheme` default | Done | `getInitialTheme()` in both apps |
-| 8 | Kanban drag UX + issue panel tabs | In progress | Issue panel tabs done |
+| 8 | Kanban drag UX + issue panel tabs | In progress | Issue panel tabs done; Kanban polish done |
 | 9 | Master tenant detail drawer | Not started | Phase B |
 | 10 | Consistent loading skeletons | Partial | Exists on some pages; not extended everywhere |
 
@@ -45,7 +45,7 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
 | Item | Status |
 |------|--------|
-| Kanban drag-and-drop polish | Not started |
+| Kanban drag-and-drop polish | Done |
 | Issue panel tabs | Done |
 | Master tenant detail drawer | Not started |
 | Mobile bottom nav | Not started |
@@ -84,16 +84,16 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 |-----------|----------|
 | `tenant-app/src/test/confirmDialog.test.jsx` | `ConfirmDialog`, `useConfirmDialog` |
 | `tenant-app/src/test/issueDetailPanel.test.jsx` | Issue panel tabs |
+| `tenant-app/src/test/kanbanBoard.test.jsx` | Kanban drag/drop + quick priority |
 | Existing tenant + master test suites | Regression on form/modal changes |
 
 ---
 
 ## Next up (recommended order)
 
-1. Kanban drag-and-drop visual polish
-2. Master tenant detail drawer
-3. Inline form validation on blur
-4. Workspace settings page (branding from provision data)
+1. Master tenant detail drawer
+2. Inline form validation on blur
+3. Workspace settings page (branding from provision data)
 
 ---
 
@@ -112,3 +112,9 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
 - Issue detail panel: sticky header with key/title and Details / Activity / Comments tabs
 - Panel section styles moved to shared CSS tokens
+
+### July 2026 — Kanban polish
+
+- Drag handle, improved drop zones, empty-column placeholder, and rollback on failed moves
+- Quick priority edit on issue cards with optimistic updates
+- Mobile horizontal scroll snap for board columns
