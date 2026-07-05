@@ -24,7 +24,7 @@ const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
   const { isLoading, error } = useSelector((state) => state.issues);
 
   const { values, handleChange, handleBlur, validateAll, getFieldError, reset } = useFormFields(
-    { title: '', description: '', priority: 'MEDIUM', status: 'TODO' },
+    { title: '', description: '', priority: 'MEDIUM', status: 'TODO', labels: '' },
     validators
   );
 
@@ -37,7 +37,16 @@ const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
     e.preventDefault();
     if (!validateAll()) return;
 
-    const result = await dispatch(createIssue({ ...values, projectId }));
+    const result = await dispatch(
+      createIssue({
+        ...values,
+        labels: values.labels
+          .split(',')
+          .map((label) => label.trim())
+          .filter(Boolean),
+        projectId,
+      })
+    );
     if (createIssue.fulfilled.match(result)) {
       reset();
       onClose();
@@ -83,6 +92,17 @@ const CreateIssueModal = ({ isOpen, onClose, projectId }) => {
           rows={4}
           placeholder="Add more detail..."
         />
+
+        <Input
+          id="issue-labels"
+          name="labels"
+          label="Labels"
+          value={values.labels}
+          onChange={handleChange}
+          placeholder="bug, frontend, urgent"
+          inputClassName="input--with-icon"
+        />
+        <p className="form-hint">Separate multiple labels with commas.</p>
 
         <div className="form-row form-row--2">
           <Select

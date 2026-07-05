@@ -8,6 +8,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
 } from '../../features/notifications/notificationSlice';
+import { useNotificationStream } from '../../hooks/useNotificationStream';
 import { setSelectedIssue } from '../../features/issues/issueSlice';
 
 const NOTIFICATION_TYPE_LABELS = {
@@ -25,9 +26,11 @@ const NotificationBell = () => {
 
   const { items, unreadCount, loading } = useSelector((s) => s.notifications);
 
+  useNotificationStream();
+
   useEffect(() => {
     dispatch(fetchUnreadCount());
-    const interval = setInterval(() => dispatch(fetchUnreadCount()), 15000);
+    const interval = setInterval(() => dispatch(fetchUnreadCount()), 60000);
     return () => clearInterval(interval);
   }, [dispatch]);
 

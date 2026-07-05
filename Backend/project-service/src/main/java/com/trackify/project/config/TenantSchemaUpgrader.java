@@ -40,6 +40,7 @@ public class TenantSchemaUpgrader {
       createSprintsTable(jdbc);
       addIssueSprintColumn(jdbc);
       ensureIssueKeyColumns(jdbc);
+      addIssueLabelsColumn(jdbc);
       backfillProjectAndIssueKeys(jdbc);
       verifiedTenants.add(tenantId);
     }
@@ -99,6 +100,14 @@ public class TenantSchemaUpgrader {
       jdbc.execute("ALTER TABLE issues ADD COLUMN issue_key VARCHAR(20)");
       log.info("Added issues.issue_key column");
     }
+  }
+
+  private void addIssueLabelsColumn(JdbcTemplate jdbc) {
+    if (columnExists(jdbc, "issues", "labels")) {
+      return;
+    }
+    jdbc.execute("ALTER TABLE issues ADD COLUMN labels VARCHAR(500) NULL");
+    log.info("Added issues.labels column");
   }
 
   private void backfillProjectAndIssueKeys(JdbcTemplate jdbc) {

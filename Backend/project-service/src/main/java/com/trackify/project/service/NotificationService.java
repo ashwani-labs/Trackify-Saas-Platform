@@ -6,6 +6,7 @@ import com.trackify.project.entity.Issue;
 import com.trackify.project.entity.Notification;
 import com.trackify.project.enums.NotificationReferenceType;
 import com.trackify.project.enums.NotificationType;
+import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.NotificationRepository;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationService {
 
   private final NotificationRepository notificationRepository;
+  private final IssueRepository issueRepository;
+  private final NotificationStreamService notificationStreamService;
   private final JdbcTemplate jdbcTemplate;
 
   @Transactional
@@ -55,6 +58,7 @@ public class NotificationService {
               .referenceId(pendingUserId)
               .build();
       notificationRepository.save(notification);
+      publishUnreadCount(adminId);
     }
   }
 
@@ -77,6 +81,7 @@ public class NotificationService {
             .build();
 
     notificationRepository.save(notification);
+    publishUnreadCount(assigneeId);
     log.debug("Created assignment notification for user {} issue {}", assigneeId, issue.getId());
   }
 
@@ -170,6 +175,7 @@ public class NotificationService {
               .projectId(issue.getProject() != null ? issue.getProject().getId() : null)
               .build();
       notificationRepository.save(notification);
+      publishUnreadCount(recipientId);
     }
   }
 
@@ -209,7 +215,27 @@ public class NotificationService {
         .referenceType(notification.getReferenceType())
         .referenceId(notification.getReferenceId())
         .projectId(notification.getProjectId())
+        .issueKey(resolveIssueKey(notification))
         .createdAt(notification.getCreatedAt())
         .build();
+  }
+
+  private String resolveIssueKey(Notification notification) {
+    if (notification.getReferenceType() != NotificationReferenceType.ISSUE
+        || notification.getReferenceId() == null) {
+      return null;
+    }
+    return issueRepository
+        .findById(notification.getReferenceId())
+        .map(Issue::getIssueKey)
+        .orElse(null);
+  }
+
+  private void publishUnreadCount(Long userId) {
+    if (userId == null) {
+      return;
+    }
+    long unread = notificationRepository.countByUserIdAndReadAtIsNull(userId);
+    notificationStreamService.publishUnreadCount(userId, unread);
   }
 }

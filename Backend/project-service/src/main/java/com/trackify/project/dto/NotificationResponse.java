@@ -21,5 +21,6 @@ public class NotificationResponse {
   private NotificationReferenceType referenceType;
   private Long referenceId;
   private Long projectId;
+  private String issueKey;
   private LocalDateTime createdAt;
 }

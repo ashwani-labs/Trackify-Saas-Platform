@@ -70,6 +70,15 @@ const IssueCard = ({ issue, isDragging, onDragStart, onDragEnd, onPriorityChange
 
       <div className="issue-meta">
         <span className="issue-key">{issueKey}</span>
+        {issue.labels?.length > 0 && (
+          <div className="issue-card__labels">
+            {issue.labels.map((label) => (
+              <span key={label} className="issue-card__label">
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="issue-footer">
           <label className="issue-card__priority-label">
             <span className="sr-only">Priority for {issue.title}</span>

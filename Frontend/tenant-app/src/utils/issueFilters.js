@@ -7,6 +7,7 @@ export const DEFAULT_ISSUE_FILTERS = {
   priority: FILTER_ALL,
   assigneeId: FILTER_ALL,
   sprintId: FILTER_ALL,
+  label: FILTER_ALL,
 };
 
 export function hasActiveIssueFilters(filters) {
@@ -14,7 +15,8 @@ export function hasActiveIssueFilters(filters) {
     filters.status !== FILTER_ALL ||
     filters.priority !== FILTER_ALL ||
     filters.assigneeId !== FILTER_ALL ||
-    filters.sprintId !== FILTER_ALL
+    filters.sprintId !== FILTER_ALL ||
+    filters.label !== FILTER_ALL
   );
 }
 
@@ -38,13 +40,20 @@ function matchesSprint(issue, sprintFilter) {
   return issue.sprintId === Number(sprintFilter);
 }
 
+function matchesLabel(issue, labelFilter) {
+  if (!labelFilter || labelFilter === FILTER_ALL) return true;
+  const labels = issue.labels || [];
+  return labels.includes(labelFilter);
+}
+
 export function applyIssueFilters(issues, filters) {
   return issues.filter(
     (issue) =>
       matchesStatus(issue, filters.status) &&
       matchesPriority(issue, filters.priority) &&
       matchesAssignee(issue, filters.assigneeId) &&
-      matchesSprint(issue, filters.sprintId)
+      matchesSprint(issue, filters.sprintId) &&
+      matchesLabel(issue, filters.label)
   );
 }
 

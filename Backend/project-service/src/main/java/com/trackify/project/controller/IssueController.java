@@ -35,6 +35,12 @@ public class IssueController {
     return ResponseEntity.ok(ApiResponse.ok("Issue created successfully", response));
   }
 
+  @GetMapping("/project/{projectId}/labels")
+  public ResponseEntity<ApiResponse<List<String>>> getProjectLabels(@PathVariable Long projectId) {
+    return ResponseEntity.ok(
+        ApiResponse.ok("Project labels fetched", issueService.getProjectLabels(projectId)));
+  }
+
   @GetMapping("/project/{projectId}")
   public ResponseEntity<ApiResponse<List<IssueResponse>>> getIssuesByProject(
       @PathVariable Long projectId) {

@@ -67,4 +67,8 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
           + "OR LOWER(p.name) LIKE LOWER(CONCAT('%', :term, '%')))")
   List<Issue> searchByTermAndProjectIds(
       @Param("projectIds") List<Long> projectIds, @Param("term") String term, Pageable pageable);
+
+  @Query(
+      "SELECT DISTINCT i.labels FROM Issue i WHERE i.project.id = :projectId AND i.labels IS NOT NULL AND i.labels <> ''")
+  List<String> findDistinctLabelValuesByProjectId(@Param("projectId") Long projectId);
 }

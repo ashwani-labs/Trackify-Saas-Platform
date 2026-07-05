@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.trackify.common.enums.Plan;
 import com.trackify.project.dto.ProjectRequest;
 import com.trackify.project.dto.ProjectResponse;
 import com.trackify.project.entity.Project;
@@ -27,6 +28,7 @@ class ProjectServiceTest {
   @Mock private IssueRepository issueRepository;
   @Mock private ActivityEventRepository activityEventRepository;
   @Mock private ProjectMemberRepository projectMemberRepository;
+  @Mock private TenantPlanService tenantPlanService;
 
   @InjectMocks private ProjectService projectService;
 
@@ -49,6 +51,8 @@ class ProjectServiceTest {
             .ownerId(10L)
             .build();
 
+    when(projectRepository.count()).thenReturn(0L);
+    when(tenantPlanService.getCurrentTenantPlan()).thenReturn(Plan.PRO);
     when(projectRepository.save(any(Project.class))).thenReturn(savedProject);
     when(issueRepository.countByProjectIdAndStatus(1L, IssueStatus.TODO)).thenReturn(0L);
     when(issueRepository.countByProjectIdAndStatus(1L, IssueStatus.IN_PROGRESS)).thenReturn(0L);

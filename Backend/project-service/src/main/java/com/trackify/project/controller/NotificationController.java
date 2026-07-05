@@ -3,11 +3,13 @@ package com.trackify.project.controller;
 import com.trackify.common.dto.ApiResponse;
 import com.trackify.common.security.JwtUtil;
 import com.trackify.project.dto.NotificationResponse;
+import com.trackify.project.service.NotificationStreamService;
 import com.trackify.project.service.NotificationService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/notifications")
@@ -23,7 +26,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController {
 
   private final NotificationService notificationService;
+  private final NotificationStreamService notificationStreamService;
   private final JwtUtil jwtUtil;
+
+  @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  public SseEmitter streamNotifications(
+      @RequestHeader(value = "Authorization", required = false) String authHeader,
+      @RequestParam(value = "token", required = false) String tokenParam) {
+    String token =
+        authHeader != null && authHeader.startsWith("Bearer ")
+            ? authHeader.substring(7)
+            : tokenParam;
+    if (token == null || token.isBlank()) {
+      throw new IllegalArgumentException("Authorization token is required");
+    }
+    Long userId = jwtUtil.extractUserId(token);
+    return notificationStreamService.subscribe(userId);
+  }
 
   @GetMapping
   public ResponseEntity<ApiResponse<Page<NotificationResponse>>> listNotifications(

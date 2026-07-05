@@ -4,6 +4,7 @@ import com.trackify.common.enums.Role;
 import com.trackify.common.enums.TenantStatus;
 import com.trackify.common.enums.UserStatus;
 import com.trackify.common.exception.AppException;
+import com.trackify.common.plan.PlanLimits;
 import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantDashboardStatsResponse;
@@ -360,6 +361,12 @@ public class TenantService {
       throw AppException.forbidden("Tenant is not active");
     }
 
+    JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
+    Long existingUsers = tenantJdbc.queryForObject("SELECT COUNT(*) FROM users", Long.class);
+    if (existingUsers != null && existingUsers >= PlanLimits.maxUsers(tenant.getPlan())) {
+      throw AppException.forbidden("User seat limit reached for your subscription plan.");
+    }
+
     // 3. Insert into User Lookup (Master DB)
     UserLookup lookup =
         UserLookup.builder().email(request.getEmail()).tenantId(tenant.getId()).build();
@@ -367,7 +374,6 @@ public class TenantService {
 
     // 4. Insert into Tenant Database
     String hashedPassword = passwordEncoder.encode(request.getPassword());
-    JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
 
     UserStatus initialStatus = UserStatus.PENDING;
     if (request.getStatus() != null) {

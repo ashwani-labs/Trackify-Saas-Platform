@@ -50,6 +50,9 @@ public class Issue {
   @Column(name = "assignee_id")
   private Long assigneeId;
 
+  @Column(length = 500)
+  private String labels;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "sprint_id")
   private Sprint sprint;

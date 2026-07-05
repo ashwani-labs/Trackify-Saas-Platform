@@ -8,7 +8,6 @@ import { setWorkspaceBranding } from '../features/auth/authSlice';
 
 const PLAN_LIMITS = {
   FREE: { users: 5, projects: 3, label: 'Free' },
-  BASIC: { users: 25, projects: 10, label: 'Basic' },
   PRO: { users: 100, projects: 50, label: 'Pro' },
   ENTERPRISE: { users: 'Unlimited', projects: 'Unlimited', label: 'Enterprise' },
 };

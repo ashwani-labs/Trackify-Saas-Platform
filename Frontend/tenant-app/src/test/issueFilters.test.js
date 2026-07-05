@@ -48,6 +48,16 @@ describe('issueFilters', () => {
     expect(filtered).toEqual([sampleIssues[1]]);
   });
 
+  it('filters by label', () => {
+    const issues = [
+      { id: 1, labels: ['bug', 'frontend'] },
+      { id: 2, labels: ['docs'] },
+    ];
+    expect(
+      applyIssueFilters(issues, { ...DEFAULT_ISSUE_FILTERS, label: 'bug' })
+    ).toEqual([issues[0]]);
+  });
+
   it('detects active filters', () => {
     expect(hasActiveIssueFilters(DEFAULT_ISSUE_FILTERS)).toBe(false);
     expect(hasActiveIssueFilters({ ...DEFAULT_ISSUE_FILTERS, status: 'TODO' })).toBe(true);

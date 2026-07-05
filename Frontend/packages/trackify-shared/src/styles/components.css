@@ -1728,6 +1728,23 @@
   cursor: grabbing;
 }
 
+.issue-card__labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+}
+
+.issue-card__label {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--primary);
+  border: 1px solid var(--border-main);
+  text-transform: lowercase;
+}
+
 .issue-card__priority-label {
   display: inline-flex;
 }

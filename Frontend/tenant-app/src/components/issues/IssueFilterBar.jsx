@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { setFilters, clearFilters } from '../../features/issues/issueSlice';
 import { SlidersHorizontal, X, BookmarkPlus } from 'lucide-react';
-import { hasActiveIssueFilters, SPRINT_BACKLOG } from '../../utils/issueFilters';
+import { hasActiveIssueFilters, SPRINT_BACKLOG, FILTER_ALL } from '../../utils/issueFilters';
 import { loadSavedFilters, saveFilterPreset, deleteFilterPreset } from '../../utils/savedFilters';
 import { Button, Select } from '@trackify/shared';
 
@@ -25,7 +25,7 @@ const PRIORITY_OPTIONS = [
 const IssueFilterBar = () => {
   const dispatch = useDispatch();
   const { id: projectId } = useParams();
-  const { filters } = useSelector((s) => s.issues);
+  const { filters, issues } = useSelector((s) => s.issues);
   const { list: sprints } = useSelector((s) => s.sprints);
   const { members } = useSelector((s) => s.projects);
   const [savedFilters, setSavedFilters] = useState(() => loadSavedFilters(projectId));
@@ -54,6 +54,14 @@ const IssueFilterBar = () => {
         .map((sprint) => ({ value: String(sprint.id), label: `${sprint.name} (${sprint.status})` }))
     );
   }, [sprints]);
+
+  const labelOptions = useMemo(() => {
+    const labels = new Set();
+    issues.forEach((issue) => {
+      (issue.labels || []).forEach((label) => labels.add(label));
+    });
+    return [{ value: FILTER_ALL, label: 'All Labels' }, ...Array.from(labels).sort().map((label) => ({ value: label, label }))];
+  }, [issues]);
 
   const hasActiveFilters = hasActiveIssueFilters(filters);
 
@@ -108,6 +116,14 @@ const IssueFilterBar = () => {
         onChange={(e) => dispatch(setFilters({ sprintId: e.target.value }))}
         aria-label="Filter by sprint"
         options={sprintOptions}
+      />
+
+      <Select
+        className="issue-filter-bar__select"
+        value={filters.label || FILTER_ALL}
+        onChange={(e) => dispatch(setFilters({ label: e.target.value }))}
+        aria-label="Filter by label"
+        options={labelOptions}
       />
 
       {savedFilters.length > 0 && (

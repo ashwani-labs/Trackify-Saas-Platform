@@ -19,6 +19,7 @@ import com.trackify.project.repository.IssueCommentRepository;
 import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
 import com.trackify.project.repository.SprintRepository;
+import com.trackify.project.util.IssueLabelUtil;
 import com.trackify.project.util.ProjectKeyUtil;
 import java.util.Collections;
 import java.util.List;
@@ -101,6 +102,7 @@ public class IssueService {
             .sprint(sprint)
             .reporterId(reporterId)
             .assigneeId(request.getAssigneeId())
+            .labels(IssueLabelUtil.serialize(request.getLabels()))
             .build();
 
     issue = issueRepository.save(issue);
@@ -152,6 +154,9 @@ public class IssueService {
     if (request.getStatus() != null) issue.setStatus(request.getStatus());
     if (request.getPriority() != null) issue.setPriority(request.getPriority());
     issue.setAssigneeId(request.getAssigneeId());
+    if (request.getLabels() != null) {
+      issue.setLabels(IssueLabelUtil.serialize(request.getLabels()));
+    }
 
     if (request.getSprintId() != null) {
       Sprint sprint =
@@ -307,6 +312,11 @@ public class IssueService {
     projectRepository.save(project);
   }
 
+  public List<String> getProjectLabels(Long projectId) {
+    return IssueLabelUtil.distinctProjectLabels(
+        issueRepository.findDistinctLabelValuesByProjectId(projectId));
+  }
+
   private IssueResponse mapToResponse(Issue issue) {
     return IssueResponse.builder()
         .id(issue.getId())
@@ -320,6 +330,7 @@ public class IssueService {
         .sprintId(issue.getSprint() != null ? issue.getSprint().getId() : null)
         .reporterId(issue.getReporterId())
         .assigneeId(issue.getAssigneeId())
+        .labels(IssueLabelUtil.deserialize(issue.getLabels()))
         .createdAt(issue.getCreatedAt())
         .updatedAt(issue.getUpdatedAt())
         .attachments(

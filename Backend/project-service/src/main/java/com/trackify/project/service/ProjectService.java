@@ -1,6 +1,7 @@
 package com.trackify.project.service;
 
 import com.trackify.common.exception.AppException;
+import com.trackify.common.plan.PlanLimits;
 import com.trackify.project.dto.ProjectRequest;
 import com.trackify.project.dto.ProjectResponse;
 import com.trackify.project.dto.ProjectStatsResponse;
@@ -26,21 +27,31 @@ public class ProjectService {
   private final IssueRepository issueRepository;
   private final ActivityEventRepository activityEventRepository;
   private final ProjectMemberRepository projectMemberRepository;
+  private final TenantPlanService tenantPlanService;
 
   public ProjectService(
       ProjectRepository projectRepository,
       IssueRepository issueRepository,
       ActivityEventRepository activityEventRepository,
-      ProjectMemberRepository projectMemberRepository) {
+      ProjectMemberRepository projectMemberRepository,
+      TenantPlanService tenantPlanService) {
     this.projectRepository = projectRepository;
     this.issueRepository = issueRepository;
     this.activityEventRepository = activityEventRepository;
     this.projectMemberRepository = projectMemberRepository;
+    this.tenantPlanService = tenantPlanService;
   }
 
   @Transactional
   public ProjectResponse createProject(ProjectRequest request, Long ownerId) {
     log.info("Creating project: {} for owner: {}", request.getName(), ownerId);
+
+    long projectCount = projectRepository.count();
+    int maxProjects = PlanLimits.maxProjects(tenantPlanService.getCurrentTenantPlan());
+    if (projectCount >= maxProjects) {
+      throw AppException.forbidden(
+          "Project limit reached for your plan. Upgrade to create more projects.");
+    }
 
     Project project =
         Project.builder()

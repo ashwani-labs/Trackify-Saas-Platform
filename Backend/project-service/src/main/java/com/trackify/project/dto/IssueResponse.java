@@ -28,4 +28,5 @@ public class IssueResponse {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private List<IssueAttachmentResponse> attachments;
+  private List<String> labels;
 }
