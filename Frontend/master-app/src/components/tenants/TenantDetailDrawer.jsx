@@ -10,7 +10,8 @@ import {
   ExternalLink,
   Globe,
   Calendar,
-  Trash2,
+  ListTodo,
+  Zap,
 } from 'lucide-react';
 import {
   Alert,
@@ -40,6 +41,37 @@ const statusVariant = (status) => {
   if (status === 'ACTIVE') return 'success';
   if (status === 'SUSPENDED') return 'warning';
   return 'danger';
+};
+
+const PLAN_LIMITS = {
+  FREE: { users: 5, projects: 3 },
+  PRO: { users: 100, projects: 50 },
+  ENTERPRISE: { users: null, projects: null },
+};
+
+const UsageMeter = ({ label, value, limit }) => {
+  const hasLimit = limit != null && limit > 0;
+  const percent = hasLimit ? Math.min(100, Math.round((value / limit) * 100)) : 0;
+
+  return (
+    <div className="tenant-detail-panel__stat tenant-detail-panel__stat--wide">
+      <span className="tenant-detail-panel__stat-value">{value ?? 0}</span>
+      <span className="tenant-detail-panel__stat-label">{label}</span>
+      {hasLimit && (
+        <div className="tenant-detail-panel__meter" aria-hidden>
+          <div
+            className="tenant-detail-panel__meter-fill"
+            style={{ width: `${percent}%` }}
+          />
+        </div>
+      )}
+      {hasLimit && (
+        <span className="tenant-detail-panel__stat-sublabel">
+          {value ?? 0} / {limit} plan limit
+        </span>
+      )}
+    </div>
+  );
 };
 
 const DetailField = ({ label, children }) => (
@@ -256,26 +288,51 @@ const TenantDetailDrawer = ({ onToggleStatus, onDelete }) => {
                   <Users size={16} aria-hidden />
                   Usage
                 </h3>
-                <div className="tenant-detail-panel__stats">
-                  <div className="tenant-detail-panel__stat">
-                    <span className="tenant-detail-panel__stat-value">
-                      {tenant.totalUsers ?? 0}
-                    </span>
-                    <span className="tenant-detail-panel__stat-label">Total users</span>
-                  </div>
-                  <div className="tenant-detail-panel__stat">
-                    <span className="tenant-detail-panel__stat-value">
-                      {tenant.activeUsers ?? 0}
-                    </span>
-                    <span className="tenant-detail-panel__stat-label">Active</span>
-                  </div>
-                  <div className="tenant-detail-panel__stat">
-                    <span className="tenant-detail-panel__stat-value">
-                      {tenant.pendingUsers ?? 0}
-                    </span>
-                    <span className="tenant-detail-panel__stat-label">Pending</span>
-                  </div>
-                </div>
+                {(() => {
+                  const limits = PLAN_LIMITS[tenant.plan] || PLAN_LIMITS.FREE;
+                  return (
+                    <div className="tenant-detail-panel__stats tenant-detail-panel__stats--grid">
+                      <UsageMeter
+                        label="Users"
+                        value={tenant.totalUsers}
+                        limit={limits.users}
+                      />
+                      <UsageMeter
+                        label="Projects"
+                        value={tenant.totalProjects}
+                        limit={limits.projects}
+                      />
+                      <div className="tenant-detail-panel__stat">
+                        <span className="tenant-detail-panel__stat-value">
+                          {tenant.totalIssues ?? 0}
+                        </span>
+                        <span className="tenant-detail-panel__stat-label">
+                          <ListTodo size={12} aria-hidden /> Issues
+                        </span>
+                      </div>
+                      <div className="tenant-detail-panel__stat">
+                        <span className="tenant-detail-panel__stat-value">
+                          {tenant.activeSprints ?? 0}
+                        </span>
+                        <span className="tenant-detail-panel__stat-label">
+                          <Zap size={12} aria-hidden /> Active sprints
+                        </span>
+                      </div>
+                      <div className="tenant-detail-panel__stat">
+                        <span className="tenant-detail-panel__stat-value">
+                          {tenant.activeUsers ?? 0}
+                        </span>
+                        <span className="tenant-detail-panel__stat-label">Active users</span>
+                      </div>
+                      <div className="tenant-detail-panel__stat">
+                        <span className="tenant-detail-panel__stat-value">
+                          {tenant.pendingUsers ?? 0}
+                        </span>
+                        <span className="tenant-detail-panel__stat-label">Pending users</span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="tenant-detail-panel__footer">

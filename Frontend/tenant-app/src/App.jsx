@@ -24,6 +24,8 @@ const TeamPage = lazy(() => import('./pages/TeamPage'));
 const UserApprovalPage = lazy(() => import('./pages/UserApprovalPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const WorkspaceSettingsPage = lazy(() => import('./pages/WorkspaceSettingsPage'));
+const WorkspaceAuditPage = lazy(() => import('./pages/WorkspaceAuditPage'));
+const NotificationPreferencesPage = lazy(() => import('./pages/NotificationPreferencesPage'));
 
 function App() {
   return (
@@ -132,6 +134,28 @@ function App() {
                     <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
                       <DashboardLayout>
                         <WorkspaceSettingsPage />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/workspace-audit"
+                  element={
+                    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                      <DashboardLayout>
+                        <WorkspaceAuditPage />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/notification-preferences"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <NotificationPreferencesPage />
                       </DashboardLayout>
                     </ProtectedRoute>
                   }

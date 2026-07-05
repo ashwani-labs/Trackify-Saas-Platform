@@ -27,6 +27,9 @@ const mockTenantDetail = {
   totalUsers: 12,
   activeUsers: 10,
   pendingUsers: 2,
+  totalProjects: 4,
+  totalIssues: 87,
+  activeSprints: 2,
 };
 
 vi.mock('../services/tenantApi', () => ({
@@ -68,7 +71,8 @@ describe('TenantDetailDrawer', () => {
     expect(screen.getByText('acme.trackify.io')).toBeInTheDocument();
     expect(screen.getByText('trackify_acme')).toBeInTheDocument();
     expect(screen.getByText('12')).toBeInTheDocument();
-    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getByText('87')).toBeInTheDocument();
+    expect(screen.getByText('Pending users')).toBeInTheDocument();
   });
 
   it('closes when the close button is clicked', async () => {

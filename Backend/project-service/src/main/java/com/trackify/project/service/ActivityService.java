@@ -89,6 +89,12 @@ public class ActivityService {
     return page.map(event -> mapToResponse(event, issueKeys.get(event.getIssueId())));
   }
 
+  public Page<ActivityEventResponse> getWorkspaceActivity(Pageable pageable) {
+    Page<ActivityEvent> page = activityEventRepository.findAllByOrderByCreatedAtDesc(pageable);
+    Map<Long, String> issueKeys = loadIssueKeys(page.getContent());
+    return page.map(event -> mapToResponse(event, issueKeys.get(event.getIssueId())));
+  }
+
   private Map<Long, String> loadIssueKeys(List<ActivityEvent> events) {
     Set<Long> issueIds =
         events.stream()

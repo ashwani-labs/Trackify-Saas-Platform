@@ -10,7 +10,7 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
 
 
-**Overall:** Phase A ~95% complete · Phase B ~90% complete · Phase C ~30% complete · Feature tier 1 ~85%
+**Overall:** Phase A ~95% complete · Phase B ~95% complete · Phase C ~45% complete · Feature tier 1 ~90%
 
 
 
@@ -120,7 +120,7 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
 | Expanded onboarding wizard | Done | Dashboard checklist includes sprint + issue steps |
 
-| WCAG accessibility audit | Partial | Reduced-motion support; focus traps exist; full audit deferred |
+| WCAG accessibility audit | Done | Reduced-motion, focus traps, Kanban `aria-live` + column labels, drag handle labels |
 
 | Optimistic Kanban updates | Done | Status + priority optimistic updates with rollback |
 
@@ -148,7 +148,7 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
 | 2 | Plan limits enforcement | Done | `PlanLimits` enforced on project + user creation; limits shown in workspace settings |
 
-| 2 | Per-tenant usage dashboard | Partial | User counts in master tenant drawer |
+| 2 | Per-tenant usage dashboard | Done | Master drawer: users/projects/issues/sprints + plan limit meters |
 
 | 2 | Platform audit log | Done | `GET /tenants/audit-logs` + master audit page |
 
@@ -215,6 +215,24 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 2. GitHub/Slack integrations
 
 3. Custom workflows, epics, time tracking (tier 3)
+
+
+
+### Recently completed (not yet committed)
+
+
+
+- Per-tenant usage metrics in master drawer (projects, issues, active sprints, plan meters)
+
+- Workspace audit log page (`GET /activity/workspace`) for tenant admins
+
+- Notification preferences page + in-app filtering
+
+- Issue CSV export from project detail
+
+- Project templates in create-project modal
+
+- Kanban screen-reader live region for drag-and-drop
 
 
 

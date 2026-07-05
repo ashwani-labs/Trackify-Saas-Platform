@@ -40,6 +40,10 @@ const ProjectActivityFeed = ({
   isLoading = false,
   error = null,
   totalElements = 0,
+  showProjectLinks = false,
+  title = 'Project activity',
+  emptyTitle = 'No project activity yet',
+  emptyDescription = 'Issue updates, comments, and sprint events across this project will appear here.',
 }) => {
   if (error) {
     return (
@@ -64,8 +68,8 @@ const ProjectActivityFeed = ({
       <div className="card project-activity">
         <EmptyState
           icon={<Activity size={40} />}
-          title="No project activity yet"
-          description="Issue updates, comments, and sprint events across this project will appear here."
+          title={emptyTitle}
+          description={emptyDescription}
           className="project-activity__empty"
         />
       </div>
@@ -77,7 +81,7 @@ const ProjectActivityFeed = ({
       <header className="project-activity__header">
         <h2 className="project-activity__title">
           <Activity size={18} aria-hidden />
-          Project activity
+          {title}
         </h2>
         {totalElements > 0 && (
           <span className="project-activity__count">{totalElements} events</span>
@@ -113,9 +117,20 @@ const ProjectActivityFeed = ({
                   </time>
                 </div>
                 <p className="activity-timeline__summary">
+                  {showProjectLinks && event.projectId && (
+                    <>
+                      <Link
+                        to={`/projects/${event.projectId}`}
+                        className="project-activity__issue-key"
+                      >
+                        Project #{event.projectId}
+                      </Link>
+                      {' · '}
+                    </>
+                  )}
                   {event.issueKey && (
                     <Link
-                      to={`/projects/${projectId}/issue/${event.issueKey}`}
+                      to={`/projects/${projectId ?? event.projectId}/issue/${event.issueKey}`}
                       className="project-activity__issue-key"
                     >
                       {event.issueKey}

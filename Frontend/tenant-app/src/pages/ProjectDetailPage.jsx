@@ -16,9 +16,11 @@ import ProjectMembersModal from '../components/projects/ProjectMembersModal';
 import ProjectActivityFeed from '../components/projects/ProjectActivityFeed';
 import BacklogView from '../components/sprints/BacklogView';
 import CreateSprintModal from '../components/sprints/CreateSprintModal';
-import { Users, LayoutDashboard, ListTodo, Plus, Calendar, Activity } from 'lucide-react';
+import { Users, LayoutDashboard, ListTodo, Plus, Calendar, Activity, Download } from 'lucide-react';
 import { Button, PageHeader, Alert } from '@trackify/shared';
 import { applyIssueFilters } from '../utils/issueFilters';
+import { exportIssuesToCsv } from '../utils/exportIssuesCsv';
+import toast from 'react-hot-toast';
 
 const STAT_CONFIG = [
   { label: 'To Do', status: 'TODO', pillClass: 'stat-pill--todo' },
@@ -83,6 +85,15 @@ const ProjectDetailPage = () => {
 
   const filteredIssues = applyIssueFilters(issues, filters);
 
+  const handleExportCsv = () => {
+    if (!filteredIssues.length) {
+      toast.error('No issues to export');
+      return;
+    }
+    exportIssuesToCsv(filteredIssues, currentProject?.name || 'project');
+    toast.success('Issues exported');
+  };
+
   const boardIssues =
     viewMode === 'BOARD' && activeSprint
       ? filteredIssues.filter((i) => i.sprintId === activeSprint.id)
@@ -131,6 +142,13 @@ const ProjectDetailPage = () => {
         }
         actions={
           <>
+            <Button
+              variant="secondary"
+              leftIcon={<Download size={16} />}
+              onClick={handleExportCsv}
+            >
+              Export CSV
+            </Button>
             <Button
               variant="secondary"
               leftIcon={<Users size={16} />}

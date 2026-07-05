@@ -26,6 +26,7 @@ import {
   Search,
   Bell,
   Settings,
+  ScrollText,
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
@@ -66,6 +67,12 @@ const DashboardLayout = ({ children }) => {
       name: 'Workspace',
       path: '/workspace-settings',
       icon: <Settings size={18} />,
+      adminOnly: true,
+    },
+    {
+      name: 'Audit log',
+      path: '/workspace-audit',
+      icon: <ScrollText size={18} />,
       adminOnly: true,
     },
     { name: 'Profile', path: '/profile', icon: <User size={18} /> },

@@ -29,4 +29,7 @@ public class TenantDetailResponse {
   private Long totalUsers;
   private Long activeUsers;
   private Long pendingUsers;
+  private Long totalProjects;
+  private Long totalIssues;
+  private Long activeSprints;
 }

@@ -6,11 +6,46 @@ import { Modal, Button, Alert, Select, Textarea } from '@trackify/shared';
 import toast from 'react-hot-toast';
 
 const INITIAL_FORM = {
+  template: 'blank',
   name: '',
   key: '',
   description: '',
   category: 'Software',
 };
+
+const PROJECT_TEMPLATES = [
+  {
+    value: 'blank',
+    label: 'Blank project',
+    category: 'Software',
+    description: '',
+    keyHint: '',
+  },
+  {
+    value: 'software',
+    label: 'Software delivery',
+    category: 'Software',
+    description:
+      'Track features, bugs, and releases. Use the backlog for grooming and sprints for delivery.',
+    keyHint: 'SW',
+  },
+  {
+    value: 'marketing',
+    label: 'Marketing campaign',
+    category: 'Marketing',
+    description:
+      'Plan campaigns, content tasks, and launch milestones across channels.',
+    keyHint: 'MKT',
+  },
+  {
+    value: 'operations',
+    label: 'Business operations',
+    category: 'Business',
+    description:
+      'Coordinate internal requests, process improvements, and cross-team initiatives.',
+    keyHint: 'OPS',
+  },
+];
 
 const CATEGORY_OPTIONS = [
   { value: 'Software', label: 'Software Engineering' },
@@ -26,6 +61,21 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === 'template') {
+      const template = PROJECT_TEMPLATES.find((t) => t.value === value) || PROJECT_TEMPLATES[0];
+      setFormData((prev) => ({
+        ...prev,
+        template: value,
+        category: template.category,
+        description: template.description,
+        key: prev.name
+          ? prev.key
+          : template.keyHint || prev.key,
+      }));
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -74,6 +124,15 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
     >
       <form id="create-project-form" className="form-stack" onSubmit={handleSubmit}>
         {error && <Alert className="page-alert">{error}</Alert>}
+
+        <Select
+          id="template"
+          name="template"
+          label="Template"
+          value={formData.template}
+          onChange={handleChange}
+          options={PROJECT_TEMPLATES.map((t) => ({ value: t.value, label: t.label }))}
+        />
 
         <div className="form-group">
           <label className="form-label" htmlFor="name">

@@ -67,6 +67,30 @@ class ActivityServiceTest {
   }
 
   @Test
+  void getWorkspaceActivity_returnsPagedEventsAcrossProjects() {
+    ActivityEvent event =
+        ActivityEvent.builder()
+            .id(4L)
+            .projectId(20L)
+            .issueId(200L)
+            .eventType(ActivityEventType.ASSIGNEE_CHANGED)
+            .summary("Assignee changed to user #5")
+            .createdAt(LocalDateTime.now())
+            .build();
+    Pageable pageable = PageRequest.of(0, 25);
+    when(activityEventRepository.findAllByOrderByCreatedAtDesc(pageable))
+        .thenReturn(new PageImpl<>(List.of(event)));
+    when(issueRepository.findAllById(List.of(200L)))
+        .thenReturn(List.of(Issue.builder().id(200L).issueKey("OPS-7").build()));
+
+    Page<ActivityEventResponse> page = activityService.getWorkspaceActivity(pageable);
+
+    assertEquals(1, page.getTotalElements());
+    assertEquals("OPS-7", page.getContent().get(0).getIssueKey());
+    verify(activityEventRepository).findAllByOrderByCreatedAtDesc(pageable);
+  }
+
+  @Test
   void getIssueActivity_returnsEventsForIssue() {
     ActivityEvent event =
         ActivityEvent.builder()

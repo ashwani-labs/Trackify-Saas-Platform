@@ -31,11 +31,16 @@ const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
   const issues = filteredIssues ?? allIssues;
   const [draggingIssueId, setDraggingIssueId] = useState(null);
   const [dragOverColumn, setDragOverColumn] = useState(null);
+  const [liveMessage, setLiveMessage] = useState('');
 
   const issuesByStatus = useCallback((status) => issues.filter((i) => i.status === status), [issues]);
 
   const handleDragStart = (issueId) => {
     setDraggingIssueId(issueId);
+    const issue = issues.find((i) => i.id === issueId);
+    if (issue) {
+      setLiveMessage(`Picked up ${issue.title}. Use arrow keys or drop in a column.`);
+    }
   };
 
   const handleDragEnd = () => {
@@ -81,6 +86,7 @@ const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
         })
       ).unwrap();
       toast.success(`Moved to ${columnLabel}`);
+      setLiveMessage(`Moved issue to ${columnLabel}.`);
     } catch (err) {
       dispatch(optimisticStatusUpdate({ id: issueId, status: previousStatus }));
       toast.error(typeof err === 'string' ? err : 'Failed to move issue');
@@ -120,6 +126,9 @@ const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
 
   return (
     <div className={`kanban-board ${isDragging ? 'kanban-board--dragging' : ''}`}>
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {liveMessage}
+      </div>
       {COLUMNS.map(({ status, label, accent }) => {
         const columnIssues = issuesByStatus(status);
         const isDropTarget = dragOverColumn === status;

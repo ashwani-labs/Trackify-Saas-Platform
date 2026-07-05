@@ -12,16 +12,19 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 
 | Area | Today |
 |------|--------|
-| **Master app** | Login, dashboard charts, tenant CRUD, provision modal |
-| **Tenant app** | Landing, auth, dashboard widgets, projects, Kanban, backlog/sprints, team, approvals, profile, global search, notifications |
-| **Design system** | `@trackify/shared` tokens + components (Button, Input, Modal, etc.) |
-| **Known UX gaps** | `window.confirm` dialogs, mixed styling (`input-field` vs `input`), master search is decorative, no ErrorBoundary in master-app, limited mobile polish |
+| **Master app** | Login, dashboard charts, tenant CRUD, provision modal, tenant search, detail drawer, platform audit log, toasts, `ErrorBoundary` |
+| **Tenant app** | Landing, auth, dashboard widgets + onboarding checklist, projects, Kanban (drag/drop, optimistic updates), backlog/sprints + burndown, team, approvals, profile, global search + keyboard shortcuts, notifications (SSE + polling), workspace settings, mobile bottom nav, saved filters, issue labels |
+| **Design system** | `@trackify/shared` tokens + components (`Button`, `Input`, `Select`, `ConfirmDialog`, `PasswordStrength`, `KeyboardShortcutsPanel`, skeletons, mobile nav styles) |
+| **Backend** | Multi-tenant auth, projects/issues/sprints, notifications SSE stream, issue labels, plan limits (`FREE`/`PRO`/`ENTERPRISE`), tenant branding PATCH, platform audit log |
+| **Remaining gaps** | Full WCAG audit, gateway SSE streaming proxy, Stripe billing, GitHub/Slack integrations, custom workflows/epics, AI features |
+
+> **Implementation tracker:** [ROADMAP_PROGRESS.md](./ROADMAP_PROGRESS.md) — Phase A ~95%, Phase B ~90%, Tier 1 features ~85% complete (July 2026).
 
 ---
 
 ## Part 1 — UI/UX improvements
 
-### Phase A — Quick wins (1–2 weeks)
+### Phase A — Quick wins (1–2 weeks) ✅ *Mostly complete*
 
 *High impact, low effort. Polish what exists.*
 
@@ -59,7 +62,7 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 
 ---
 
-### Phase B — Core experience (3–5 weeks)
+### Phase B — Core experience (3–5 weeks) ✅ *Mostly complete*
 
 *Make daily use feel modern and fast.*
 
@@ -101,14 +104,14 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 
 #### 10. Notification UX
 
-- Real-time feel: WebSocket or SSE instead of 60s polling.
+- ~~Real-time feel: WebSocket or SSE instead of 60s polling.~~ **Done** — SSE `/notifications/stream` with 60s polling fallback.
 - Group notifications ("3 comments on ALP-12").
-- Mark as read on view; notification preferences page.
-- Deep-link directly to issue key URL (`/projects/1/issue/ALP-12`).
+- ~~Mark as read on view; notification preferences page.~~ **Done** — preferences page + in-app type toggles.
+- ~~Deep-link directly to issue key URL (`/projects/1/issue/ALP-12`).~~ **Done**
 
 ---
 
-### Phase C — Premium polish (6–10 weeks)
+### Phase C — Premium polish (6–10 weeks) 🔄 *In progress*
 
 *Differentiation and enterprise feel.*
 
@@ -148,27 +151,27 @@ Grouped by value and fit with the current architecture.
 
 ### Tier 1 — High value, builds on existing backend
 
-| Feature | Why | Effort |
-|---------|-----|--------|
-| **Issue assignee and labels** | Backend has assignee; add labels/tags for filtering | Medium |
-| **Saved filters and views** | Extend `IssueFilterBar` — save "My high priority" views | Medium |
-| **Sprint ceremonies UI** | Start/complete sprint, burndown chart (`SprintStatus` exists) | Medium |
-| **Project templates** | Software / Marketing / Ops templates with default columns | Low |
-| **Bulk actions** | Multi-select issues → assign, move sprint, change status | Medium |
-| **Export** | CSV export of issues, project summary PDF | Low |
-| **Audit log (tenant)** | Activity feed exists — expose admin audit page | Medium |
-| **Workspace settings** | Admin page: branding, default workflow, invite policy | Medium |
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **Issue assignee and labels** | Done | Labels column + API, filter bar, create modal, card chips |
+| **Saved filters and views** | Done | `IssueFilterBar` saved views in localStorage |
+| **Sprint ceremonies UI** | Done | Start/complete + `SprintBurndownChart` |
+| **Project templates** | Done | Blank, software, marketing, and operations presets in create modal |
+| **Bulk actions** | Done | Multi-select backlog → change status |
+| **Export** | Done | CSV export from project detail |
+| **Audit log (tenant)** | Done | Workspace audit page + `GET /activity/workspace` |
+| **Workspace settings** | Done | Admin page + `PATCH /tenants/{id}/branding` |
 
 ### Tier 2 — Platform and master-app capabilities
 
-| Feature | Why | Effort |
-|---------|-----|--------|
-| **Plan limits enforcement** | FREE/PREMIUM/ENTERPRISE enums exist but no enforcement UI | Medium |
-| **Usage dashboard per tenant** | Users, projects, storage, API calls | Medium |
-| **Tenant impersonation** | Master admin "login as tenant admin" for support | High |
-| **Provisioning status** | Show provisioning progress (DB create, schema, email) | Medium |
-| **Platform audit log** | Who created/suspended/deleted tenants | Medium |
-| **Billing hooks (Stripe)** | Plan upgrade, seat limits, invoices | High |
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **Plan limits enforcement** | Done | `PlanLimits` on project + user creation; shown in workspace settings |
+| **Usage dashboard per tenant** | Done | Master drawer: users, projects, issues, active sprints, plan limit meters |
+| **Tenant impersonation** | Not started | Master admin "login as tenant admin" for support |
+| **Provisioning status** | Not started | Show provisioning progress (DB create, schema, email) |
+| **Platform audit log** | Done | `GET /tenants/audit-logs` + master audit page |
+| **Billing hooks (Stripe)** | Not started | Plan upgrade, seat limits, invoices |
 
 ### Tier 3 — Collaboration and workflow depth
 
@@ -195,36 +198,36 @@ Grouped by value and fit with the current architecture.
 
 ## Recommended 12-week roadmap
 
-### Month 1 — Trust and polish
+### Month 1 — Trust and polish ✅
 
-1. Shared `ConfirmDialog`, form components, toast in master-app
-2. Kanban drag UX + issue panel tabs
-3. Master tenant detail drawer + working search
-4. ErrorBoundary + consistent loading states
+1. ~~Shared `ConfirmDialog`, form components, toast in master-app~~ **Done**
+2. ~~Kanban drag UX + issue panel tabs~~ **Done**
+3. ~~Master tenant detail drawer + working search~~ **Done**
+4. ~~ErrorBoundary + consistent loading states~~ **Done**
 
-### Month 2 — Productivity
+### Month 2 — Productivity ✅
 
-5. Labels, saved filters, bulk actions
-6. Sprint start/complete + burndown
-7. Workspace settings (branding, defaults)
-8. Notification deep-links + preferences
+5. ~~Labels, saved filters, bulk actions~~ **Done**
+6. ~~Sprint start/complete + burndown~~ **Done**
+7. ~~Workspace settings (branding, defaults)~~ **Done**
+8. ~~Notification deep-links~~ **Done**; ~~notification preferences~~ **Done**
 
-### Month 3 — Platform scale
+### Month 3 — Platform scale ✅
 
-9. Plan limits per tier
-10. Per-tenant usage metrics
-11. Audit logs (master + tenant)
-12. Real-time notifications (WebSocket)
+9. ~~Plan limits per tier~~ **Done**
+10. ~~Per-tenant usage metrics~~ **Done**
+11. ~~Platform audit log~~ **Done**; ~~tenant audit log~~ **Done**
+12. ~~Real-time notifications (SSE)~~ **Done** (WebSocket/gateway streaming deferred)
 
 ### Timeline overview
 
-| Phase | Focus | Duration |
-|-------|--------|----------|
-| A | Design system cleanup, ConfirmDialog, form patterns | Weeks 1–3 |
-| B | Kanban polish, master app parity, mobile pass | Weeks 4–7 |
-| C | Branding, onboarding, accessibility, performance | Weeks 8–12 |
-| Features v1 | Labels, sprint ceremonies, workspace settings | Weeks 6–9 |
-| Platform v1 | Plan limits, usage dashboard, real-time notifications | Weeks 10–12 |
+| Phase | Focus | Status |
+|-------|--------|--------|
+| A | Design system cleanup, ConfirmDialog, form patterns | ~95% complete |
+| B | Kanban polish, master app parity, mobile pass | ~90% complete |
+| C | Branding, onboarding, accessibility, performance | ~45% complete |
+| Features v1 | Labels, sprint ceremonies, workspace settings | ~90% complete |
+| Platform v1 | Plan limits, usage dashboard, real-time notifications | ~90% complete |
 
 ---
 
@@ -252,15 +255,15 @@ Grouped by value and fit with the current architecture.
 
 ---
 
-## Recommended first builds
+## Recommended next builds
 
-Highest UX lift with reasonable effort:
+Highest value remaining work:
 
-1. **Shared `ConfirmDialog` + form component library** — removes the biggest UX inconsistency today
-2. **Kanban quick actions + better issue panel** — core daily workflow
-3. **Workspace settings + branding** — uses data already collected at tenant provision
-4. **Sprint burndown + ceremony buttons** — makes sprint feature feel complete
-5. **Master tenant detail + usage** — makes platform admin useful beyond a table
+1. **Stripe billing + seat upgrades** — monetize plan tiers already enforced in code
+2. **Notification grouping** — collapse related alerts ("3 comments on ALP-12")
+3. **GitHub/Slack integrations** — tier 3 collaboration depth
+4. **Custom workflows and epics** — beyond TODO → IN_PROGRESS → DONE
+5. **Gateway SSE streaming proxy** — live notifications through API gateway
 
 ---
 

@@ -292,6 +292,9 @@ public class TenantService {
     long totalUsers = 0;
     long activeUsers = 0;
     long pendingUsers = 0;
+    long totalProjects = 0;
+    long totalIssues = 0;
+    long activeSprints = 0;
 
     try {
       JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
@@ -302,11 +305,19 @@ public class TenantService {
       Long pending =
           tenantJdbc.queryForObject(
               "SELECT COUNT(*) FROM users WHERE status = 'PENDING'", Long.class);
+      Long projects = tenantJdbc.queryForObject("SELECT COUNT(*) FROM projects", Long.class);
+      Long issues = tenantJdbc.queryForObject("SELECT COUNT(*) FROM issues", Long.class);
+      Long sprints =
+          tenantJdbc.queryForObject(
+              "SELECT COUNT(*) FROM sprints WHERE status = 'ACTIVE'", Long.class);
       totalUsers = total != null ? total : 0;
       activeUsers = active != null ? active : 0;
       pendingUsers = pending != null ? pending : 0;
+      totalProjects = projects != null ? projects : 0;
+      totalIssues = issues != null ? issues : 0;
+      activeSprints = sprints != null ? sprints : 0;
     } catch (Exception e) {
-      log.warn("Could not load user stats for tenant {}: {}", tenant.getDomain(), e.getMessage());
+      log.warn("Could not load usage stats for tenant {}: {}", tenant.getDomain(), e.getMessage());
     }
 
     return TenantDetailResponse.builder()
@@ -326,6 +337,9 @@ public class TenantService {
         .totalUsers(totalUsers)
         .activeUsers(activeUsers)
         .pendingUsers(pendingUsers)
+        .totalProjects(totalProjects)
+        .totalIssues(totalIssues)
+        .activeSprints(activeSprints)
         .build();
   }
 

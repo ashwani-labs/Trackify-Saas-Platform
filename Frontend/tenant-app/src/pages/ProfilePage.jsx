@@ -4,6 +4,7 @@ import { Lock, AlertCircle, Camera, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '../utils/axios';
 import { PageHeader, Button, Input, Badge, PasswordStrength } from '@trackify/shared';
+import { Link } from 'react-router-dom';
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -141,6 +142,12 @@ const ProfilePage = () => {
             <div className="form-group">
               <label className="form-label">Workspace domain</label>
               <div className="domain-display">{tenantDomain}.trackify.com</div>
+            </div>
+
+            <div className="form-group">
+              <Link to="/notification-preferences" className="workspace-settings-links__item">
+                Notification preferences
+              </Link>
             </div>
           </div>
         </section>

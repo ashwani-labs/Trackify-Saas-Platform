@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { PageHeader, Input, Button, Alert, Badge } from '@trackify/shared';
+import { Link } from 'react-router-dom';
 import { useFormFields } from '@trackify/shared';
 import { updateWorkspaceBranding } from '../services/workspaceApi';
 import { setWorkspaceBranding } from '../features/auth/authSlice';
@@ -119,6 +120,15 @@ const WorkspaceSettingsPage = () => {
           </div>
           <div className="stat-value">{planInfo.projects}</div>
         </div>
+      </div>
+
+      <div className="workspace-settings-links card">
+        <Link to="/workspace-audit" className="workspace-settings-links__item">
+          View workspace audit log
+        </Link>
+        <Link to="/notification-preferences" className="workspace-settings-links__item">
+          Notification preferences
+        </Link>
       </div>
 
       <div className="card" style={{ padding: '1.5rem' }}>

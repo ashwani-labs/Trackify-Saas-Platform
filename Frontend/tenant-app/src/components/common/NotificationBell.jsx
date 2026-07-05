@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import {
   fetchNotifications,
@@ -10,6 +10,7 @@ import {
 } from '../../features/notifications/notificationSlice';
 import { useNotificationStream } from '../../hooks/useNotificationStream';
 import { setSelectedIssue } from '../../features/issues/issueSlice';
+import { isNotificationTypeEnabled } from '../../utils/notificationPreferences';
 
 const NOTIFICATION_TYPE_LABELS = {
   ISSUE_ASSIGNED: 'Assignment',
@@ -25,6 +26,11 @@ const NotificationBell = () => {
   const [open, setOpen] = useState(false);
 
   const { items, unreadCount, loading } = useSelector((s) => s.notifications);
+
+  const visibleItems = useMemo(
+    () => items.filter((n) => isNotificationTypeEnabled(n.type)),
+    [items]
+  );
 
   useNotificationStream();
 
@@ -119,21 +125,26 @@ const NotificationBell = () => {
             <span className="search-results__section" style={{ margin: 0 }}>
               Notifications
             </span>
-            {unreadCount > 0 && (
-              <button type="button" className="btn btn--ghost btn--sm" onClick={handleMarkAllRead}>
-                Mark all read
-              </button>
-            )}
+            <div className="notification-panel__header-actions">
+              <Link to="/notification-preferences" className="btn btn--ghost btn--sm" onClick={() => setOpen(false)}>
+                Preferences
+              </Link>
+              {unreadCount > 0 && (
+                <button type="button" className="btn btn--ghost btn--sm" onClick={handleMarkAllRead}>
+                  Mark all read
+                </button>
+              )}
+            </div>
           </div>
 
           {loading && <div className="search-results__empty">Loading…</div>}
 
-          {!loading && items.length === 0 && (
+          {!loading && visibleItems.length === 0 && (
             <div className="search-results__empty">No notifications yet</div>
           )}
 
           {!loading &&
-            items.map((n) => (
+            visibleItems.map((n) => (
               <button
                 key={n.id}
                 type="button"

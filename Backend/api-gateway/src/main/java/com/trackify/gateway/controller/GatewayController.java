@@ -48,6 +48,7 @@ public class GatewayController {
       targetBaseUrl = projectUrl;
     } else if (path.startsWith("/projects")
         || path.startsWith("/issues")
+        || path.startsWith("/activity")
         || path.startsWith("/search")
         || path.startsWith("/notifications")
         || path.startsWith("/dashboard")) {
