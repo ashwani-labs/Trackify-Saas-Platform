@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchDashboard } from '../features/dashboard/dashboardSlice';
@@ -28,7 +28,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { PageHeader, Button, Alert, OnboardingChecklist, ROLES } from '@trackify/shared';
+import { PageHeader, Button, Alert, OnboardingChecklist, ROLES, Select } from '@trackify/shared';
 import MyOpenIssuesWidget from '../components/dashboard/MyOpenIssuesWidget';
 import RecentActivityWidget from '../components/dashboard/RecentActivityWidget';
 import RecentProjectsWidget from '../components/dashboard/RecentProjectsWidget';
@@ -49,6 +49,19 @@ const PRIORITY_COLORS = {
   URGENT: 'var(--danger)',
 };
 
+const DATE_RANGE_OPTIONS = [
+  { value: '', label: 'All time' },
+  { value: '7', label: 'Last 7 days' },
+  { value: '30', label: 'Last 30 days' },
+  { value: '90', label: 'Last 90 days' },
+];
+
+const STATUS_CHART_MAP = {
+  'To Do': 'TODO',
+  'In Progress': 'IN_PROGRESS',
+  Done: 'DONE',
+};
+
 const DashboardPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -56,6 +69,7 @@ const DashboardPage = () => {
   const { data: dashboard, isLoading, error } = useSelector((s) => s.dashboard);
   const { allUsersTotalElements, isLoading: usersLoading } = useSelector((s) => s.users);
   const isAdmin = user?.role === ROLES.ADMIN;
+  const [chartDays, setChartDays] = useState('');
 
   const stats = dashboard?.summary;
   const tenantUrl = getTenantWorkspaceBaseUrl(tenantDomain);
@@ -67,8 +81,9 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchDashboard());
-  }, [dispatch]);
+    const days = chartDays ? Number(chartDays) : undefined;
+    dispatch(fetchDashboard(days));
+  }, [dispatch, chartDays]);
 
   useEffect(() => {
     if (isAdmin && tenantId) {
@@ -163,20 +178,42 @@ const DashboardPage = () => {
       value: dashboard?.assignedToMeCount ?? 0,
       icon: <ListTodo size={18} />,
       accent: 'primary',
+      onClick: () => navigate('/projects'),
     },
     {
       label: 'Active sprints',
       value: dashboard?.activeSprintCount ?? 0,
       icon: <Zap size={18} />,
       accent: 'warning',
+      onClick: () => navigate('/projects'),
     },
     {
       label: 'Unread alerts',
       value: dashboard?.unreadNotifications ?? 0,
       icon: <Bell size={18} />,
       accent: 'accent',
+      onClick: () => navigate('/notification-preferences'),
     },
   ];
+
+  const openProjectFilter = (params) => {
+    const project = dashboard?.recentProjects?.[0];
+    if (project) {
+      const query = new URLSearchParams(params).toString();
+      navigate(`/projects/${project.id}${query ? `?${query}` : ''}`);
+      return;
+    }
+    navigate('/projects');
+  };
+
+  const handleStatusChartClick = (entry) => {
+    const status = STATUS_CHART_MAP[entry?.name];
+    if (status) openProjectFilter({ status });
+  };
+
+  const handlePriorityChartClick = (entry) => {
+    if (entry?.name) openProjectFilter({ priority: entry.name });
+  };
 
   const issueDistributionData = [
     { name: 'To Do', value: stats?.todoCount || 0, color: 'var(--chart-todo)' },
@@ -205,6 +242,14 @@ const DashboardPage = () => {
         subtitle="Track your team's progress and manage project deliverables."
         actions={
           <>
+            <Select
+              id="dashboard-chart-days"
+              label="Chart range"
+              value={chartDays}
+              onChange={(e) => setChartDays(e.target.value)}
+              options={DATE_RANGE_OPTIONS}
+              className="dashboard-range-select"
+            />
             <Button onClick={() => navigate('/projects')}>Browse Projects</Button>
             {user?.role === 'ADMIN' && (
               <Button variant="secondary" onClick={() => navigate('/team')}>
@@ -263,6 +308,7 @@ const DashboardPage = () => {
         </div>
       )}
 
+      {isAdmin && (
       <div className="stats-grid">
         {statCards.map((card) => (
           <div key={card.label} className={`stat-card stat-card--${card.accent}`}>
@@ -281,6 +327,7 @@ const DashboardPage = () => {
           </div>
         ))}
       </div>
+      )}
 
       <div className="stats-grid stats-grid--insights">
         {insightCards.map((card) => {
@@ -326,6 +373,7 @@ const DashboardPage = () => {
         <RecentActivityWidget activity={dashboard?.recentActivity} isLoading={isLoading} />
       </div>
 
+      {isAdmin && (
       <div className="dashboard-grid">
         <div className="card chart-card">
           <h3 className="chart-title">Issue Status Distribution</h3>
@@ -333,7 +381,12 @@ const DashboardPage = () => {
             {isLoading ? (
               <div className="skeleton chart-empty" />
             ) : !hasIssueChartData ? (
-              <div className="chart-empty">No issues yet.</div>
+              <div className="chart-empty">
+                <p>No issues yet.</p>
+                <Button size="sm" onClick={() => navigate('/projects')}>
+                  Create a project
+                </Button>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -343,6 +396,8 @@ const DashboardPage = () => {
                     outerRadius={90}
                     paddingAngle={4}
                     dataKey="value"
+                    onClick={(_, index) => handleStatusChartClick(issueDistributionData[index])}
+                    style={{ cursor: 'pointer' }}
                   >
                     {issueDistributionData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -366,7 +421,12 @@ const DashboardPage = () => {
             {isLoading ? (
               <div className="skeleton chart-empty" />
             ) : !hasPriorityChartData ? (
-              <div className="chart-empty">No priority data yet.</div>
+              <div className="chart-empty">
+                <p>No priority data yet.</p>
+                <Button size="sm" onClick={() => navigate('/projects')}>
+                  Go to projects
+                </Button>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={priorityData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
@@ -379,7 +439,14 @@ const DashboardPage = () => {
                   />
                   <YAxis hide allowDecimals={false} />
                   <Tooltip cursor={{ fill: 'transparent' }} contentStyle={CHART_TOOLTIP_STYLE} />
-                  <Bar dataKey="count" name="Issues" radius={[4, 4, 0, 0]} barSize={36}>
+                  <Bar
+                    dataKey="count"
+                    name="Issues"
+                    radius={[4, 4, 0, 0]}
+                    barSize={36}
+                    onClick={(entry) => handlePriorityChartClick(entry)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     {priorityData.map((entry) => (
                       <Cell key={entry.name} fill={entry.color} />
                     ))}
@@ -390,6 +457,7 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+      )}
 
       <RecentProjectsWidget projects={dashboard?.recentProjects} isLoading={isLoading} />
 

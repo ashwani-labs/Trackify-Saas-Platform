@@ -78,6 +78,19 @@ const DashboardLayout = ({ children }) => {
 
   const filteredMenu = menuItems.filter((item) => !item.adminOnly || user?.role === ROLES.ADMIN);
 
+  const prefetchRoute = (path) => {
+    const loaders = {
+      '/dashboard': () => import('../pages/DashboardPage.jsx'),
+      '/projects': () => import('../pages/ProjectsPage.jsx'),
+      '/team': () => import('../pages/TeamPage.jsx'),
+      '/pending-users': () => import('../pages/UserApprovalPage.jsx'),
+      '/workspace-settings': () => import('../pages/WorkspaceSettingsPage.jsx'),
+      '/workspace-audit': () => import('../pages/WorkspaceAuditPage.jsx'),
+      '/profile': () => import('../pages/ProfilePage.jsx'),
+    };
+    loaders[path]?.().catch(() => {});
+  };
+
   useEffect(() => {
     if (activeProject?.id) {
       trackVisit({
@@ -218,6 +231,7 @@ const DashboardLayout = ({ children }) => {
                 to={item.path}
                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                 onClick={() => setMobileOpen(false)}
+                onMouseEnter={() => prefetchRoute(item.path)}
               >
                 <span>{item.icon}</span>
                 {!collapsed && <span>{item.name}</span>}

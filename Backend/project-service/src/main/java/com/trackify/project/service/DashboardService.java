@@ -16,6 +16,7 @@ import com.trackify.project.repository.ActivityEventRepository;
 import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
 import com.trackify.project.repository.SprintRepository;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -43,11 +44,16 @@ public class DashboardService {
   private final NotificationService notificationService;
 
   public DashboardResponse getDashboard(Long userId, String role) {
+    return getDashboard(userId, role, null);
+  }
+
+  public DashboardResponse getDashboard(Long userId, String role, Integer days) {
     boolean isAdmin = isAdminRole(role);
     List<Long> projectIds =
         isAdmin ? Collections.emptyList() : projectRepository.findProjectIdsByUserId(userId);
 
-    ProjectStatsResponse summary = projectService.getProjectStats(userId, role);
+    LocalDateTime since = days != null && days > 0 ? LocalDateTime.now().minusDays(days) : null;
+    ProjectStatsResponse summary = buildSummary(isAdmin, projectIds, since);
     long unreadNotifications = notificationService.getUnreadCount(userId);
     long assignedToMeCount =
         issueRepository.countByAssigneeIdAndStatusNot(userId, IssueStatus.DONE);
@@ -58,11 +64,63 @@ public class DashboardService {
         .unreadNotifications(unreadNotifications)
         .assignedToMeCount(assignedToMeCount)
         .activeSprintCount(activeSprintCount)
-        .priorityBreakdown(buildPriorityBreakdown(isAdmin, projectIds))
+        .priorityBreakdown(buildPriorityBreakdown(isAdmin, projectIds, since))
         .myOpenIssues(loadMyOpenIssues(userId))
-        .recentActivity(loadRecentActivity(isAdmin, projectIds))
+        .recentActivity(loadRecentActivity(isAdmin, projectIds, since))
         .recentProjects(loadRecentProjects(isAdmin, projectIds, userId, role))
         .build();
+  }
+
+  private ProjectStatsResponse buildSummary(
+      boolean isAdmin, List<Long> projectIds, LocalDateTime since) {
+    if (since == null) {
+      return projectService.getProjectStatsForScope(isAdmin, projectIds);
+    }
+
+    long totalProjects;
+    long todoCount;
+    long inProgressCount;
+    long doneCount;
+
+    if (isAdmin) {
+      totalProjects = projectRepository.count();
+      todoCount = issueRepository.countByStatusAndUpdatedAtAfter(IssueStatus.TODO, since);
+      inProgressCount =
+          issueRepository.countByStatusAndUpdatedAtAfter(IssueStatus.IN_PROGRESS, since);
+      doneCount = issueRepository.countByStatusAndUpdatedAtAfter(IssueStatus.DONE, since);
+    } else if (projectIds.isEmpty()) {
+      return ProjectStatsResponse.builder()
+          .totalProjects(0)
+          .todoCount(0)
+          .inProgressCount(0)
+          .doneCount(0)
+          .totalIssues(0)
+          .build();
+    } else {
+      totalProjects = projectIds.size();
+      todoCount =
+          issueRepository.countByStatusAndProjectIdInAndUpdatedAtAfter(
+              IssueStatus.TODO, projectIds, since);
+      inProgressCount =
+          issueRepository.countByStatusAndProjectIdInAndUpdatedAtAfter(
+              IssueStatus.IN_PROGRESS, projectIds, since);
+      doneCount =
+          issueRepository.countByStatusAndProjectIdInAndUpdatedAtAfter(
+              IssueStatus.DONE, projectIds, since);
+    }
+
+    long totalIssues = todoCount + inProgressCount + doneCount;
+    return ProjectStatsResponse.builder()
+        .totalProjects(totalProjects)
+        .todoCount(todoCount)
+        .inProgressCount(inProgressCount)
+        .doneCount(doneCount)
+        .totalIssues(totalIssues)
+        .build();
+  }
+
+  private boolean isAdminRole(String role) {
+    return "ADMIN".equalsIgnoreCase(role) || "MASTER".equalsIgnoreCase(role);
   }
 
   private long countActiveSprints(boolean isAdmin, List<Long> projectIds) {
@@ -75,25 +133,37 @@ public class DashboardService {
     return sprintRepository.countByStatusAndProjectIds(SprintStatus.ACTIVE, projectIds);
   }
 
-  private List<PriorityCountItem> buildPriorityBreakdown(boolean isAdmin, List<Long> projectIds) {
+  private List<PriorityCountItem> buildPriorityBreakdown(
+      boolean isAdmin, List<Long> projectIds, LocalDateTime since) {
     return Arrays.stream(IssuePriority.values())
         .map(
             priority ->
                 PriorityCountItem.builder()
                     .priority(priority)
-                    .count(countByPriority(isAdmin, projectIds, priority))
+                    .count(countByPriority(isAdmin, projectIds, priority, since))
                     .build())
         .collect(Collectors.toList());
   }
 
-  private long countByPriority(boolean isAdmin, List<Long> projectIds, IssuePriority priority) {
+  private long countByPriority(
+      boolean isAdmin, List<Long> projectIds, IssuePriority priority, LocalDateTime since) {
+    if (since == null) {
+      if (isAdmin) {
+        return issueRepository.countByPriority(priority);
+      }
+      if (projectIds.isEmpty()) {
+        return 0;
+      }
+      return issueRepository.countByPriorityAndProjectIds(priority, projectIds);
+    }
     if (isAdmin) {
-      return issueRepository.countByPriority(priority);
+      return issueRepository.countByPriorityAndUpdatedAtAfter(priority, since);
     }
     if (projectIds.isEmpty()) {
       return 0;
     }
-    return issueRepository.countByPriorityAndProjectIds(priority, projectIds);
+    return issueRepository.countByPriorityAndProjectIdInAndUpdatedAtAfter(
+        priority, projectIds, since);
   }
 
   private List<DashboardIssueItem> loadMyOpenIssues(Long userId) {
@@ -103,16 +173,24 @@ public class DashboardService {
         .collect(Collectors.toList());
   }
 
-  private List<DashboardActivityItem> loadRecentActivity(boolean isAdmin, List<Long> projectIds) {
+  private List<DashboardActivityItem> loadRecentActivity(
+      boolean isAdmin, List<Long> projectIds, LocalDateTime since) {
     Pageable pageable =
         PageRequest.of(0, RECENT_ACTIVITY_LIMIT, Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<ActivityEvent> page;
     if (isAdmin) {
-      page = activityEventRepository.findAllByOrderByCreatedAtDesc(pageable);
+      page =
+          since == null
+              ? activityEventRepository.findAllByOrderByCreatedAtDesc(pageable)
+              : activityEventRepository.findByCreatedAtAfterOrderByCreatedAtDesc(since, pageable);
     } else if (projectIds.isEmpty()) {
       return Collections.emptyList();
     } else {
-      page = activityEventRepository.findByProjectIdInOrderByCreatedAtDesc(projectIds, pageable);
+      page =
+          since == null
+              ? activityEventRepository.findByProjectIdInOrderByCreatedAtDesc(projectIds, pageable)
+              : activityEventRepository.findByProjectIdInAndCreatedAtAfterOrderByCreatedAtDesc(
+                  projectIds, since, pageable);
     }
     return page.getContent().stream().map(this::mapActivityItem).collect(Collectors.toList());
   }
@@ -156,9 +234,5 @@ public class DashboardService {
         .issueId(event.getIssueId())
         .createdAt(event.getCreatedAt())
         .build();
-  }
-
-  private boolean isAdminRole(String role) {
-    return "ADMIN".equalsIgnoreCase(role) || "MASTER".equalsIgnoreCase(role);
   }
 }

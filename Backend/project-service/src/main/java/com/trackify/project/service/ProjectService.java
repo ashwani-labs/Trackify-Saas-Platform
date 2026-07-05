@@ -67,16 +67,22 @@ public class ProjectService {
   }
 
   public ProjectStatsResponse getProjectStats(Long userId, String role) {
+    boolean isAdmin = "ADMIN".equalsIgnoreCase(role) || "MASTER".equalsIgnoreCase(role);
+    List<Long> projectIds =
+        isAdmin ? List.of() : projectRepository.findProjectIdsByUserId(userId);
+    return getProjectStatsForScope(isAdmin, projectIds);
+  }
+
+  public ProjectStatsResponse getProjectStatsForScope(boolean isAdmin, List<Long> projectIds) {
     long totalProjects, todoCount, inProgressCount, doneCount, totalIssues;
 
-    if ("ADMIN".equalsIgnoreCase(role) || "MASTER".equalsIgnoreCase(role)) {
+    if (isAdmin) {
       totalProjects = projectRepository.count();
       todoCount = issueRepository.countByStatus(IssueStatus.TODO);
       inProgressCount = issueRepository.countByStatus(IssueStatus.IN_PROGRESS);
       doneCount = issueRepository.countByStatus(IssueStatus.DONE);
       totalIssues = todoCount + inProgressCount + doneCount;
     } else {
-      List<Long> projectIds = projectRepository.findProjectIdsByUserId(userId);
       if (projectIds.isEmpty()) {
         return ProjectStatsResponse.builder()
             .totalProjects(0)

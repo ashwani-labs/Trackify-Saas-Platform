@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -24,7 +24,13 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { PageHeader, Button, Badge, EmptyState } from '@trackify/shared';
+import { PageHeader, Button, Badge, EmptyState, Select } from '@trackify/shared';
+
+const MONTH_OPTIONS = [
+  { value: '3', label: 'Last 3 months' },
+  { value: '6', label: 'Last 6 months' },
+  { value: '12', label: 'Last 12 months' },
+];
 
 const CHART_TOOLTIP_STYLE = {
   background: 'var(--bg-surface)',
@@ -42,11 +48,15 @@ const DashboardPage = () => {
   const isLoading = useSelector(selectTenantLoading);
   const isStatsLoading = useSelector(selectTenantStatsLoading);
   const dashboardStats = useSelector(selectDashboardStats);
+  const [chartMonths, setChartMonths] = useState('6');
 
   useEffect(() => {
     dispatch(loadTenants({ page: 0, size: 5 }));
-    dispatch(loadDashboardStats({ months: 6 }));
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(loadDashboardStats({ months: Number(chartMonths) }));
+  }, [dispatch, chartMonths]);
 
   const totalTenants = dashboardStats?.totalTenants ?? 0;
   const activeTenants = dashboardStats?.activeTenants ?? 0;
@@ -115,6 +125,16 @@ const DashboardPage = () => {
         }
         title="Platform Overview"
         subtitle="Real-time insights into global platform health and organizational metrics."
+        actions={
+          <Select
+            id="master-chart-months"
+            label="Chart range"
+            value={chartMonths}
+            onChange={(e) => setChartMonths(e.target.value)}
+            options={MONTH_OPTIONS}
+            className="dashboard-range-select"
+          />
+        }
       />
 
       <section className="stats-grid">

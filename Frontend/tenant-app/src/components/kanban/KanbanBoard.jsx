@@ -93,6 +93,26 @@ const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
     }
   };
 
+  const handleStatusChange = async (issue, status) => {
+    if (issue.status === status) return;
+
+    const previousStatus = issue.status;
+    dispatch(optimisticStatusUpdate({ id: issue.id, status }));
+
+    try {
+      await dispatch(
+        updateIssue({
+          id: issue.id,
+          data: buildUpdatePayload(issue, { status }),
+        })
+      ).unwrap();
+      toast.success(`Moved to ${COLUMNS.find((c) => c.status === status)?.label || status}`);
+    } catch (err) {
+      dispatch(optimisticStatusUpdate({ id: issue.id, status: previousStatus }));
+      toast.error(typeof err === 'string' ? err : 'Failed to update status');
+    }
+  };
+
   const handlePriorityChange = async (issue, priority) => {
     if (issue.priority === priority) return;
 
@@ -166,6 +186,7 @@ const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
                   onDragStart={handleDragStart}
                   onDragEnd={handleDragEnd}
                   onPriorityChange={handlePriorityChange}
+                  onStatusChange={handleStatusChange}
                 />
               ))}
 

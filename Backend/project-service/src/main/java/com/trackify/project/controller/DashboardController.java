@@ -21,12 +21,13 @@ public class DashboardController {
 
   @GetMapping
   public ResponseEntity<ApiResponse<DashboardResponse>> getDashboard(
-      @RequestHeader("Authorization") String authHeader) {
+      @RequestHeader("Authorization") String authHeader,
+      @org.springframework.web.bind.annotation.RequestParam(required = false) Integer days) {
     String token = authHeader.substring(7);
     Long userId = jwtUtil.extractUserId(token);
     String role = jwtUtil.extractRole(token);
     return ResponseEntity.ok(
         ApiResponse.ok(
-            "Dashboard fetched successfully", dashboardService.getDashboard(userId, role)));
+            "Dashboard fetched successfully", dashboardService.getDashboard(userId, role, days)));
   }
 }

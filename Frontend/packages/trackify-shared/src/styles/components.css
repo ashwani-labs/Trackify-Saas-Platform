@@ -729,8 +729,11 @@
 .chart-empty {
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.75rem;
+  text-align: center;
   color: var(--text-muted);
   font-size: 0.875rem;
 }
@@ -1597,6 +1600,43 @@
 .modal-close:hover {
   background: color-mix(in srgb, var(--text-main) 8%, transparent);
   color: var(--text-main);
+}
+
+@media (max-width: 767px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal {
+    max-width: none;
+    max-height: 92vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    animation: modal-sheet-in 0.25s ease-out;
+  }
+
+  .modal-header {
+    padding-top: 1.25rem;
+  }
+
+  .modal-body {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+
+  .modal-footer {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+}
+
+@keyframes modal-sheet-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Dropdown */
@@ -3143,6 +3183,61 @@
 
 .workspace-settings-links__item:hover {
   text-decoration: underline;
+}
+
+.dashboard-range-select {
+  margin: 0;
+  min-width: 9rem;
+}
+
+.dashboard-range-select .form-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.issue-card__status {
+  font-size: 0.65rem;
+  font-weight: 600;
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-main);
+  padding: 0.1rem 0.25rem;
+  max-width: 6.5rem;
+}
+
+.provisioning-steps {
+  padding: 1rem;
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  margin-bottom: 1rem;
+}
+
+.provisioning-steps__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.provisioning-steps__list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.provisioning-steps__item--active {
+  color: var(--primary);
+  font-weight: 600;
 }
 
 .notification-prefs {

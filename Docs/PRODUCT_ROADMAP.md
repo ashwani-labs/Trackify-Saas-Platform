@@ -13,12 +13,12 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 | Area | Today |
 |------|--------|
 | **Master app** | Login, dashboard charts, tenant CRUD, provision modal, tenant search, detail drawer, platform audit log, toasts, `ErrorBoundary` |
-| **Tenant app** | Landing, auth, dashboard widgets + onboarding checklist, projects, Kanban (drag/drop, optimistic updates), backlog/sprints + burndown, team, approvals, profile, global search + keyboard shortcuts, notifications (SSE + polling), workspace settings, mobile bottom nav, saved filters, issue labels |
+| **Tenant app** | Landing, auth, dashboard widgets + onboarding checklist, projects, Kanban (drag/drop, optimistic updates, card status/priority quick-edit), backlog/sprints + burndown, team, approvals, profile, global search + keyboard shortcuts, notifications (SSE + polling + grouping), workspace settings, saved filters, issue labels, per-tenant themes |
 | **Design system** | `@trackify/shared` tokens + components (`Button`, `Input`, `Select`, `ConfirmDialog`, `PasswordStrength`, `KeyboardShortcutsPanel`, skeletons, mobile nav styles) |
 | **Backend** | Multi-tenant auth, projects/issues/sprints, notifications SSE stream, issue labels, plan limits (`FREE`/`PRO`/`ENTERPRISE`), tenant branding PATCH, platform audit log |
-| **Remaining gaps** | Full WCAG audit, gateway SSE streaming proxy, Stripe billing, GitHub/Slack integrations, custom workflows/epics, AI features |
+| **Remaining gaps** | Stripe billing, GitHub/Slack integrations, tenant impersonation, gateway SSE proxy, custom workflows/epics, AI features, @mentions, attachment previews |
 
-> **Implementation tracker:** [ROADMAP_PROGRESS.md](./ROADMAP_PROGRESS.md) — Phase A ~95%, Phase B ~90%, Tier 1 features ~85% complete (July 2026).
+> **Implementation tracker:** [ROADMAP_PROGRESS.md](./ROADMAP_PROGRESS.md) — Phase A ~98%, Phase B ~95%, Phase C ~60%, Tier 1 features ~95% complete (July 2026).
 
 ---
 
@@ -92,20 +92,20 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 
 - Collapsible sidebar (tenant-app has mobile menu; refine touch targets).
 - Kanban horizontal scroll on mobile with snap columns.
-- Bottom nav on mobile: Dashboard | Projects | Search | Notifications | Profile.
-- Modal → full-screen sheet on small viewports.
+- ~~Bottom nav on mobile: Dashboard | Projects | Search | Notifications | Profile.~~ **Removed** — hamburger + top bar used instead.
+- Modal → full-screen sheet on small viewports. **Done**
 
 #### 9. Dashboard personalization
 
 - Drag-and-drop widget layout (My Issues, Activity, Recent Projects).
-- "My work" default view for `USER` role vs admin overview.
-- Date range filter on charts (7d / 30d / 90d).
-- Click-through from chart segments → filtered issue list.
+- "My work" default view for `USER` role vs admin overview. **Done** — non-admin users see widgets + insights; admin charts are admin-only.
+- Date range filter on charts (7d / 30d / 90d). **Done**
+- Click-through from chart segments → filtered issue list. **Done**
 
 #### 10. Notification UX
 
 - ~~Real-time feel: WebSocket or SSE instead of 60s polling.~~ **Done** — SSE `/notifications/stream` with 60s polling fallback.
-- Group notifications ("3 comments on ALP-12").
+- Group notifications ("3 comments on ALP-12"). **Done**
 - ~~Mark as read on view; notification preferences page.~~ **Done** — preferences page + in-app type toggles.
 - ~~Deep-link directly to issue key URL (`/projects/1/issue/ALP-12`).~~ **Done**
 
@@ -117,9 +117,9 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 
 #### 11. Tenant white-labeling
 
-Backend partially supports `primaryColor` and `logoUrl` at provision time.
+Backend supports `brandTheme`, `primaryColor`, and `logoUrl`.
 
-- Apply branding across buttons, sidebar, and auth pages.
+- Apply branding across buttons, sidebar, and auth pages. **Partial** — post-login via `TenantBrandingEffect` + workspace theme picker.
 - Custom subdomain landing (`acme.trackify.io` branded login).
 - Email templates with tenant branding.
 
@@ -138,9 +138,9 @@ Backend partially supports `primaryColor` and `logoUrl` at provision time.
 
 #### 14. Performance UX
 
-- Optimistic updates for Kanban drag, comment post, status change.
+- Optimistic updates for Kanban drag, comment post, status change. **Done**
 - Virtualized lists for large backlogs (100+ issues).
-- Route prefetch on sidebar hover.
+- Route prefetch on sidebar hover. **Done**
 - Stale-while-revalidate for dashboard widgets.
 
 ---
@@ -169,7 +169,7 @@ Grouped by value and fit with the current architecture.
 | **Plan limits enforcement** | Done | `PlanLimits` on project + user creation; shown in workspace settings |
 | **Usage dashboard per tenant** | Done | Master drawer: users, projects, issues, active sprints, plan limit meters |
 | **Tenant impersonation** | Not started | Master admin "login as tenant admin" for support |
-| **Provisioning status** | Not started | Show provisioning progress (DB create, schema, email) |
+| **Provisioning status** | Partial | Step checklist shown during master provision modal submit |
 | **Platform audit log** | Done | `GET /tenants/audit-logs` + master audit page |
 | **Billing hooks (Stripe)** | Not started | Plan upgrade, seat limits, invoices |
 
@@ -223,10 +223,10 @@ Grouped by value and fit with the current architecture.
 
 | Phase | Focus | Status |
 |-------|--------|--------|
-| A | Design system cleanup, ConfirmDialog, form patterns | ~95% complete |
-| B | Kanban polish, master app parity, mobile pass | ~90% complete |
-| C | Branding, onboarding, accessibility, performance | ~45% complete |
-| Features v1 | Labels, sprint ceremonies, workspace settings | ~90% complete |
+| A | Design system cleanup, ConfirmDialog, form patterns | ~98% complete |
+| B | Kanban polish, master app parity, mobile pass | ~95% complete |
+| C | Branding, onboarding, accessibility, performance | ~60% complete |
+| Features v1 | Labels, sprint ceremonies, workspace settings | ~95% complete |
 | Platform v1 | Plan limits, usage dashboard, real-time notifications | ~90% complete |
 
 ---
@@ -260,10 +260,11 @@ Grouped by value and fit with the current architecture.
 Highest value remaining work:
 
 1. **Stripe billing + seat upgrades** — monetize plan tiers already enforced in code
-2. **Notification grouping** — collapse related alerts ("3 comments on ALP-12")
+2. **Tenant impersonation** — master admin support login
 3. **GitHub/Slack integrations** — tier 3 collaboration depth
 4. **Custom workflows and epics** — beyond TODO → IN_PROGRESS → DONE
 5. **Gateway SSE streaming proxy** — live notifications through API gateway
+6. **Branded auth + email templates** — complete white-label onboarding
 
 ---
 

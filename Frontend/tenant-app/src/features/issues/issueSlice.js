@@ -279,10 +279,37 @@ const issueSlice = createSlice({
       .addCase(fetchIssueComments.rejected, (state) => {
         state.isCommentLoading = false;
       })
+      .addCase(addComment.pending, (state, action) => {
+        state.isCommentLoading = true;
+        const { issueId, content } = action.meta.arg;
+        const tempId = `temp-${Date.now()}`;
+        if (!state.comments[issueId]) state.comments[issueId] = [];
+        state.comments[issueId].unshift({
+          id: tempId,
+          content,
+          optimistic: true,
+          createdAt: new Date().toISOString(),
+        });
+        action.meta.tempId = tempId;
+      })
       .addCase(addComment.fulfilled, (state, action) => {
+        state.isCommentLoading = false;
         const { issueId, comment } = action.payload;
         if (!state.comments[issueId]) state.comments[issueId] = [];
-        state.comments[issueId].unshift(comment);
+        const list = state.comments[issueId];
+        const tempIndex = list.findIndex((c) => c.optimistic);
+        if (tempIndex >= 0) {
+          list[tempIndex] = comment;
+        } else {
+          list.unshift(comment);
+        }
+      })
+      .addCase(addComment.rejected, (state, action) => {
+        state.isCommentLoading = false;
+        const issueId = action.meta.arg?.issueId;
+        if (issueId && state.comments[issueId]) {
+          state.comments[issueId] = state.comments[issueId].filter((c) => !c.optimistic);
+        }
       })
       .addCase(addAttachment.pending, (state) => {
         state.isAttachmentLoading = true;

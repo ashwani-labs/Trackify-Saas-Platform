@@ -97,6 +97,20 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
       }
     >
       <form id="create-tenant-form" className="form-stack" onSubmit={handleSubmit}>
+        {isSubmitting && (
+          <div className="provisioning-steps" aria-live="polite">
+            <p className="provisioning-steps__title">Provisioning workspace…</p>
+            <ol className="provisioning-steps__list">
+              <li className="provisioning-steps__item provisioning-steps__item--active">
+                Creating tenant database
+              </li>
+              <li className="provisioning-steps__item">Applying schema migrations</li>
+              <li className="provisioning-steps__item">Creating admin account</li>
+              <li className="provisioning-steps__item">Sending welcome email</li>
+            </ol>
+          </div>
+        )}
+
         {errors.form && (
           <Alert variant="danger" center>
             {errors.form}

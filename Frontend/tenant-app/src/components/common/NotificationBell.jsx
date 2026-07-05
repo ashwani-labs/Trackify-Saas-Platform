@@ -11,6 +11,7 @@ import {
 import { useNotificationStream } from '../../hooks/useNotificationStream';
 import { setSelectedIssue } from '../../features/issues/issueSlice';
 import { isNotificationTypeEnabled } from '../../utils/notificationPreferences';
+import { groupNotifications, getGroupTitle } from '../../utils/groupNotifications';
 
 const NOTIFICATION_TYPE_LABELS = {
   ISSUE_ASSIGNED: 'Assignment',
@@ -31,6 +32,8 @@ const NotificationBell = () => {
     () => items.filter((n) => isNotificationTypeEnabled(n.type)),
     [items]
   );
+
+  const displayItems = useMemo(() => groupNotifications(visibleItems), [visibleItems]);
 
   useNotificationStream();
 
@@ -59,6 +62,25 @@ const NotificationBell = () => {
   const handleOpen = () => {
     setOpen((prev) => !prev);
   };
+
+  const handleSelectGroup = useCallback(
+    async (group) => {
+      const unread = group.items.filter((n) => !n.read);
+      await Promise.all(unread.map((n) => dispatch(markNotificationRead(n.id))));
+      setOpen(false);
+
+      const latest = group.items[0];
+      if (latest.referenceType === 'ISSUE' && latest.projectId) {
+        const issueKey = group.issueKey;
+        if (issueKey) {
+          navigate(`/projects/${latest.projectId}/issue/${issueKey}`);
+          return;
+        }
+        navigate(`/projects/${latest.projectId}`);
+      }
+    },
+    [dispatch, navigate]
+  );
 
   const handleSelect = useCallback(
     async (notification) => {
@@ -144,7 +166,27 @@ const NotificationBell = () => {
           )}
 
           {!loading &&
-            visibleItems.map((n) => (
+            displayItems.map((entry) => {
+              if (entry.kind === 'group') {
+                return (
+                  <button
+                    key={`${entry.issueKey}-${entry.type}`}
+                    type="button"
+                    className={`search-result ${entry.hasUnread ? 'notification-item--unread' : ''}`}
+                    onClick={() => handleSelectGroup(entry)}
+                  >
+                    <div style={{ flex: 1, textAlign: 'left' }}>
+                      <div className="search-result__title">{getGroupTitle(entry)}</div>
+                      <div className="search-result__meta">
+                        {entry.items[0]?.message || 'Open issue to view activity'}
+                      </div>
+                    </div>
+                  </button>
+                );
+              }
+
+              const n = entry.notification;
+              return (
               <button
                 key={n.id}
                 type="button"
@@ -161,7 +203,8 @@ const NotificationBell = () => {
                   {n.message && <div className="search-result__meta">{n.message}</div>}
                 </div>
               </button>
-            ))}
+              );
+            })}
         </div>
       )}
     </div>

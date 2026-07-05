@@ -1,6 +1,7 @@
 package com.trackify.project.repository;
 
 import com.trackify.project.entity.ActivityEvent;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -21,4 +22,10 @@ public interface ActivityEventRepository extends JpaRepository<ActivityEvent, Lo
 
   Page<ActivityEvent> findByProjectIdInOrderByCreatedAtDesc(
       List<Long> projectIds, Pageable pageable);
+
+  Page<ActivityEvent> findByCreatedAtAfterOrderByCreatedAtDesc(
+      LocalDateTime since, Pageable pageable);
+
+  Page<ActivityEvent> findByProjectIdInAndCreatedAtAfterOrderByCreatedAtDesc(
+      List<Long> projectIds, LocalDateTime since, Pageable pageable);
 }

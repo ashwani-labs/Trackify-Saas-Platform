@@ -11,7 +11,15 @@ const PRIORITY_CLASS = {
   LOW: 'issue-card__priority--low',
 };
 
-const IssueCard = ({ issue, isDragging, onDragStart, onDragEnd, onPriorityChange }) => {
+const STATUS_OPTIONS = ['TODO', 'IN_PROGRESS', 'DONE'];
+
+const STATUS_LABELS = {
+  TODO: 'To Do',
+  IN_PROGRESS: 'In Progress',
+  DONE: 'Done',
+};
+
+const IssueCard = ({ issue, isDragging, onDragStart, onDragEnd, onPriorityChange, onStatusChange }) => {
   const dispatch = useDispatch();
   const skipClickRef = useRef(false);
 
@@ -80,6 +88,22 @@ const IssueCard = ({ issue, isDragging, onDragStart, onDragEnd, onPriorityChange
           </div>
         )}
         <div className="issue-footer">
+          <label className="issue-card__priority-label">
+            <span className="sr-only">Status for {issue.title}</span>
+            <select
+              className="issue-card__status"
+              value={issue.status}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => onStatusChange?.(issue, e.target.value)}
+              aria-label={`Status for ${issue.title}`}
+            >
+              {STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>
+                  {STATUS_LABELS[status]}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="issue-card__priority-label">
             <span className="sr-only">Priority for {issue.title}</span>
             <select

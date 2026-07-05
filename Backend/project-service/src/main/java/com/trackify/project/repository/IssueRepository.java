@@ -40,6 +40,28 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
   long countByPriority(IssuePriority priority);
 
+  @Query("SELECT COUNT(i) FROM Issue i WHERE i.status = :status AND i.updatedAt >= :since")
+  long countByStatusAndUpdatedAtAfter(
+      @Param("status") IssueStatus status, @Param("since") java.time.LocalDateTime since);
+
+  @Query(
+      "SELECT COUNT(i) FROM Issue i WHERE i.status = :status AND i.project.id IN :projectIds AND i.updatedAt >= :since")
+  long countByStatusAndProjectIdInAndUpdatedAtAfter(
+      @Param("status") IssueStatus status,
+      @Param("projectIds") List<Long> projectIds,
+      @Param("since") java.time.LocalDateTime since);
+
+  @Query("SELECT COUNT(i) FROM Issue i WHERE i.priority = :priority AND i.updatedAt >= :since")
+  long countByPriorityAndUpdatedAtAfter(
+      @Param("priority") IssuePriority priority, @Param("since") java.time.LocalDateTime since);
+
+  @Query(
+      "SELECT COUNT(i) FROM Issue i WHERE i.priority = :priority AND i.project.id IN :projectIds AND i.updatedAt >= :since")
+  long countByPriorityAndProjectIdInAndUpdatedAtAfter(
+      @Param("priority") IssuePriority priority,
+      @Param("projectIds") List<Long> projectIds,
+      @Param("since") java.time.LocalDateTime since);
+
   @Query(
       "SELECT COUNT(i) FROM Issue i WHERE i.priority = :priority AND i.project.id IN :projectIds")
   long countByPriorityAndProjectIds(

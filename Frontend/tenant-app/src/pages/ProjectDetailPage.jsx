@@ -6,7 +6,7 @@ import {
   fetchProjectMembers,
   fetchProjectActivity,
 } from '../features/projects/projectSlice';
-import { fetchIssuesByProject, fetchIssueByKey, clearIssues } from '../features/issues/issueSlice';
+import { fetchIssuesByProject, fetchIssueByKey, clearIssues, setFilters } from '../features/issues/issueSlice';
 import { fetchSprintsByProject } from '../features/sprints/sprintSlice';
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import CreateIssueModal from '../components/issues/CreateIssueModal';
@@ -80,6 +80,19 @@ const ProjectDetailPage = () => {
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    const priority = searchParams.get('priority');
+    if (status || priority) {
+      dispatch(
+        setFilters({
+          ...(status ? { status } : {}),
+          ...(priority ? { priority } : {}),
+        })
+      );
+    }
+  }, [id, searchParams, dispatch]);
 
   const activeSprint = sprints.find((s) => s.status === 'ACTIVE');
 
