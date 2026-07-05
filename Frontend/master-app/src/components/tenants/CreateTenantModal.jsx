@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { createTenantAsync } from '../../features/tenants/tenantSlice';
 import { Globe, Mail, Briefcase } from 'lucide-react';
 import { Alert, Button, Input, Modal } from '@trackify/shared';
+import toast from 'react-hot-toast';
 
 const INITIAL_FORM = {
   name: '',
@@ -72,6 +73,7 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
     try {
       await dispatch(createTenantAsync(formData)).unwrap();
+      toast.success(`Organization "${formData.name}" provisioned`);
       resetForm();
       onClose();
     } catch (err) {

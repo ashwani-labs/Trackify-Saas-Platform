@@ -6,7 +6,7 @@ import Pagination from '../components/common/Pagination';
 import { Globe, Copy, Search, RefreshCw, UserPlus } from 'lucide-react';
 import { registerUser } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
-import { PageHeader, Button, Input, Modal, Badge, Alert, EmptyState } from '@trackify/shared';
+import { PageHeader, Button, Input, Modal, Badge, Alert, EmptyState, useConfirmDialog } from '@trackify/shared';
 
 const STATUS_VARIANTS = {
   ACTIVE: 'success',
@@ -18,6 +18,7 @@ const TeamPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirm, dialog } = useConfirmDialog();
   const { tenantId, tenantDomain } = useSelector((s) => s.auth);
   const { allUsers, allUsersPage, allUsersTotalPages, allUsersTotalElements, isLoading, error } =
     useSelector((s) => s.users);
@@ -64,13 +65,24 @@ const TeamPage = () => {
     toast.success(`${label} copied!`);
   };
 
-  const handleStatusChange = (userId, status) => {
+  const handleStatusChange = async (userId, status, userName) => {
     const label = status === 'ACTIVE' ? 'activate' : 'deactivate';
-    if (window.confirm(`Are you sure you want to ${label} this user?`)) {
-      dispatch(updateUserStatus({ tenantId, userId, status })).then(() => {
-        dispatch(fetchAllUsers({ tenantId, page: allUsersPage, size: 10 }));
-      });
-    }
+    const confirmed = await confirm({
+      title: `${label.charAt(0).toUpperCase() + label.slice(1)} user?`,
+      message:
+        status === 'ACTIVE'
+          ? `Restore access for ${userName}?`
+          : `Deactivate ${userName}? They will not be able to sign in.`,
+      confirmLabel: label.charAt(0).toUpperCase() + label.slice(1),
+      variant: status === 'ACTIVE' ? 'primary' : 'danger',
+    });
+
+    if (!confirmed) return;
+
+    dispatch(updateUserStatus({ tenantId, userId, status })).then(() => {
+      dispatch(fetchAllUsers({ tenantId, page: allUsersPage, size: 10 }));
+      toast.success(`User ${label}d`);
+    });
   };
 
   const filtered = search
@@ -85,6 +97,7 @@ const TeamPage = () => {
 
   return (
     <div className="page">
+      {dialog}
       <PageHeader
         breadcrumb={
           <>
@@ -214,7 +227,7 @@ const TeamPage = () => {
                             <Button
                               variant="secondary"
                               size="sm"
-                              onClick={() => handleStatusChange(u.id, 'ACTIVE')}
+                              onClick={() => handleStatusChange(u.id, 'ACTIVE', u.fullName || u.email)}
                             >
                               Activate
                             </Button>
@@ -224,7 +237,7 @@ const TeamPage = () => {
                               variant="secondary"
                               size="sm"
                               className="btn--danger-text"
-                              onClick={() => handleStatusChange(u.id, 'INACTIVE')}
+                              onClick={() => handleStatusChange(u.id, 'INACTIVE', u.fullName || u.email)}
                             >
                               Deactivate
                             </Button>

@@ -38,6 +38,18 @@
   z-index: 100;
 }
 
+.master-search {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 2rem;
+}
+
+.master-search__input {
+  height: 32px;
+  font-size: 0.875rem;
+  background-color: transparent;
+}
+
 .page-body {
   padding: 1.5rem 2.5rem;
   max-width: 1400px;

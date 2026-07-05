@@ -4,6 +4,7 @@ import { updateIssue, fetchBacklogIssuesPaged } from '../../features/issues/issu
 import { startSprint, completeSprint } from '../../features/sprints/sprintSlice';
 import Pagination from '../common/Pagination';
 import toast from 'react-hot-toast';
+import { useConfirmDialog } from '@trackify/shared';
 import {
   applyIssueFilters,
   shouldShowBacklogSection,
@@ -86,6 +87,7 @@ const SkeletonRow = () => (
 
 const BacklogView = ({ projectId, issues, onCreateSprint }) => {
   const dispatch = useDispatch();
+  const { confirm, dialog } = useConfirmDialog();
   const { list: sprints } = useSelector((s) => s.sprints);
   const {
     filters,
@@ -128,10 +130,15 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
 
   const handleComplete = async (sprintId) => {
     try {
-      if (window.confirm('Are you sure you want to complete this sprint?')) {
-        await dispatch(completeSprint({ id: sprintId, projectId })).unwrap();
-        toast.success('Sprint completed!');
-      }
+      const confirmed = await confirm({
+        title: 'Complete sprint?',
+        message: 'Incomplete issues will move back to the backlog. You can start a new sprint afterward.',
+        confirmLabel: 'Complete sprint',
+      });
+      if (!confirmed) return;
+
+      await dispatch(completeSprint({ id: sprintId, projectId })).unwrap();
+      toast.success('Sprint completed!');
     } catch (e) {
       toast.error(e.message || 'Cannot complete sprint');
     }
@@ -139,6 +146,7 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
 
   return (
     <div style={{ padding: '24px 0' }}>
+      {dialog}
       <div
         style={{
           display: 'flex',

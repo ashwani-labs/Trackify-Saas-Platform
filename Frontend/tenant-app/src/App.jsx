@@ -5,7 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { store } from './store';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
-import ErrorBoundary from './components/common/ErrorBoundary';
+import { ErrorBoundary } from '@trackify/shared';
 import PageLoader from './components/common/PageLoader';
 import { ROLES } from '@trackify/shared';
 import { ThemeProvider } from './context/ThemeContext';

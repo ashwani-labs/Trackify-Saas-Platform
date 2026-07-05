@@ -4,12 +4,14 @@ import { ROUTES } from '../constants/routes';
 import { useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { useTheme } from '../hooks/useTheme';
+import { useMasterSearch } from '../context/MasterSearchContext';
 import { LayoutDashboard, Users, LogOut, Sun, Moon, Menu, X, Search, Layout } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { theme, toggleTheme } = useTheme();
+  const { query, setQuery } = useMasterSearch();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
@@ -72,29 +74,16 @@ const DashboardLayout = ({ children }) => {
           </nav>
         </div>
 
-        <div className="hide-mobile" style={{ flex: 1, maxWidth: '400px', margin: '0 2rem' }}>
-          <div style={{ position: 'relative', width: '100%' }}>
-            <Search
-              style={{
-                position: 'absolute',
-                left: '0.75rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={14}
-            />
+        <div className="hide-mobile master-search">
+          <div className="input-wrap">
+            <Search className="input-wrap__icon" size={14} aria-hidden />
             <input
-              type="text"
-              className="input-field"
-              placeholder="Search..."
-              style={{
-                paddingLeft: '2.25rem',
-                height: '32px',
-                fontSize: '0.875rem',
-                backgroundColor: 'transparent',
-                border: '2px solid var(--border-main)',
-              }}
+              type="search"
+              className="input input--with-icon master-search__input"
+              placeholder="Search tenants by name, domain, plan..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search tenants"
             />
           </div>
         </div>

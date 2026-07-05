@@ -1,25 +1,35 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createProject } from '../../features/projects/projectSlice';
-import { Briefcase, Key, Database, Loader2 } from 'lucide-react';
-import { Modal, Button, Alert } from '@trackify/shared';
+import { Briefcase, Key, Database } from 'lucide-react';
+import { Modal, Button, Alert, Select, Textarea } from '@trackify/shared';
+import toast from 'react-hot-toast';
+
+const INITIAL_FORM = {
+  name: '',
+  key: '',
+  description: '',
+  category: 'Software',
+};
+
+const CATEGORY_OPTIONS = [
+  { value: 'Software', label: 'Software Engineering' },
+  { value: 'Business', label: 'Business Management' },
+  { value: 'Marketing', label: 'Marketing & Growth' },
+  { value: 'Finance', label: 'Finance & Operations' },
+];
 
 const CreateProjectModal = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.projects);
-  const [formData, setFormData] = useState({
-    name: '',
-    key: '',
-    description: '',
-    category: 'Software',
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === 'name' && !formData.key
+      ...(name === 'name' && !prev.key
         ? {
             key: value
               .substring(0, 3)
@@ -30,56 +40,52 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
     }));
   };
 
+  const handleClose = () => {
+    if (isLoading) return;
+    setFormData(INITIAL_FORM);
+    onClose();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const resultAction = await dispatch(createProject(formData));
     if (createProject.fulfilled.match(resultAction)) {
+      toast.success(`Project "${formData.name}" created`);
+      setFormData(INITIAL_FORM);
       onClose();
-      setFormData({ name: '', key: '', description: '', category: 'Software' });
     }
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="Create New Project"
       footer={
         <>
-          <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
+          <Button type="button" variant="secondary" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button type="submit" form="create-project-form" disabled={isLoading}>
-            {isLoading ? <Loader2 size={18} className="btn-spinner" /> : 'Create Project'}
+          <Button type="submit" form="create-project-form" isLoading={isLoading}>
+            Create Project
           </Button>
         </>
       }
     >
-      <form id="create-project-form" onSubmit={handleSubmit}>
+      <form id="create-project-form" className="form-stack" onSubmit={handleSubmit}>
         {error && <Alert className="page-alert">{error}</Alert>}
 
         <div className="form-group">
           <label className="form-label" htmlFor="name">
-            Project Name *
+            Project name *
           </label>
-          <div style={{ position: 'relative' }}>
-            <Briefcase
-              style={{
-                position: 'absolute',
-                left: '1rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={16}
-              aria-hidden
-            />
+          <div className="input-wrap">
+            <Briefcase className="input-wrap__icon" size={16} aria-hidden />
             <input
               type="text"
               id="name"
               name="name"
-              className="input-field"
-              style={{ paddingLeft: '2.5rem' }}
+              className="input input--with-icon"
               value={formData.name}
               onChange={handleChange}
               placeholder="e.g. Apollo Mission"
@@ -90,26 +96,15 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
 
         <div className="form-group">
           <label className="form-label" htmlFor="key">
-            Project Key *
+            Project key *
           </label>
-          <div style={{ position: 'relative' }}>
-            <Key
-              style={{
-                position: 'absolute',
-                left: '1rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={16}
-              aria-hidden
-            />
+          <div className="input-wrap">
+            <Key className="input-wrap__icon" size={16} aria-hidden />
             <input
               type="text"
               id="key"
               name="key"
-              className="input-field"
-              style={{ paddingLeft: '2.5rem' }}
+              className="input input--with-icon"
               value={formData.key}
               onChange={handleChange}
               placeholder="e.g. APO"
@@ -117,56 +112,28 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
               maxLength="10"
             />
           </div>
-          <small className="form-hint">Used as a prefix for issue IDs (e.g. APO-123).</small>
+          <span className="form-hint">Used as a prefix for issue IDs (e.g. APO-123).</span>
         </div>
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="category">
-            Category
-          </label>
-          <div style={{ position: 'relative' }}>
-            <Database
-              style={{
-                position: 'absolute',
-                left: '1rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-              size={16}
-              aria-hidden
-            />
-            <select
-              id="category"
-              name="category"
-              className="input-field"
-              style={{ paddingLeft: '2.5rem', appearance: 'none' }}
-              value={formData.category}
-              onChange={handleChange}
-            >
-              <option value="Software">Software Engineering</option>
-              <option value="Business">Business Management</option>
-              <option value="Marketing">Marketing & Growth</option>
-              <option value="Finance">Finance & Operations</option>
-            </select>
-          </div>
-        </div>
+        <Select
+          id="category"
+          name="category"
+          label="Category"
+          icon={Database}
+          value={formData.category}
+          onChange={handleChange}
+          options={CATEGORY_OPTIONS}
+        />
 
-        <div className="form-group" style={{ marginBottom: 0 }}>
-          <label className="form-label" htmlFor="description">
-            Description (optional)
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            className="input-field"
-            value={formData.description}
-            onChange={handleChange}
-            rows="3"
-            placeholder="Briefly describe the project goals..."
-            style={{ resize: 'vertical' }}
-          />
-        </div>
+        <Textarea
+          id="description"
+          name="description"
+          label="Description (optional)"
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Briefly describe the project goals..."
+          className="form-group"
+        />
       </form>
     </Modal>
   );

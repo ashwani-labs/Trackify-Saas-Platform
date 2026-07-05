@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 import {
   loadTenants,
   toggleTenantStatus,
@@ -12,11 +13,22 @@ import {
 } from '../features/tenants/tenantSlice';
 import CreateTenantModal from '../components/tenants/CreateTenantModal';
 import Pagination from '../components/common/Pagination';
+import { useMasterSearch } from '../context/MasterSearchContext';
 import { Globe, Activity, RefreshCw, Plus, Trash2 } from 'lucide-react';
-import { PageHeader, Button, Badge, Alert, EmptyState } from '@trackify/shared';
+import { PageHeader, Button, Badge, Alert, EmptyState, useConfirmDialog } from '@trackify/shared';
+
+const matchesSearch = (tenant, query) => {
+  const haystack = [tenant.name, tenant.domain, tenant.plan, tenant.status]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(query);
+};
 
 const TenantManagementPage = () => {
   const dispatch = useDispatch();
+  const { query } = useMasterSearch();
+  const { confirm, dialog } = useConfirmDialog();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const tenants = useSelector(selectAllTenants);
   const isLoading = useSelector(selectTenantLoading);
@@ -24,34 +36,62 @@ const TenantManagementPage = () => {
   const totalPages = useSelector(selectTenantTotalPages);
   const error = useSelector(selectTenantError);
 
+  const normalizedQuery = query.trim().toLowerCase();
+
+  const filteredTenants = useMemo(() => {
+    if (!normalizedQuery) return tenants;
+    return tenants.filter((tenant) => matchesSearch(tenant, normalizedQuery));
+  }, [tenants, normalizedQuery]);
+
   useEffect(() => {
     dispatch(loadTenants({ page: 0, size: 10 }));
   }, [dispatch]);
 
-  const handleToggleStatus = (id, currentStatus) => {
-    const action = currentStatus === 'ACTIVE' ? 'mark as INACTIVE' : 'mark as ACTIVE';
-    const warning =
-      currentStatus === 'ACTIVE'
-        ? '\nNote: This will prevent users from logging in to this organization.'
-        : '';
+  const handleToggleStatus = async (id, currentStatus, name) => {
+    const nextStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const confirmed = await confirm({
+      title: currentStatus === 'ACTIVE' ? 'Suspend organization?' : 'Activate organization?',
+      message:
+        currentStatus === 'ACTIVE'
+          ? `Suspend "${name}"? Users will not be able to log in until the organization is reactivated.`
+          : `Activate "${name}" and restore user access?`,
+      confirmLabel: currentStatus === 'ACTIVE' ? 'Suspend' : 'Activate',
+      variant: currentStatus === 'ACTIVE' ? 'danger' : 'primary',
+    });
 
-    if (window.confirm(`Are you sure you want to ${action} this organization?${warning}`)) {
-      dispatch(toggleTenantStatus({ id, currentStatus }));
+    if (!confirmed) return;
+
+    const result = await dispatch(toggleTenantStatus({ id, currentStatus }));
+    if (toggleTenantStatus.fulfilled.match(result)) {
+      toast.success(`Organization ${nextStatus === 'ACTIVE' ? 'activated' : 'suspended'}`);
+    } else {
+      toast.error(result.payload || 'Failed to update organization status');
     }
   };
 
-  const handleDeleteTenant = (id, name) => {
-    if (
-      window.confirm(
-        `⚠️ PERMANENT DELETION WARNING ⚠️\n\nAre you sure you want to PERMANENTLY delete "${name}"?\n\nThis will drop the organization's database and remove ALL data. This action CANNOT be undone.`
-      )
-    ) {
-      dispatch(deleteTenantAsync(id));
+  const handleDeleteTenant = async (id, name) => {
+    const confirmed = await confirm({
+      title: 'Permanently delete organization?',
+      message: `Delete "${name}" and drop its database?\n\nThis removes ALL organization data. This action cannot be undone.`,
+      confirmLabel: 'Delete permanently',
+      cancelLabel: 'Keep organization',
+      variant: 'danger',
+    });
+
+    if (!confirmed) return;
+
+    const result = await dispatch(deleteTenantAsync(id));
+    if (deleteTenantAsync.fulfilled.match(result)) {
+      toast.success(`"${name}" deleted`);
+    } else {
+      toast.error(result.payload || 'Failed to delete organization');
     }
   };
 
   return (
     <div className="page">
+      {dialog}
+
       <PageHeader
         breadcrumb={
           <>
@@ -68,6 +108,13 @@ const TenantManagementPage = () => {
       />
 
       {error && <Alert className="page-alert">{error}</Alert>}
+
+      {normalizedQuery && (
+        <Alert className="page-alert">
+          Showing {filteredTenants.length} result{filteredTenants.length === 1 ? '' : 's'} for "
+          {query.trim()}"
+        </Alert>
+      )}
 
       <div className="stats-grid">
         <div className="stat-card stat-card--primary">
@@ -119,7 +166,7 @@ const TenantManagementPage = () => {
                   </td>
                 </tr>
               ) : (
-                tenants.map((tenant) => (
+                filteredTenants.map((tenant) => (
                   <tr key={tenant.id}>
                     <td>
                       <div className="org-row">
@@ -148,7 +195,7 @@ const TenantManagementPage = () => {
                         <Button
                           variant="secondary"
                           size="sm"
-                          onClick={() => handleToggleStatus(tenant.id, tenant.status)}
+                          onClick={() => handleToggleStatus(tenant.id, tenant.status, tenant.name)}
                         >
                           {tenant.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
                         </Button>
@@ -167,12 +214,16 @@ const TenantManagementPage = () => {
                   </tr>
                 ))
               )}
-              {tenants.length === 0 && !isLoading && (
+              {filteredTenants.length === 0 && !isLoading && (
                 <tr>
                   <td colSpan={6}>
                     <EmptyState
-                      title="No tenants yet"
-                      description="Create your first organization to get started."
+                      title={normalizedQuery ? 'No matching tenants' : 'No tenants yet'}
+                      description={
+                        normalizedQuery
+                          ? 'Try a different search term or clear the search box.'
+                          : 'Create your first organization to get started.'
+                      }
                     />
                   </td>
                 </tr>
@@ -181,7 +232,7 @@ const TenantManagementPage = () => {
           </table>
         </div>
 
-        {tenants.length > 0 && totalPages > 1 && (
+        {tenants.length > 0 && totalPages > 1 && !normalizedQuery && (
           <div className="card-footer">
             <Pagination
               currentPage={currentPage}

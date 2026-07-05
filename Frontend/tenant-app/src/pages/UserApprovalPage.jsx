@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 import { fetchPendingUsers, updateUserStatus } from '../features/users/userSlice';
 import Pagination from '../components/common/Pagination';
 import { Clock, Mail, RefreshCw, ShieldCheck } from 'lucide-react';
-import { PageHeader, Button, Badge, Alert, EmptyState } from '@trackify/shared';
+import { PageHeader, Button, Badge, Alert, EmptyState, useConfirmDialog } from '@trackify/shared';
 
 const UserApprovalPage = () => {
   const dispatch = useDispatch();
+  const { confirm, dialog } = useConfirmDialog();
   const { tenantId } = useSelector((state) => state.auth);
   const { pendingUsers, currentPage, totalPages, isLoading, error } = useSelector(
     (state) => state.users
@@ -18,15 +20,32 @@ const UserApprovalPage = () => {
     }
   }, [dispatch, tenantId]);
 
-  const handleAction = (userId, status) => {
-    const actionText = status === 'ACTIVE' ? 'approve' : 'reject';
-    if (window.confirm(`Are you sure you want to ${actionText} this user?`)) {
-      dispatch(updateUserStatus({ tenantId, userId, status }));
+  const handleAction = async (userId, status, fullName) => {
+    const isApprove = status === 'ACTIVE';
+    const confirmed = await confirm({
+      title: isApprove ? 'Approve access?' : 'Reject request?',
+      message: isApprove
+        ? `Grant workspace access to ${fullName}?`
+        : `Reject ${fullName}'s request to join this workspace?`,
+      confirmLabel: isApprove ? 'Approve' : 'Reject',
+      variant: isApprove ? 'primary' : 'danger',
+    });
+
+    if (!confirmed) return;
+
+    const result = await dispatch(updateUserStatus({ tenantId, userId, status }));
+    if (updateUserStatus.fulfilled.match(result)) {
+      toast.success(isApprove ? 'User approved' : 'Request rejected');
+      dispatch(fetchPendingUsers({ tenantId, page: currentPage, size: 10 }));
+    } else {
+      toast.error(result.payload || 'Failed to update user status');
     }
   };
 
   return (
     <div className="page">
+      {dialog}
+
       <PageHeader
         breadcrumb={
           <>
@@ -83,11 +102,13 @@ const UserApprovalPage = () => {
                   <Button
                     variant="secondary"
                     className="btn--danger-text"
-                    onClick={() => handleAction(user.id, 'INACTIVE')}
+                    onClick={() => handleAction(user.id, 'INACTIVE', user.fullName)}
                   >
                     Reject
                   </Button>
-                  <Button onClick={() => handleAction(user.id, 'ACTIVE')}>Approve Access</Button>
+                  <Button onClick={() => handleAction(user.id, 'ACTIVE', user.fullName)}>
+                    Approve Access
+                  </Button>
                 </div>
               </div>
             ))}

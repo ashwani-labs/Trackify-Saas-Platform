@@ -7,10 +7,11 @@ import {
   removeProjectMember,
 } from '../../features/projects/projectSlice';
 import { fetchAllUsers } from '../../features/users/userSlice';
-import { Modal, Button, EmptyState } from '@trackify/shared';
+import { Modal, Button, EmptyState, useConfirmDialog } from '@trackify/shared';
 
 const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
   const dispatch = useDispatch();
+  const { confirm, dialog } = useConfirmDialog();
   const { tenantId } = useSelector((s) => s.auth);
   const { members, memberLoading } = useSelector((s) => s.projects);
   const { allUsers, isLoading: usersLoading } = useSelector((s) => s.users);
@@ -45,14 +46,21 @@ const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
     setSelectedUserId('');
   };
 
-  const handleRemoveMember = async (userId) => {
-    if (window.confirm('Are you sure you want to remove this member?')) {
+  const handleRemoveMember = async (userId, userName) => {
+    const confirmed = await confirm({
+      title: 'Remove member?',
+      message: `Remove ${userName || 'this member'} from the project? They will lose access to this workspace.`,
+      confirmLabel: 'Remove member',
+      variant: 'danger',
+    });
+    if (confirmed) {
       await dispatch(removeProjectMember({ projectId, userId }));
     }
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Project Access" className="modal--wide">
+      {dialog}
       <div style={{ marginBottom: '2rem' }}>
         <label className="form-label" htmlFor="member-select">
           Add Member
@@ -153,7 +161,7 @@ const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
                   type="button"
                   className="theme-toggle"
                   style={{ color: 'var(--danger)', width: '32px', height: '32px' }}
-                  onClick={() => handleRemoveMember(member.userId)}
+                  onClick={() => handleRemoveMember(member.userId, member.userName || member.userEmail)}
                   aria-label={`Remove ${member.userName || member.userEmail}`}
                 >
                   <UserMinus size={18} />
