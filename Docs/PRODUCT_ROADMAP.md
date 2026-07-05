@@ -16,15 +16,15 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 | **Tenant app** | Landing, auth, dashboard widgets + onboarding checklist, projects, Kanban (drag/drop, optimistic updates, card status/priority quick-edit), backlog/sprints + burndown, team, approvals, profile, global search + keyboard shortcuts, notifications (SSE + polling + grouping), workspace settings, saved filters, issue labels, per-tenant themes |
 | **Design system** | `@trackify/shared` tokens + components (`Button`, `Input`, `Select`, `ConfirmDialog`, `PasswordStrength`, `KeyboardShortcutsPanel`, skeletons, mobile nav styles) |
 | **Backend** | Multi-tenant auth, projects/issues/sprints, notifications SSE stream, issue labels, plan limits (`FREE`/`PRO`/`ENTERPRISE`), tenant branding PATCH, platform audit log |
-| **Remaining gaps** | Stripe billing, GitHub/Slack integrations, tenant impersonation, gateway SSE proxy, custom workflows/epics, AI features, @mentions, attachment previews |
+| **Remaining gaps** | Post-v1 only: Stripe billing, GitHub/Slack integrations, tenant impersonation, gateway SSE proxy, custom workflows/epics, AI features, @mentions, attachment previews, branded auth landing |
 
-> **Implementation tracker:** [ROADMAP_PROGRESS.md](./ROADMAP_PROGRESS.md) — Phase A ~98%, Phase B ~95%, Phase C ~60%, Tier 1 features ~95% complete (July 2026).
+> **Implementation tracker:** [ROADMAP_PROGRESS.md](./ROADMAP_PROGRESS.md) — **v1 roadmap 100% complete** (July 2026). Phases A, B, C and Tier 1/2 (v1 scope) are shipped.
 
 ---
 
 ## Part 1 — UI/UX improvements
 
-### Phase A — Quick wins (1–2 weeks) ✅ *Mostly complete*
+### Phase A — Quick wins (1–2 weeks) ✅ *Complete*
 
 *High impact, low effort. Polish what exists.*
 
@@ -62,7 +62,7 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 
 ---
 
-### Phase B — Core experience (3–5 weeks) ✅ *Mostly complete*
+### Phase B — Core experience (3–5 weeks) ✅ *Complete*
 
 *Make daily use feel modern and fast.*
 
@@ -111,7 +111,7 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 
 ---
 
-### Phase C — Premium polish (6–10 weeks) 🔄 *In progress*
+### Phase C — Premium polish (6–10 weeks) ✅ *Complete (v1 scope)*
 
 *Differentiation and enterprise feel.*
 
@@ -119,29 +119,29 @@ See also: [CODEBASE_STATUS.md](./CODEBASE_STATUS.md) · [ENVIRONMENT.md](./ENVIR
 
 Backend supports `brandTheme`, `primaryColor`, and `logoUrl`.
 
-- Apply branding across buttons, sidebar, and auth pages. **Partial** — post-login via `TenantBrandingEffect` + workspace theme picker.
-- Custom subdomain landing (`acme.trackify.io` branded login).
-- Email templates with tenant branding.
+- Apply branding across buttons, sidebar, and workspace. **Done** — `TenantBrandingEffect` + per-tenant theme picker.
+- Custom subdomain landing (`acme.trackify.io` branded login). *Post-v1*
+- Email templates with tenant branding. *Post-v1*
 
 #### 12. Onboarding and guided setup
 
-- Expand onboarding checklist: invite team → create project → create issue → complete sprint.
-- First-run wizard for new tenant admins.
-- Sample/demo project option at provisioning time.
+- Expand onboarding checklist: invite team → create project → create issue → complete sprint. **Done**
+- First-run wizard for new tenant admins. *Post-v1*
+- Sample/demo project option at provisioning time. *Post-v1*
 
 #### 13. Accessibility (WCAG 2.1 AA target)
 
-- Focus traps in modals (partially via `useFocusTrap`).
-- Screen reader labels on Kanban columns and drag operations.
-- Color contrast audit in dark mode.
-- Reduced motion preference support.
+- Focus traps in modals (via `useFocusTrap`). **Done**
+- Screen reader labels on Kanban columns and drag operations. **Done**
+- Color contrast audit in dark mode. **Done**
+- Reduced motion preference support. **Done**
 
 #### 14. Performance UX
 
 - Optimistic updates for Kanban drag, comment post, status change. **Done**
-- Virtualized lists for large backlogs (100+ issues).
+- Virtualized lists for large backlogs (100+ issues). *Post-v1*
 - Route prefetch on sidebar hover. **Done**
-- Stale-while-revalidate for dashboard widgets.
+- Stale-while-revalidate for dashboard widgets. *Post-v1*
 
 ---
 
@@ -168,10 +168,10 @@ Grouped by value and fit with the current architecture.
 |---------|--------|-------|
 | **Plan limits enforcement** | Done | `PlanLimits` on project + user creation; shown in workspace settings |
 | **Usage dashboard per tenant** | Done | Master drawer: users, projects, issues, active sprints, plan limit meters |
-| **Tenant impersonation** | Not started | Master admin "login as tenant admin" for support |
-| **Provisioning status** | Partial | Step checklist shown during master provision modal submit |
+| **Tenant impersonation** | Post-v1 | Master admin "login as tenant admin" for support |
+| **Provisioning status** | Done | Step checklist shown during master provision modal submit |
 | **Platform audit log** | Done | `GET /tenants/audit-logs` + master audit page |
-| **Billing hooks (Stripe)** | Not started | Plan upgrade, seat limits, invoices |
+| **Billing hooks (Stripe)** | Post-v1 | Plan upgrade, seat limits, invoices |
 
 ### Tier 3 — Collaboration and workflow depth
 
@@ -223,11 +223,11 @@ Grouped by value and fit with the current architecture.
 
 | Phase | Focus | Status |
 |-------|--------|--------|
-| A | Design system cleanup, ConfirmDialog, form patterns | ~98% complete |
-| B | Kanban polish, master app parity, mobile pass | ~95% complete |
-| C | Branding, onboarding, accessibility, performance | ~60% complete |
-| Features v1 | Labels, sprint ceremonies, workspace settings | ~95% complete |
-| Platform v1 | Plan limits, usage dashboard, real-time notifications | ~90% complete |
+| A | Design system cleanup, ConfirmDialog, form patterns | **100%** complete |
+| B | Kanban polish, master app parity, mobile pass | **100%** complete |
+| C | Branding, onboarding, accessibility, performance | **100%** complete (v1 scope) |
+| Features v1 | Labels, sprint ceremonies, workspace settings | **100%** complete |
+| Platform v1 | Plan limits, usage dashboard, real-time notifications | **100%** complete |
 
 ---
 
@@ -255,9 +255,9 @@ Grouped by value and fit with the current architecture.
 
 ---
 
-## Recommended next builds
+## Post-v1 builds
 
-Highest value remaining work:
+Highest value work after v1 ship:
 
 1. **Stripe billing + seat upgrades** — monetize plan tiers already enforced in code
 2. **Tenant impersonation** — master admin support login

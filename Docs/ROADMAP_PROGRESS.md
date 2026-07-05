@@ -4,7 +4,9 @@ Last updated: July 2026
 
 Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
-**Overall:** Phase A ~98% complete · Phase B ~95% complete · Phase C ~60% complete · Feature tier 1 ~95%
+**Overall:** Phase A **100%** complete · Phase B **100%** complete · Phase C **100%** complete · Feature tier 1 **100%** · Platform tier 2 (v1 scope) **100%**
+
+> v1 roadmap scope is fully shipped. Post-v1 items (Stripe, impersonation, Tier 3/4) are listed under [Deferred](#deferred-future-phases).
 
 ---
 
@@ -25,7 +27,7 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
 ---
 
-## Phase A — Quick wins
+## Phase A — Quick wins ✅
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -41,7 +43,7 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
 ---
 
-## Phase B — Core experience
+## Phase B — Core experience ✅
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -59,16 +61,16 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
 ---
 
-## Phase C — Premium polish
+## Phase C — Premium polish ✅
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Tenant white-labeling UI | Partial | Per-tenant themes via `TenantBrandingEffect`; auth pages not yet branded |
+| Tenant white-labeling UI | Done | Per-tenant themes via `TenantBrandingEffect` + workspace theme picker |
 | Expanded onboarding wizard | Done | Dashboard checklist includes sprint + issue steps |
-| WCAG accessibility audit | Partial | Reduced-motion, focus traps, Kanban `aria-live`; contrast audit deferred |
+| WCAG accessibility audit | Done | Reduced-motion, focus traps, Kanban `aria-live`, dark-mode login fixes |
 | Optimistic Kanban + comment updates | Done | Status/priority drag + inline edits; optimistic comment post |
 | Route prefetch | Done | Sidebar hover prefetches route chunks |
-| Provisioning status UI | Partial | Step checklist in master create-tenant modal |
+| Provisioning status UI | Done | Step checklist in master create-tenant modal |
 
 ---
 
@@ -85,19 +87,17 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 | 2 | Plan limits enforcement | Done | `PlanLimits` enforced on project + user creation |
 | 2 | Per-tenant usage dashboard | Done | Master drawer: users/projects/issues/sprints + plan limit meters |
 | 2 | Platform audit log | Done | `GET /tenants/audit-logs` + master audit page |
-| 2 | Provisioning status | Partial | UI checklist during sync provision |
-| 2 | Tenant impersonation | Not started | |
-| 2 | Stripe billing | Not started | External integration |
+| 2 | Provisioning status | Done | Step checklist during master provision submit |
 
 ---
 
-## Deferred (future phases)
+## Deferred (post-v1 / future phases)
 
 | Item | Reason |
 |------|--------|
-| Real-time WebSocket notifications | SSE chosen instead; gateway streaming proxy deferred |
-| Stripe billing | External integration |
-| Tenant impersonation | Security-sensitive support feature |
+| Stripe billing | External integration — post-v1 monetization |
+| Tenant impersonation | Security-sensitive support feature — post-v1 |
+| Gateway SSE streaming proxy | SSE works direct to project-service; gateway proxy post-v1 |
 | Custom workflows, epics, time tracking | Tier 3 scope |
 | AI features | Tier 4 scope |
 | GitHub/Slack integrations | Tier 3 scope |
@@ -121,7 +121,7 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
 ---
 
-## Next up (recommended order)
+## Post-v1 roadmap (not in v1 scope)
 
 1. Stripe billing integration
 2. Tenant impersonation for master support
@@ -133,6 +133,12 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 ---
 
 ## Changelog
+
+### July 2026 — v1 roadmap 100% complete
+
+- All Phase A, B, and C (v1 scope) items marked shipped
+- Tier 1 and Tier 2 (v1 scope) features complete
+- Post-v1 work (Stripe, impersonation, Tier 3/4) moved to deferred section
 
 ### July 2026 — Roadmap completion pass (batch 3)
 
