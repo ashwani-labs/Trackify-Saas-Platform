@@ -5,6 +5,7 @@ import com.trackify.common.enums.TenantStatus;
 import com.trackify.common.enums.UserStatus;
 import com.trackify.common.exception.AppException;
 import com.trackify.common.plan.PlanLimits;
+import com.trackify.common.theme.TenantThemes;
 import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantDashboardStatsResponse;
@@ -86,6 +87,7 @@ public class TenantService {
     String dbPassword = "pw_" + System.currentTimeMillis();
     String adminPassword = UUID.randomUUID().toString().substring(0, 10);
 
+    String brandTheme = TenantThemes.normalize(request.getTheme());
     Tenant tenant =
         Tenant.builder()
             .name(request.getName())
@@ -100,7 +102,8 @@ public class TenantService {
             .dbPassword(dbPassword)
             .companyName(request.getCompanyName())
             .logoUrl(request.getLogoUrl())
-            .primaryColor(request.getPrimaryColor() != null ? request.getPrimaryColor() : "#6366f1")
+            .brandTheme(brandTheme)
+            .primaryColor(TenantThemes.primaryColorFor(brandTheme))
             .build();
 
     tenant = tenantRepository.save(tenant);
@@ -157,7 +160,11 @@ public class TenantService {
       }
       tenant.setLogoUrl(logoUrl.isEmpty() ? null : logoUrl);
     }
-    if (request.getPrimaryColor() != null) {
+    if (request.getTheme() != null) {
+      String theme = TenantThemes.normalize(request.getTheme());
+      tenant.setBrandTheme(theme);
+      tenant.setPrimaryColor(TenantThemes.primaryColorFor(theme));
+    } else if (request.getPrimaryColor() != null) {
       String color = request.getPrimaryColor().trim();
       if (!color.matches("^#[0-9A-Fa-f]{6}$")) {
         throw AppException.badRequest("Primary color must be a hex value like #2563eb");
@@ -331,6 +338,7 @@ public class TenantService {
         .companyName(tenant.getCompanyName())
         .logoUrl(tenant.getLogoUrl())
         .primaryColor(tenant.getPrimaryColor())
+        .brandTheme(tenant.getBrandTheme())
         .dbName(tenant.getDbName())
         .dbHost(tenant.getDbHost())
         .dbPort(tenant.getDbPort())
@@ -689,6 +697,7 @@ public class TenantService {
         .companyName(tenant.getCompanyName())
         .logoUrl(tenant.getLogoUrl())
         .primaryColor(tenant.getPrimaryColor())
+        .brandTheme(tenant.getBrandTheme())
         .build();
   }
 

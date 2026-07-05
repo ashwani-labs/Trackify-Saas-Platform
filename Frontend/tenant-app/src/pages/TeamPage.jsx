@@ -7,6 +7,7 @@ import { Globe, Copy, Search, RefreshCw, UserPlus } from 'lucide-react';
 import { registerUser } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
 import { PageHeader, Button, Input, Modal, Badge, Alert, EmptyState, useConfirmDialog } from '@trackify/shared';
+import { getTenantRegisterUrl, copyToClipboard } from '../utils/workspaceUrl';
 
 const STATUS_VARIANTS = {
   ACTIVE: 'success',
@@ -27,7 +28,7 @@ const TeamPage = () => {
   const [formData, setFormData] = useState({ fullName: '', email: '', password: '' });
   const [isAdding, setIsAdding] = useState(false);
 
-  const tenantUrl = `http://${tenantDomain}.trackify.com:5174`;
+  const registerUrl = getTenantRegisterUrl(tenantDomain);
 
   useEffect(() => {
     if (tenantId) dispatch(fetchAllUsers({ tenantId, page: 0, size: 10 }));
@@ -60,9 +61,13 @@ const TeamPage = () => {
     }
   };
 
-  const copyToClipboard = (text, label) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} copied!`);
+  const handleCopyLink = async () => {
+    const copied = await copyToClipboard(registerUrl);
+    if (copied) {
+      toast.success('Registration link copied');
+    } else {
+      toast.error('Could not copy link');
+    }
   };
 
   const handleStatusChange = async (userId, status, userName) => {
@@ -123,6 +128,7 @@ const TeamPage = () => {
         }
       />
 
+      <div className="team-page-sections">
       {isSoloWorkspace && (
         <EmptyState
           icon={<UserPlus size={40} />}
@@ -133,30 +139,29 @@ const TeamPage = () => {
               Invite Your First Teammate
             </Button>
           }
-          className="card--spaced"
         />
       )}
 
-      <div className="card team-banner">
-        <div className="team-banner__content">
-          <Globe className="team-banner__icon" size={20} aria-hidden />
-          <div>
-            <span className="team-banner__label">Self-registration Link:</span>
-            <code className="team-banner__link">{tenantUrl}/register</code>
+        <div className="card team-banner">
+          <div className="team-banner__content">
+            <Globe className="team-banner__icon" size={20} aria-hidden />
+            <div>
+              <span className="team-banner__label">Self-registration Link:</span>
+              <code className="team-banner__link">{registerUrl}</code>
+            </div>
           </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="team-banner__copy"
+            leftIcon={<Copy size={12} />}
+            onClick={handleCopyLink}
+          >
+            Copy
+          </Button>
         </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="team-banner__copy"
-          leftIcon={<Copy size={12} />}
-          onClick={() => copyToClipboard(`${tenantUrl}/register`, 'Link')}
-        >
-          Copy
-        </Button>
-      </div>
 
-      <div className="card card--flush">
+        <div className="card card--flush">
         <div className="card-section-header">
           <h2 className="card-section-title">Members ({allUsersTotalElements ?? 0})</h2>
           <div className="search-field">
@@ -268,6 +273,7 @@ const TeamPage = () => {
             />
           </div>
         )}
+      </div>
       </div>
 
       <Modal

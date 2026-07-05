@@ -21,6 +21,7 @@ const mockTenantDetail = {
   companyName: 'Acme Corporation',
   logoUrl: 'https://example.com/logo.png',
   primaryColor: '#2563eb',
+  brandTheme: 'indigo',
   dbName: 'trackify_acme',
   dbHost: 'localhost',
   dbPort: 5432,

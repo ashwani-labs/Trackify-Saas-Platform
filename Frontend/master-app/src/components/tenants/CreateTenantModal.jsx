@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { createTenantAsync } from '../../features/tenants/tenantSlice';
 import { Globe, Mail, Briefcase } from 'lucide-react';
-import { Alert, Button, Input, Modal } from '@trackify/shared';
+import { Alert, Button, Input, Modal, ThemeSelector, DEFAULT_TENANT_THEME } from '@trackify/shared';
 import toast from 'react-hot-toast';
 
 const INITIAL_FORM = {
@@ -12,7 +12,7 @@ const INITIAL_FORM = {
   plan: 'FREE',
   companyName: '',
   logoUrl: '',
-  primaryColor: '#6366f1',
+  theme: DEFAULT_TENANT_THEME,
 };
 
 const CreateTenantModal = ({ isOpen, onClose }) => {
@@ -58,9 +58,6 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
     }
     if (formData.logoUrl.trim() && !/^https?:\/\/.+/i.test(formData.logoUrl.trim())) {
       newErrors.logoUrl = 'Enter a valid URL starting with http:// or https://';
-    }
-    if (formData.primaryColor && !/^#[0-9A-Fa-f]{6}$/.test(formData.primaryColor)) {
-      newErrors.primaryColor = 'Enter a valid hex color (e.g. #6366f1)';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -163,29 +160,13 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
             value={formData.companyName}
             onChange={(e) => updateField('companyName', e.target.value)}
           />
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="tenant-color">
-              Primary color
-            </label>
-            <div className="color-input-row">
-              <input
-                id="tenant-color"
-                type="color"
-                className="input"
-                value={formData.primaryColor}
-                onChange={(e) => updateField('primaryColor', e.target.value)}
-              />
-              <input
-                type="text"
-                className="input input--flex"
-                value={formData.primaryColor}
-                onChange={(e) => updateField('primaryColor', e.target.value)}
-              />
-            </div>
-            {errors.primaryColor && <span className="field-error">{errors.primaryColor}</span>}
-          </div>
         </div>
+
+        <ThemeSelector
+          value={formData.theme}
+          onChange={(theme) => updateField('theme', theme)}
+          label="Workspace theme"
+        />
 
         <Input
           id="tenant-logo"

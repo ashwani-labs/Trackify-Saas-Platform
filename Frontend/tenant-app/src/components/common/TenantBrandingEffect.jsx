@@ -1,15 +1,13 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { applyTenantTheme, DEFAULT_TENANT_THEME } from '@trackify/shared';
 
 const TenantBrandingEffect = () => {
-  const primaryColor = useSelector((state) => state.auth.primaryColor);
+  const brandTheme = useSelector((state) => state.auth.brandTheme);
 
   useEffect(() => {
-    if (primaryColor) {
-      document.documentElement.style.setProperty('--primary', primaryColor);
-      document.documentElement.style.setProperty('--brand-primary', primaryColor);
-    }
-  }, [primaryColor]);
+    applyTenantTheme(brandTheme || DEFAULT_TENANT_THEME);
+  }, [brandTheme]);
 
   return null;
 };

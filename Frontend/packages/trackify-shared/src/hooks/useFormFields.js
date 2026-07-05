@@ -1,33 +1,36 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 /**
  * Lightweight form state with blur validation.
  * validators: { fieldName: (value, allValues) => string | undefined }
  */
 export function useFormFields(initialValues, validators = {}) {
+  const initialValuesRef = useRef(initialValues);
+  initialValuesRef.current = initialValues;
+
+  const validatorsRef = useRef(validators);
+  validatorsRef.current = validators;
+
   const [values, setValues] = useState(initialValues);
   const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
 
-  const validateField = useCallback(
-    (name, nextValues) => {
-      const validator = validators[name];
-      if (!validator) return undefined;
-      return validator(nextValues[name], nextValues);
-    },
-    [validators]
-  );
+  const validateField = useCallback((name, nextValues) => {
+    const validator = validatorsRef.current[name];
+    if (!validator) return undefined;
+    return validator(nextValues[name], nextValues);
+  }, []);
 
   const validateAll = useCallback(() => {
     const nextErrors = {};
-    Object.keys(validators).forEach((name) => {
+    Object.keys(validatorsRef.current).forEach((name) => {
       const message = validateField(name, values);
       if (message) nextErrors[name] = message;
     });
     setErrors(nextErrors);
-    setTouched(Object.keys(validators).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+    setTouched(Object.keys(validatorsRef.current).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
     return Object.keys(nextErrors).length === 0;
-  }, [validateField, validators, values]);
+  }, [validateField, values]);
 
   const setFieldValue = useCallback(
     (name, value) => {
@@ -71,18 +74,15 @@ export function useFormFields(initialValues, validators = {}) {
     [validateField, values]
   );
 
-  const reset = useCallback(
-    (nextValues = initialValues) => {
-      setValues(nextValues);
-      setTouched({});
-      setErrors({});
-    },
-    [initialValues]
-  );
+  const reset = useCallback((nextValues) => {
+    setValues(nextValues ?? initialValuesRef.current);
+    setTouched({});
+    setErrors({});
+  }, []);
 
   const getFieldError = useCallback((name) => (touched[name] ? errors[name] : undefined), [errors, touched]);
 
-  const isValid = Object.keys(validators).every((name) => !validateField(name, values));
+  const isValid = Object.keys(validatorsRef.current).every((name) => !validateField(name, values));
 
   return {
     values,

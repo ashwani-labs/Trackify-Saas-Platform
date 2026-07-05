@@ -25,7 +25,8 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    include: ['@trackify/shared'],
+    // Source-linked workspace package; pre-bundling caches stale exports.
+    exclude: ['@trackify/shared'],
   },
   server: {
     port: 5174,

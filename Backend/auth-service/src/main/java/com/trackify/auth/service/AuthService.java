@@ -92,6 +92,8 @@ public class AuthService {
         .companyName(tenant.getCompanyName())
         .logoUrl(tenant.getLogoUrl())
         .primaryColor(tenant.getPrimaryColor())
+        .brandTheme(
+            tenant.getBrandTheme() != null ? tenant.getBrandTheme() : com.trackify.common.theme.TenantThemes.DEFAULT)
         .plan(tenant.getPlan() != null ? tenant.getPlan().name() : null)
         .build();
   }

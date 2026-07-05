@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Lock, AlertCircle, Camera, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from '../utils/axios';
+import { changePassword, updateProfilePhoto } from '../features/auth/authSlice';
 import { PageHeader, Button, Input, Badge, PasswordStrength } from '@trackify/shared';
 import { Link } from 'react-router-dom';
 

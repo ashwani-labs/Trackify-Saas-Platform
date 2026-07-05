@@ -62,7 +62,11 @@ public class Tenant {
 
   @Column(name = "primary_color")
   @Builder.Default
-  private String primaryColor = "#6366f1"; // Default indigo
+  private String primaryColor = "#6366f1";
+
+  @Column(name = "brand_theme", nullable = false)
+  @Builder.Default
+  private String brandTheme = "indigo";
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)

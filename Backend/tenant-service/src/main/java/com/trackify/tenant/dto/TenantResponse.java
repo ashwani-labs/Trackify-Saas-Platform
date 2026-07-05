@@ -23,4 +23,5 @@ public class TenantResponse {
   private String companyName;
   private String logoUrl;
   private String primaryColor;
+  private String brandTheme;
 }

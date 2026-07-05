@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getApiErrorPayload, unwrapApiData } from '@trackify/shared';
+import { getApiErrorPayload, unwrapApiData, DEFAULT_TENANT_THEME } from '@trackify/shared';
 import api from '../../utils/axios';
 
 export const loginUser = createAsyncThunk(
@@ -17,14 +17,18 @@ export const loginUser = createAsyncThunk(
         company_name: companyName,
         logo_url: logoUrl,
         primary_color: primaryColor,
+        brand_theme: brandTheme,
         plan,
       } = login;
+
+      const resolvedTheme = brandTheme || DEFAULT_TENANT_THEME;
 
       localStorage.setItem('tenantToken', token);
       localStorage.setItem('tenantId', tenantId);
       localStorage.setItem('tenantDomain', domain);
       localStorage.setItem('tenantLogo', logoUrl || '');
       localStorage.setItem('tenantColor', primaryColor || '#6366f1');
+      localStorage.setItem('tenantTheme', resolvedTheme);
       localStorage.setItem('tenantCompanyName', companyName || '');
       localStorage.setItem('tenantPlan', plan || 'FREE');
       localStorage.setItem('tenantUserEmail', email || '');
@@ -41,6 +45,7 @@ export const loginUser = createAsyncThunk(
         companyName,
         logoUrl,
         primaryColor,
+        brandTheme: resolvedTheme,
         plan,
       };
     } catch (error) {
@@ -96,6 +101,7 @@ const initialState = {
   tenantDomain: localStorage.getItem('tenantDomain'),
   tenantLogo: localStorage.getItem('tenantLogo'),
   primaryColor: localStorage.getItem('tenantColor') || '#6366f1',
+  brandTheme: localStorage.getItem('tenantTheme') || DEFAULT_TENANT_THEME,
   companyName: localStorage.getItem('tenantCompanyName') || '',
   plan: localStorage.getItem('tenantPlan') || 'FREE',
   isAuthenticated: !!localStorage.getItem('tenantToken'),
@@ -116,6 +122,7 @@ const authSlice = createSlice({
       localStorage.removeItem('tenantDomain');
       localStorage.removeItem('tenantLogo');
       localStorage.removeItem('tenantColor');
+      localStorage.removeItem('tenantTheme');
       localStorage.removeItem('tenantCompanyName');
       localStorage.removeItem('tenantPlan');
       localStorage.removeItem('tenantUserEmail');
@@ -132,7 +139,7 @@ const authSlice = createSlice({
       }
     },
     setWorkspaceBranding: (state, action) => {
-      const { companyName, logoUrl, primaryColor } = action.payload;
+      const { companyName, logoUrl, primaryColor, brandTheme } = action.payload;
       if (companyName != null) {
         state.companyName = companyName;
         localStorage.setItem('tenantCompanyName', companyName);
@@ -140,6 +147,10 @@ const authSlice = createSlice({
       if (logoUrl != null) {
         state.tenantLogo = logoUrl;
         localStorage.setItem('tenantLogo', logoUrl);
+      }
+      if (brandTheme != null) {
+        state.brandTheme = brandTheme;
+        localStorage.setItem('tenantTheme', brandTheme);
       }
       if (primaryColor != null) {
         state.primaryColor = primaryColor;
@@ -161,8 +172,10 @@ const authSlice = createSlice({
         state.tenantDomain = action.payload.domain;
         state.tenantLogo = action.payload.logoUrl;
         state.primaryColor = action.payload.primaryColor || '#6366f1';
+        state.brandTheme = action.payload.brandTheme || DEFAULT_TENANT_THEME;
         state.companyName = action.payload.companyName || '';
         state.plan = action.payload.plan || 'FREE';
+        localStorage.setItem('tenantTheme', state.brandTheme);
         localStorage.setItem('tenantCompanyName', state.companyName);
         localStorage.setItem('tenantPlan', state.plan);
         state.user = {

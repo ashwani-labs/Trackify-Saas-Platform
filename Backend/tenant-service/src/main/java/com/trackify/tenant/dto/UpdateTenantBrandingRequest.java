@@ -6,5 +6,6 @@ import lombok.Data;
 public class UpdateTenantBrandingRequest {
   private String companyName;
   private String logoUrl;
+  private String theme;
   private String primaryColor;
 }

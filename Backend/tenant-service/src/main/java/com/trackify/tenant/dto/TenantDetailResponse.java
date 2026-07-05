@@ -23,6 +23,7 @@ public class TenantDetailResponse {
   private String companyName;
   private String logoUrl;
   private String primaryColor;
+  private String brandTheme;
   private String dbName;
   private String dbHost;
   private Integer dbPort;

@@ -19,6 +19,7 @@ import {
   Button,
   useFocusTrap,
   useEscapeKey,
+  getTenantTheme,
 } from '@trackify/shared';
 import {
   clearSelectedTenant,
@@ -247,19 +248,18 @@ const TenantDetailDrawer = ({ onToggleStatus, onDelete }) => {
                     <DetailField label="Company name">
                       {tenant.companyName || tenant.name}
                     </DetailField>
-                    <DetailField label="Primary color">
-                      {tenant.primaryColor ? (
-                        <span className="tenant-detail-panel__color">
-                          <span
-                            className="tenant-detail-panel__swatch"
-                            style={{ backgroundColor: tenant.primaryColor }}
-                            aria-hidden
-                          />
-                          <code>{tenant.primaryColor}</code>
-                        </span>
-                      ) : (
-                        <span className="issue-detail-panel__empty">Not set</span>
-                      )}
+                    <DetailField label="Workspace theme">
+                      <span className="tenant-detail-panel__color">
+                        <span
+                          className="tenant-detail-panel__swatch"
+                          style={{
+                            background:
+                              getTenantTheme(tenant.brandTheme || 'indigo').gradientBrand,
+                          }}
+                          aria-hidden
+                        />
+                        {getTenantTheme(tenant.brandTheme || 'indigo').label}
+                      </span>
                     </DetailField>
                   </div>
                 </div>

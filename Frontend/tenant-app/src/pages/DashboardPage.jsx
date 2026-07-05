@@ -32,6 +32,7 @@ import { PageHeader, Button, Alert, OnboardingChecklist, ROLES } from '@trackify
 import MyOpenIssuesWidget from '../components/dashboard/MyOpenIssuesWidget';
 import RecentActivityWidget from '../components/dashboard/RecentActivityWidget';
 import RecentProjectsWidget from '../components/dashboard/RecentProjectsWidget';
+import { getTenantWorkspaceBaseUrl, copyToClipboard } from '../utils/workspaceUrl';
 
 const CHART_TOOLTIP_STYLE = {
   background: 'var(--bg-surface)',
@@ -57,11 +58,12 @@ const DashboardPage = () => {
   const isAdmin = user?.role === ROLES.ADMIN;
 
   const stats = dashboard?.summary;
-  const tenantUrl = `http://${tenantDomain}.trackify.com:5174`;
+  const tenantUrl = getTenantWorkspaceBaseUrl(tenantDomain);
 
-  const copyToClipboard = (text, label) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} copied!`);
+  const handleCopy = async (text, label) => {
+    const copied = await copyToClipboard(text);
+    if (copied) toast.success(`${label} copied`);
+    else toast.error(`Could not copy ${label.toLowerCase()}`);
   };
 
   useEffect(() => {
@@ -192,7 +194,7 @@ const DashboardPage = () => {
   const hasPriorityChartData = priorityData.some((item) => item.count > 0);
 
   return (
-    <div className="page">
+    <div className="page page--dashboard">
       <PageHeader
         breadcrumb={
           <>
@@ -213,6 +215,7 @@ const DashboardPage = () => {
         }
       />
 
+      <div className="dashboard-sections">
       {error && <Alert className="page-alert">{error}</Alert>}
 
       {showOnboarding && (
@@ -238,7 +241,7 @@ const DashboardPage = () => {
                   variant="ghost"
                   className="icon-btn"
                   aria-label="Copy workspace ID"
-                  onClick={() => copyToClipboard(tenantId, 'ID')}
+                  onClick={() => handleCopy(tenantId, 'ID')}
                   leftIcon={<Copy size={12} />}
                 />
               </div>
@@ -251,7 +254,7 @@ const DashboardPage = () => {
                   variant="ghost"
                   className="icon-btn"
                   aria-label="Copy login URL"
-                  onClick={() => copyToClipboard(tenantUrl, 'URL')}
+                  onClick={() => handleCopy(tenantUrl, 'URL')}
                   leftIcon={<Copy size={12} />}
                 />
               </div>
@@ -260,7 +263,7 @@ const DashboardPage = () => {
         </div>
       )}
 
-      <div className="stats-grid stats-grid--spaced">
+      <div className="stats-grid">
         {statCards.map((card) => (
           <div key={card.label} className={`stat-card stat-card--${card.accent}`}>
             <div className="stat-header stat-header--between">
@@ -279,7 +282,7 @@ const DashboardPage = () => {
         ))}
       </div>
 
-      <div className="stats-grid stats-grid--compact">
+      <div className="stats-grid stats-grid--insights">
         {insightCards.map((card) => {
           const content = (
             <>
@@ -390,7 +393,7 @@ const DashboardPage = () => {
 
       <RecentProjectsWidget projects={dashboard?.recentProjects} isLoading={isLoading} />
 
-      <section>
+      <section className="dashboard-quick-access">
         <h2 className="section-title">Quick Access</h2>
         <div className="quick-actions-grid">
           <div className="action-card action-card__body" onClick={() => navigate('/projects')}>
@@ -412,6 +415,7 @@ const DashboardPage = () => {
           )}
         </div>
       </section>
+      </div>
     </div>
   );
 };

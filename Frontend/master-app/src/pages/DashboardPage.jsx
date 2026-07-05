@@ -1,13 +1,16 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   loadTenants,
   loadDashboardStats,
+  loadTenantDetail,
   selectAllTenants,
   selectTenantLoading,
   selectTenantStatsLoading,
   selectDashboardStats,
 } from '../features/tenants/tenantSlice';
+import { ROUTES } from '../constants/routes';
 import { useAuth } from '../hooks/useAuth';
 import { Globe, CheckCircle2, ShieldAlert } from 'lucide-react';
 import {
@@ -33,6 +36,7 @@ const CHART_TOOLTIP_STYLE = {
 
 const DashboardPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   useAuth({ requireAuth: true });
   const tenants = useSelector(selectAllTenants);
   const isLoading = useSelector(selectTenantLoading);
@@ -95,6 +99,11 @@ const DashboardPage = () => {
   ];
 
   const statsLoading = isStatsLoading && !dashboardStats;
+
+  const handleManageTenant = (tenantId) => {
+    dispatch(loadTenantDetail(tenantId));
+    navigate(ROUTES.TENANTS);
+  };
 
   return (
     <div className="page">
@@ -212,7 +221,7 @@ const DashboardPage = () => {
       <section>
         <div className="list-section-header">
           <h2 className="list-section-title">Recent Organizations</h2>
-          <Button variant="secondary" size="sm">
+          <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.TENANTS)}>
             View all tenants
           </Button>
         </div>
@@ -254,7 +263,11 @@ const DashboardPage = () => {
                       </Badge>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <Button variant="secondary" size="sm">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleManageTenant(tenant.id)}
+                      >
                         Manage
                       </Button>
                     </td>

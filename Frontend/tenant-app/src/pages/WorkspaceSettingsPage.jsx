@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { PageHeader, Input, Button, Alert, Badge } from '@trackify/shared';
+import { PageHeader, Input, Button, Alert, Badge, ThemeSelector, DEFAULT_TENANT_THEME, getTenantTheme } from '@trackify/shared';
 import { Link } from 'react-router-dom';
 import { useFormFields } from '@trackify/shared';
 import { updateWorkspaceBranding } from '../services/workspaceApi';
@@ -15,8 +15,6 @@ const PLAN_LIMITS = {
 
 const validators = {
   companyName: (value) => (!value?.trim() ? 'Company name is required' : undefined),
-  primaryColor: (value) =>
-    value && !/^#[0-9A-Fa-f]{6}$/.test(value) ? 'Use a hex color like #2563eb' : undefined,
   logoUrl: (value) =>
     value?.trim() && !/^https?:\/\/.+/.test(value.trim())
       ? 'Enter a valid URL starting with http:// or https://'
@@ -25,28 +23,27 @@ const validators = {
 
 const WorkspaceSettingsPage = () => {
   const dispatch = useDispatch();
-  const { tenantId, tenantDomain, tenantLogo, primaryColor, companyName, plan } = useSelector(
+  const { tenantId, tenantDomain, tenantLogo, brandTheme, companyName, plan } = useSelector(
     (state) => state.auth
   );
   const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState(null);
 
-  const { values, handleChange, handleBlur, validateAll, getFieldError, reset } = useFormFields(
-    {
+  const initialFormValues = useMemo(
+    () => ({
       companyName: companyName || '',
       logoUrl: tenantLogo || '',
-      primaryColor: primaryColor || '#6366f1',
-    },
-    validators
+      theme: brandTheme || DEFAULT_TENANT_THEME,
+    }),
+    [companyName, tenantLogo, brandTheme]
   );
 
+  const { values, handleChange, handleBlur, validateAll, getFieldError, reset, setFieldValue } =
+    useFormFields(initialFormValues, validators);
+
   useEffect(() => {
-    reset({
-      companyName: companyName || '',
-      logoUrl: tenantLogo || '',
-      primaryColor: primaryColor || '#6366f1',
-    });
-  }, [companyName, tenantLogo, primaryColor, reset]);
+    reset(initialFormValues);
+  }, [initialFormValues, reset]);
 
   const planInfo = PLAN_LIMITS[plan] || PLAN_LIMITS.FREE;
 
@@ -65,13 +62,14 @@ const WorkspaceSettingsPage = () => {
       const response = await updateWorkspaceBranding(tenantId, {
         companyName: values.companyName.trim(),
         logoUrl: values.logoUrl.trim(),
-        primaryColor: values.primaryColor.trim(),
+        theme: values.theme,
       });
       const data = response.data;
       dispatch(
         setWorkspaceBranding({
           companyName: data.companyName,
           logoUrl: data.logoUrl,
+          brandTheme: data.brandTheme || values.theme,
           primaryColor: data.primaryColor,
         })
       );
@@ -86,7 +84,7 @@ const WorkspaceSettingsPage = () => {
   };
 
   return (
-    <div className="page">
+    <div className="page page--stacked">
       <PageHeader
         breadcrumb={
           <>
@@ -97,6 +95,7 @@ const WorkspaceSettingsPage = () => {
         subtitle="Manage branding, plan limits, and workspace identity."
       />
 
+      <div className="page-sections">
       {saveError && <Alert className="page-alert">{saveError}</Alert>}
 
       <div className="stats-grid">
@@ -131,7 +130,7 @@ const WorkspaceSettingsPage = () => {
         </Link>
       </div>
 
-      <div className="card" style={{ padding: '1.5rem' }}>
+      <div className="card">
         <form onSubmit={handleSubmit} className="workspace-settings-form">
           <Input
             id="companyName"
@@ -153,25 +152,21 @@ const WorkspaceSettingsPage = () => {
             error={getFieldError('logoUrl')}
             placeholder="https://example.com/logo.png"
           />
-          <Input
-            id="primaryColor"
-            name="primaryColor"
-            label="Primary color"
-            value={values.primaryColor}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={getFieldError('primaryColor')}
-            placeholder="#2563eb"
+          <ThemeSelector
+            value={values.theme}
+            onChange={(theme) => setFieldValue('theme', theme)}
+            label="Workspace theme"
           />
           <div className="workspace-settings-form__preview">
             <span
               className="tenant-detail-panel__swatch"
-              style={{ backgroundColor: values.primaryColor }}
+              style={{ background: getTenantTheme(values.theme).gradientBrand }}
               aria-hidden
             />
             {values.logoUrl ? (
               <img src={values.logoUrl} alt="" className="tenant-detail-panel__logo" />
             ) : null}
+            <span className="form-hint">{getTenantTheme(values.theme).label} theme preview</span>
           </div>
           {workspaceUrl && (
             <p className="form-hint">
@@ -184,6 +179,7 @@ const WorkspaceSettingsPage = () => {
             </Button>
           </div>
         </form>
+      </div>
       </div>
     </div>
   );

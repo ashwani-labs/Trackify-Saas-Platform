@@ -18,8 +18,17 @@ export { default as OnboardingChecklist } from './components/OnboardingChecklist
 export { default as PageHeader } from './components/PageHeader.jsx';
 export { default as PasswordStrength, getPasswordStrength } from './components/PasswordStrength.jsx';
 export { default as KeyboardShortcutsPanel } from './components/KeyboardShortcutsPanel.jsx';
+export { default as ThemeSelector } from './components/ThemeSelector.jsx';
 export { useFocusTrap, useEscapeKey } from './hooks/useFocusTrap.js';
 export { useConfirmDialog } from './hooks/useConfirmDialog.jsx';
 export { useFormFields } from './hooks/useFormFields.js';
 export { useRecentItems } from './hooks/useRecentItems.js';
 export { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts.js';
+export {
+  TENANT_THEMES,
+  TENANT_THEME_LIST,
+  DEFAULT_TENANT_THEME,
+  getTenantTheme,
+  applyTenantTheme,
+  clearTenantTheme,
+} from './themes/tenantThemes.js';

@@ -22,5 +22,6 @@ public class CreateTenantRequest {
 
   private String companyName;
   private String logoUrl;
+  private String theme;
   private String primaryColor;
 }

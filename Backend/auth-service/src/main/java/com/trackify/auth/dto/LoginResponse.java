@@ -32,5 +32,8 @@ public class LoginResponse {
   @JsonProperty("primary_color")
   private String primaryColor;
 
+  @JsonProperty("brand_theme")
+  private String brandTheme;
+
   private String plan;
 }

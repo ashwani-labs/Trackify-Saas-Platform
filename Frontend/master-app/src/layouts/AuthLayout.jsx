@@ -1,31 +1,21 @@
 import React from 'react';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme';
 
 const AuthLayout = ({ children }) => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <div
-      className="auth-container"
-      style={{
-        backgroundColor: '#F4F5F7',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        className="auth-card"
-        style={{
-          backgroundColor: 'white',
-          border: '1px solid var(--border-main)',
-          borderRadius: '3px',
-          padding: '3rem',
-          boxShadow: 'var(--shadow-md)',
-          width: '100%',
-          maxWidth: '400px',
-        }}
+    <div className="auth-container">
+      <button
+        type="button"
+        className="auth-theme-toggle theme-toggle"
+        onClick={toggleTheme}
+        aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
       >
-        {children}
-      </div>
+        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+      </button>
+      <div className="auth-card">{children}</div>
     </div>
   );
 };

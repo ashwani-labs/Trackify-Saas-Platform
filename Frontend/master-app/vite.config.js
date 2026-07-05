@@ -23,6 +23,9 @@ export default defineConfig({
       '@trackify/shared': path.resolve(__dirname, '../packages/trackify-shared/src'),
     },
   },
+  optimizeDeps: {
+    exclude: ['@trackify/shared'],
+  },
   server: {
     port: 5173,
     host: true,

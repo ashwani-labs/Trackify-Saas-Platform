@@ -23,8 +23,6 @@ import {
   Menu,
   X,
   User,
-  Search,
-  Bell,
   Settings,
   ScrollText,
 } from 'lucide-react';
@@ -80,14 +78,6 @@ const DashboardLayout = ({ children }) => {
 
   const filteredMenu = menuItems.filter((item) => !item.adminOnly || user?.role === ROLES.ADMIN);
 
-  const mobileNavItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Projects', path: '/projects', icon: ClipboardList },
-    { name: 'Search', path: '/dashboard', icon: Search, action: 'search' },
-    { name: 'Alerts', path: '/dashboard', icon: Bell, action: 'notifications' },
-    { name: 'Profile', path: '/profile', icon: User },
-  ];
-
   useEffect(() => {
     if (activeProject?.id) {
       trackVisit({
@@ -98,20 +88,8 @@ const DashboardLayout = ({ children }) => {
     }
   }, [activeProject?.id, activeProject?.name, trackVisit]);
 
-  const handleMobileNav = (item) => {
-    if (item.action === 'search') {
-      searchRef.current?.focus?.();
-      return;
-    }
-    if (item.action === 'notifications') {
-      document.querySelector('.notification-bell__trigger')?.click();
-      return;
-    }
-    navigate(item.path);
-  };
-
   return (
-    <div className="layout-container layout-container--stacked layout-container--with-mobile-nav">
+    <div className="layout-container layout-container--stacked">
       <KeyboardShortcutsPanel isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
       <header className="top-bar">
@@ -146,7 +124,7 @@ const DashboardLayout = ({ children }) => {
 
           <button
             type="button"
-            className="theme-toggle hide-mobile-nav"
+            className="theme-toggle"
             onClick={toggleTheme}
             style={{ width: '32px', height: '32px' }}
             aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
@@ -155,7 +133,7 @@ const DashboardLayout = ({ children }) => {
           </button>
 
           <div
-            className="avatar-circle hide-mobile-nav"
+            className="avatar-circle"
             role="img"
             aria-label="User profile"
             onClick={() => navigate('/profile')}
@@ -261,26 +239,6 @@ const DashboardLayout = ({ children }) => {
           <div className="page-body page-body--scroll">{children}</div>
         </main>
       </div>
-
-      <nav className="mobile-bottom-nav show-mobile-nav" aria-label="Mobile navigation">
-        {mobileNavItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = !item.action && location.pathname.startsWith(item.path);
-          return (
-            <button
-              key={item.name}
-              type="button"
-              className={`mobile-bottom-nav__item${isActive ? ' mobile-bottom-nav__item--active' : ''}`}
-              onClick={() => handleMobileNav(item)}
-              aria-label={item.name}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <Icon size={20} />
-              <span>{item.name}</span>
-            </button>
-          );
-        })}
-      </nav>
 
       {mobileOpen && (
         <div
