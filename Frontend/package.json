@@ -16,7 +16,8 @@
     "test": "npm run test -w tenant-app && npm run test -w master-app",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "screenshots": "node ../scripts/capture-screenshots.mjs"
+    "screenshots": "node ../scripts/capture-screenshots.mjs",
+    "postinstall": "node scripts/ensure-rolldown-binding.mjs"
   },
   "devDependencies": {
     "prettier": "^3.8.3"

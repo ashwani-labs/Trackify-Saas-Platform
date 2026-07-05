@@ -1,8 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
-import react, { reactCompilerPreset } from '@vitejs/plugin-react';
-import babel from '@rolldown/plugin-babel';
+import react from '@vitejs/plugin-react';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -12,10 +11,10 @@ export default defineConfig({
     jsxInject: `import React from 'react'`,
   },
   plugins: [
-    react(),
-    babel({
-      presets: [reactCompilerPreset()],
-      include: /tenant-app[\\/]src[\\/].*\.[jt]sx?$/,
+    react({
+      babel: {
+        plugins: ['babel-plugin-react-compiler'],
+      },
     }),
   ],
   resolve: {
