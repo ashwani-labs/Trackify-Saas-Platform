@@ -1,6 +1,6 @@
 # Trackify SaaS Platform
 
-Trackify is a **multi-tenant SaaS platform** for project and issue management — inspired by Jira, built for teams that need isolated workspaces, Kanban workflows, and sprint planning without enterprise complexity.
+Trackify is a **personal multi-tenant SaaS platform** for project and issue management — inspired by Jira, built for isolated workspaces, Kanban workflows, and sprint planning.
 
 The platform combines a **Spring Boot microservices backend**, **per-tenant MySQL databases**, an **API gateway**, and **two React applications**: one for platform administrators and one for tenant users.
 
@@ -10,8 +10,7 @@ The platform combines a **Spring Boot microservices backend**, **per-tenant MySQ
 |---|---|
 | **Backend** | Java 17, Spring Boot 3.3, MySQL, JWT, Flyway (master DB) |
 | **Frontend** | React 19, Vite 8, Redux Toolkit, shared design system |
-| **Ops** | Docker Compose, nginx, GitHub Actions CI |
-| **Docs** | [`Docs/`](./Docs/) — architecture status, Spring profiles, production guide |
+| **Docs** | [`Docs/`](./Docs/) — codebase status, Spring profiles, env reference |
 
 ## What it does
 
@@ -37,9 +36,7 @@ Trackify helps organizations onboard into **isolated workspaces**, manage teams,
 trackify-saas-platform/
 ├── Backend/          # Spring Boot microservices
 ├── Frontend/         # React apps + shared package
-├── Docs/             # Documentation (status, profiles, production)
-├── docker-compose.yml
-└── nginx.conf
+└── Docs/             # Documentation
 ```
 
 | Layer | Components |
@@ -76,10 +73,7 @@ trackify-saas-platform/
 │   ├── README.md
 │   ├── CODEBASE_STATUS.md
 │   ├── SPRING_PROFILES.md
-│   └── DOCKER_PRODUCTION.md
-├── docker-compose.yml
-├── docker-compose.override.yml.example
-├── nginx.conf
+│   └── ENVIRONMENT.md
 └── .env.example
 ```
 
@@ -87,9 +81,9 @@ trackify-saas-platform/
 
 ### Prerequisites
 
-- Docker Desktop with Docker Compose (recommended)
-- Node.js 20+ for local frontend dev
-- JDK 17 + Maven for local backend dev
+- **MySQL 8** running on `localhost:3306`
+- **Node.js 20+**
+- **JDK 17** and **Maven**
 
 ### 1. Configure environment
 
@@ -102,46 +96,34 @@ Set at minimum:
 ```env
 JWT_SECRET=replace-with-a-long-random-secret
 INTERNAL_API_KEY=change-me-internal-api-key
+SPRING_DATASOURCE_USERNAME=root
+SPRING_DATASOURCE_PASSWORD=root
 ```
 
-See [`.env.example`](./.env.example) and [Docs/DOCKER_PRODUCTION.md](./Docs/DOCKER_PRODUCTION.md) for all variables.
+See [`.env.example`](./.env.example) and [Docs/ENVIRONMENT.md](./Docs/ENVIRONMENT.md) for all variables.
 
-### 2. Run with Docker
+### 2. Start the backend
+
+Start MySQL, then run each service (separate terminals or IDE run configs):
 
 ```bash
-docker compose up --build
+cd Backend
+mvn -pl common-lib install
+mvn -pl auth-service -am spring-boot:run      # port 8081 — runs Flyway on first boot
+mvn -pl tenant-service -am spring-boot:run    # port 8082
+mvn -pl project-service -am spring-boot:run   # port 8083
+mvn -pl api-gateway -am spring-boot:run       # port 8080
 ```
 
-With email notifications:
+Optional — email notifications:
 
 ```bash
-docker compose --profile full up --build
+mvn -pl notification-service -am spring-boot:run   # port 8084
 ```
 
-### 3. Open the apps
+The **`local`** Spring profile is active by default (see [Docs/SPRING_PROFILES.md](./Docs/SPRING_PROFILES.md)).
 
-| Service | URL |
-|---------|-----|
-| Tenant app (landing) | http://localhost:3001 |
-| Master app | http://localhost:3000 |
-| API gateway | http://localhost:8080 |
-| Swagger UI | http://localhost:8080/swagger-ui.html |
-
-## Spring profiles (backend)
-
-Each backend service defaults to the **`local`** profile for IDE runs. Docker Compose uses **`dev`**. Production uses **`prod`**.
-
-```bash
-# Override profile
-export SPRING_PROFILES_ACTIVE=prod   # Linux/macOS
-$env:SPRING_PROFILES_ACTIVE = "prod"  # PowerShell
-```
-
-Details: **[Docs/SPRING_PROFILES.md](./Docs/SPRING_PROFILES.md)**
-
-## Local development (without Docker)
-
-**Frontend:**
+### 3. Start the frontend
 
 ```bash
 cd Frontend
@@ -150,16 +132,16 @@ npm run dev:tenant    # http://localhost:5174
 npm run dev:master    # http://localhost:5173
 ```
 
-**Backend** (requires MySQL on `localhost:3306`):
+Each app reads `VITE_API_BASE_URL` from `.env` or `.env.local` (default: `http://localhost:8080`).
 
-```bash
-cd Backend
-mvn -pl common-lib install
-mvn -pl auth-service -am spring-boot:run
-mvn -pl tenant-service -am spring-boot:run
-mvn -pl project-service -am spring-boot:run
-mvn -pl api-gateway -am spring-boot:run
-```
+### 4. Open the apps
+
+| App | URL |
+|-----|-----|
+| Tenant app (landing) | http://localhost:5174 |
+| Master app | http://localhost:5173 |
+| API gateway | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
 
 ## Build and test
 
@@ -175,26 +157,26 @@ CI runs on every push/PR to `main` (`.github/workflows/ci.yml`).
 
 ## Project status
 
-**Active development.** Core product features are implemented across backend and frontend. The tenant app includes a marketing landing page and refreshed UI.
+**Active personal project.** Core features are implemented across backend and frontend.
 
 | Strengths | Gaps |
 |-----------|------|
 | Strong per-tenant DB isolation | Mixed schema strategy (Flyway vs Hibernate) |
 | Gateway auth, rate limiting, OpenAPI | No integration/E2E tests |
 | Good project-service unit tests | `master-app` and `notification-service` untested |
-| Docker Compose + CI pipeline | Custom gateway (no circuit breaking) |
+| GitHub Actions CI | Custom gateway (no circuit breaking) |
 
-Full merits/demerits and roadmap: **[Docs/CODEBASE_STATUS.md](./Docs/CODEBASE_STATUS.md)**
+Full merits/demerits: **[Docs/CODEBASE_STATUS.md](./Docs/CODEBASE_STATUS.md)**
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
 | JWT validation fails | Same `JWT_SECRET` on every backend service |
+| MySQL connection refused | Start MySQL on `localhost:3306`; check credentials in `.env` |
 | Legacy tenant DB missing columns | Restart `project-service` (runs `TenantSchemaUpgrader`) |
-| Frontend cannot reach API | Check `VITE_API_BASE_URL`, rebuild Docker images |
-| Email does not send | `docker compose --profile full` + SMTP env vars |
-| Wrong DB host in Docker | Ensure `SPRING_PROFILES_ACTIVE=dev` (set by Compose) |
+| Frontend cannot reach API | Set `VITE_API_BASE_URL=http://localhost:8080` in `Frontend/*/.env.local` |
+| Email does not send | Start `notification-service` and configure SMTP in `.env` |
 
 ## License
 

@@ -6,7 +6,7 @@ This document summarizes the current state of the Trackify codebase based on a f
 
 ## Overview
 
-Trackify is a **multi-tenant SaaS platform** for project and issue management (Jira-inspired). It ships as a **Spring Boot microservices backend**, **two React SPAs** (platform admin + tenant workspace), and **Docker Compose** for local development.
+Trackify is a **personal multi-tenant SaaS platform** for project and issue management (Jira-inspired). It ships as a **Spring Boot microservices backend**, **two React SPAs** (platform admin + tenant workspace), and runs locally via **MySQL + IDE/terminal**.
 
 | Area | Count / stack |
 |------|----------------|
@@ -37,16 +37,16 @@ Trackify is a **multi-tenant SaaS platform** for project and issue management (J
 - JWT authentication and role-based access (`MASTER`, `ADMIN`, `USER`)
 - Database-per-tenant isolation with dynamic datasource routing
 - Tenant provisioning and user approval workflow
-- Projects, issues, comments, attachments (local or S3/MinIO)
+- Projects, issues, comments, attachments (local or S3)
 - Sprint planning, activity feed, dashboard aggregation, global search
 - Email notifications (optional `notification-service`)
 - API gateway with rate limiting, OpenAPI/Swagger, correlation IDs
-- Actuator health probes for container orchestration
+- Actuator health probes
 
 ## Architecture patterns
 
 ```text
-Browser → nginx / Vite → api-gateway (8080)
+Browser → Vite dev server → api-gateway (8080)
                               ├── auth-service (8081)     → trackify_master (Flyway)
                               ├── tenant-service (8082)   → trackify_master + tenant DB provisioning
                               └── project-service (8083)  → per-tenant MySQL via TenantRoutingDataSource
@@ -63,7 +63,7 @@ notification-service (8084) ← internal HTTP from tenant/project
 2. **Centralized auth at the gateway** — JWT validated before proxying; consistent security primitives in `common-lib`.
 3. **Solid project-service test coverage** — 9 of 15 backend test classes cover core domain logic (issues, projects, search, dashboard, schema upgrades).
 4. **Production-oriented gateway** — Rate limiting (Bucket4j), correlation ID propagation, OpenAPI exposure, health probes.
-5. **Complete local stack** — Docker Compose with health checks, optional email (`full`) and S3 (`s3`) profiles, nginx front door.
+5. **Simple local workflow** — Run MySQL + Maven services + Vite dev servers; no container overhead for personal development.
 6. **Shared frontend package** — DRY roles, axios client, and reusable UI components across both apps.
 7. **Legacy tenant DB upgrades** — `TenantSchemaUpgrader` applies idempotent SQL for older tenant databases.
 8. **Modern tenant UI** — Marketing landing page, split-panel auth, refreshed design system, 21 frontend tests in CI.
@@ -76,8 +76,8 @@ notification-service (8084) ← internal HTTP from tenant/project
 4. **`master-app` test gap** — No Vitest setup or tests; CI only runs tenant-app tests.
 5. **Uneven backend coverage** — No tests for sprint/member controllers, gateway rate limit filter, or `common-lib` utilities.
 6. **Custom gateway proxy** — `RestTemplate` byte-proxy instead of Spring Cloud Gateway; no built-in circuit breaking, retries, or service discovery.
-7. **Email off by default in Docker** — Requires `--profile full`; easy to miss in local testing.
-8. **Documentation drift risk** — README and env examples must stay aligned with Spring profiles and JWT configuration as the project evolves.
+7. **Manual service startup** — Five backend processes must be started individually (no single-process dev runner).
+8. **Documentation drift risk** — README and env examples must stay aligned with Spring profiles and JWT configuration.
 
 ## Recommended next steps
 
@@ -87,8 +87,7 @@ notification-service (8084) ← internal HTTP from tenant/project
 | High | Add integration tests for auth + tenant provisioning happy path |
 | Medium | Vitest smoke tests for `master-app` |
 | Medium | Unit tests for `notification-service` |
-| Medium | Set `STORAGE_PROVIDER=s3` for multi-node production |
 | Low | Replace custom gateway with Spring Cloud Gateway or add resilience patterns |
 | Low | E2E tests (Playwright) for login → create project → create issue |
 
-See [SPRING_PROFILES.md](./SPRING_PROFILES.md) for environment configuration and [DOCKER_PRODUCTION.md](./DOCKER_PRODUCTION.md) for deployment guidance.
+See [SPRING_PROFILES.md](./SPRING_PROFILES.md) and [ENVIRONMENT.md](./ENVIRONMENT.md) for configuration.

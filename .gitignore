@@ -104,10 +104,3 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# ===============================
-
-# 🐳 Docker (optional)
-
-# ===============================
-
-docker-data/
