@@ -4,7 +4,7 @@ Last updated: July 2026
 
 Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 
-**Overall:** Phase A ~45% complete · Phase B started (~15%)
+**Overall:** Phase A ~45% complete · Phase B ~35% complete
 
 ---
 
@@ -19,8 +19,8 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 | 5 | Master app toast notifications | Done | `react-hot-toast` + tenant provision success toast |
 | 6 | Master tenant search | Done | Top-bar search filters tenant table |
 | 7 | Theme `prefers-color-scheme` default | Done | `getInitialTheme()` in both apps |
-| 8 | Kanban drag UX + issue panel tabs | In progress | Issue panel tabs done; Kanban polish done |
-| 9 | Master tenant detail drawer | Not started | Phase B |
+| 8 | Kanban drag UX + issue panel tabs | Done | Issue panel tabs + Kanban polish |
+| 9 | Master tenant detail drawer | Done | Slide-in drawer with overview, branding, infra, usage |
 | 10 | Consistent loading skeletons | Partial | Exists on some pages; not extended everywhere |
 
 ---
@@ -47,7 +47,7 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 |------|--------|
 | Kanban drag-and-drop polish | Done |
 | Issue panel tabs | Done |
-| Master tenant detail drawer | Not started |
+| Master tenant detail drawer | Done |
 | Mobile bottom nav | Not started |
 | Notification WebSocket/SSE | Not started |
 
@@ -85,15 +85,16 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 | `tenant-app/src/test/confirmDialog.test.jsx` | `ConfirmDialog`, `useConfirmDialog` |
 | `tenant-app/src/test/issueDetailPanel.test.jsx` | Issue panel tabs |
 | `tenant-app/src/test/kanbanBoard.test.jsx` | Kanban drag/drop + quick priority |
+| `master-app/src/test/tenantDetailDrawer.test.jsx` | Tenant detail drawer sections + actions |
 | Existing tenant + master test suites | Regression on form/modal changes |
 
 ---
 
 ## Next up (recommended order)
 
-1. Master tenant detail drawer
-2. Inline form validation on blur
-3. Workspace settings page (branding from provision data)
+1. Inline form validation on blur
+2. Workspace settings page (branding from provision data)
+3. Mobile bottom nav
 
 ---
 
@@ -118,3 +119,9 @@ Track implementation status against [PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md).
 - Drag handle, improved drop zones, empty-column placeholder, and rollback on failed moves
 - Quick priority edit on issue cards with optimistic updates
 - Mobile horizontal scroll snap for board columns
+
+### July 2026 — Master tenant detail drawer
+
+- `GET /tenants/{id}` returns `TenantDetailResponse` with DB info and user counts
+- Slide-in drawer on tenant table row click: overview, branding, infrastructure, usage
+- Copy workspace URL, suspend/activate/delete actions from drawer footer

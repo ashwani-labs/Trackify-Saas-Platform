@@ -14,6 +14,18 @@ export const loadTenants = createAsyncThunk(
   }
 );
 
+export const loadTenantDetail = createAsyncThunk(
+  'tenants/fetchDetail',
+  async (tenantId, { rejectWithValue }) => {
+    try {
+      const response = await tenantApi.fetchTenantById(tenantId);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch tenant details');
+    }
+  }
+);
+
 export const loadDashboardStats = createAsyncThunk(
   'tenants/fetchDashboardStats',
   async ({ months = 6 } = {}, { rejectWithValue }) => {
@@ -68,6 +80,10 @@ const initialState = {
   currentPage: 0,
   totalPages: 0,
   totalElements: 0,
+  selectedTenant: null,
+  detailTenantId: null,
+  isDetailLoading: false,
+  detailError: null,
   dashboardStats: null,
   isStatsLoading: false,
   isLoading: false,
@@ -80,6 +96,11 @@ const tenantSlice = createSlice({
   reducers: {
     clearTenantError: (state) => {
       state.error = null;
+    },
+    clearSelectedTenant: (state) => {
+      state.selectedTenant = null;
+      state.detailTenantId = null;
+      state.detailError = null;
     },
   },
   extraReducers: (builder) => {
@@ -103,6 +124,20 @@ const tenantSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
+      .addCase(loadTenantDetail.pending, (state, action) => {
+        state.isDetailLoading = true;
+        state.detailError = null;
+        state.detailTenantId = action.meta.arg;
+        state.selectedTenant = null;
+      })
+      .addCase(loadTenantDetail.fulfilled, (state, action) => {
+        state.isDetailLoading = false;
+        state.selectedTenant = action.payload;
+      })
+      .addCase(loadTenantDetail.rejected, (state, action) => {
+        state.isDetailLoading = false;
+        state.detailError = action.payload;
+      })
       .addCase(loadDashboardStats.pending, (state) => {
         state.isStatsLoading = true;
       })
@@ -118,6 +153,9 @@ const tenantSlice = createSlice({
         const index = state.list.findIndex((t) => t.id === action.payload.id);
         if (index !== -1) {
           state.list[index] = action.payload;
+        }
+        if (state.selectedTenant?.id === action.payload.id) {
+          state.selectedTenant = { ...state.selectedTenant, status: action.payload.status };
         }
       })
       .addCase(createTenantAsync.pending, (state) => {
@@ -139,6 +177,10 @@ const tenantSlice = createSlice({
       .addCase(deleteTenantAsync.fulfilled, (state, action) => {
         state.isLoading = false;
         state.list = state.list.filter((t) => t.id !== action.payload);
+        if (state.selectedTenant?.id === action.payload || state.detailTenantId === action.payload) {
+          state.selectedTenant = null;
+          state.detailTenantId = null;
+        }
       })
       .addCase(deleteTenantAsync.rejected, (state, action) => {
         state.isLoading = false;
@@ -147,7 +189,7 @@ const tenantSlice = createSlice({
   },
 });
 
-export const { clearTenantError } = tenantSlice.actions;
+export const { clearTenantError, clearSelectedTenant } = tenantSlice.actions;
 
 // Selectors
 export const selectAllTenants = (state) => state.tenants.list;
@@ -157,5 +199,9 @@ export const selectDashboardStats = (state) => state.tenants.dashboardStats;
 export const selectTenantCurrentPage = (state) => state.tenants.currentPage;
 export const selectTenantTotalPages = (state) => state.tenants.totalPages;
 export const selectTenantError = (state) => state.tenants.error;
+export const selectSelectedTenant = (state) => state.tenants.selectedTenant;
+export const selectDetailTenantId = (state) => state.tenants.detailTenantId;
+export const selectTenantDetailLoading = (state) => state.tenants.isDetailLoading;
+export const selectTenantDetailError = (state) => state.tenants.detailError;
 
 export default tenantSlice.reducer;

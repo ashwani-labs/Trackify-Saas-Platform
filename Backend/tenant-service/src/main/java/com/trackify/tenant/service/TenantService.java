@@ -8,6 +8,7 @@ import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantDashboardStatsResponse;
 import com.trackify.tenant.dto.TenantGrowthPoint;
+import com.trackify.tenant.dto.TenantDetailResponse;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
 import com.trackify.tenant.dto.UserRegistrationRequest;
@@ -218,6 +219,50 @@ public class TenantService {
     Tenant tenant =
         tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
     return mapToResponse(tenant);
+  }
+
+  public TenantDetailResponse getTenantDetail(Long id) {
+    Tenant tenant =
+        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
+
+    long totalUsers = 0;
+    long activeUsers = 0;
+    long pendingUsers = 0;
+
+    try {
+      JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
+      Long total = tenantJdbc.queryForObject("SELECT COUNT(*) FROM users", Long.class);
+      Long active =
+          tenantJdbc.queryForObject(
+              "SELECT COUNT(*) FROM users WHERE status = 'ACTIVE'", Long.class);
+      Long pending =
+          tenantJdbc.queryForObject(
+              "SELECT COUNT(*) FROM users WHERE status = 'PENDING'", Long.class);
+      totalUsers = total != null ? total : 0;
+      activeUsers = active != null ? active : 0;
+      pendingUsers = pending != null ? pending : 0;
+    } catch (Exception e) {
+      log.warn("Could not load user stats for tenant {}: {}", tenant.getDomain(), e.getMessage());
+    }
+
+    return TenantDetailResponse.builder()
+        .id(tenant.getId())
+        .name(tenant.getName())
+        .domain(tenant.getDomain())
+        .plan(tenant.getPlan())
+        .status(tenant.getStatus())
+        .createdAt(tenant.getCreatedAt())
+        .updatedAt(tenant.getUpdatedAt())
+        .companyName(tenant.getCompanyName())
+        .logoUrl(tenant.getLogoUrl())
+        .primaryColor(tenant.getPrimaryColor())
+        .dbName(tenant.getDbName())
+        .dbHost(tenant.getDbHost())
+        .dbPort(tenant.getDbPort())
+        .totalUsers(totalUsers)
+        .activeUsers(activeUsers)
+        .pendingUsers(pendingUsers)
+        .build();
   }
 
   @Transactional

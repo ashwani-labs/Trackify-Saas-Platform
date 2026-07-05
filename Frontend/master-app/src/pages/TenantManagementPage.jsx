@@ -3,8 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import {
   loadTenants,
+  loadTenantDetail,
   toggleTenantStatus,
   deleteTenantAsync,
+  clearSelectedTenant,
   selectAllTenants,
   selectTenantLoading,
   selectTenantCurrentPage,
@@ -12,6 +14,7 @@ import {
   selectTenantError,
 } from '../features/tenants/tenantSlice';
 import CreateTenantModal from '../components/tenants/CreateTenantModal';
+import TenantDetailDrawer from '../components/tenants/TenantDetailDrawer';
 import Pagination from '../components/common/Pagination';
 import { useMasterSearch } from '../context/MasterSearchContext';
 import { Globe, Activity, RefreshCw, Plus, Trash2 } from 'lucide-react';
@@ -83,9 +86,14 @@ const TenantManagementPage = () => {
     const result = await dispatch(deleteTenantAsync(id));
     if (deleteTenantAsync.fulfilled.match(result)) {
       toast.success(`"${name}" deleted`);
+      dispatch(clearSelectedTenant());
     } else {
       toast.error(result.payload || 'Failed to delete organization');
     }
+  };
+
+  const handleOpenDetail = (tenantId) => {
+    dispatch(loadTenantDetail(tenantId));
   };
 
   return (
@@ -169,12 +177,17 @@ const TenantManagementPage = () => {
                 filteredTenants.map((tenant) => (
                   <tr key={tenant.id}>
                     <td>
-                      <div className="org-row">
+                      <button
+                        type="button"
+                        className="org-row org-row--clickable"
+                        onClick={() => handleOpenDetail(tenant.id)}
+                        aria-label={`View details for ${tenant.name}`}
+                      >
                         <div className="org-avatar" aria-hidden>
                           {tenant.name.charAt(0)}
                         </div>
                         <span className="org-name">{tenant.name}</span>
-                      </div>
+                      </button>
                     </td>
                     <td>
                       <code className="domain-code">{tenant.domain}.trackify.io</code>
@@ -244,6 +257,11 @@ const TenantManagementPage = () => {
       </div>
 
       <CreateTenantModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      <TenantDetailDrawer
+        onToggleStatus={handleToggleStatus}
+        onDelete={handleDeleteTenant}
+      />
     </div>
   );
 };

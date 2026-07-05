@@ -4,6 +4,7 @@ import com.trackify.common.dto.ApiResponse;
 import com.trackify.common.enums.UserStatus;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantDashboardStatsResponse;
+import com.trackify.tenant.dto.TenantDetailResponse;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
 import com.trackify.tenant.dto.UserRegistrationRequest;
@@ -44,8 +45,8 @@ public class TenantController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<TenantResponse>> getTenant(@PathVariable("id") Long id) {
-    return ResponseEntity.ok(ApiResponse.ok(tenantService.getTenantById(id)));
+  public ResponseEntity<ApiResponse<TenantDetailResponse>> getTenant(@PathVariable("id") Long id) {
+    return ResponseEntity.ok(ApiResponse.ok(tenantService.getTenantDetail(id)));
   }
 
   @PatchMapping("/{id}/status")
