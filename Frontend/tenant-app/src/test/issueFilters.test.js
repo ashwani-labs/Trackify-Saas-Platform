@@ -53,9 +53,9 @@ describe('issueFilters', () => {
       { id: 1, labels: ['bug', 'frontend'] },
       { id: 2, labels: ['docs'] },
     ];
-    expect(
-      applyIssueFilters(issues, { ...DEFAULT_ISSUE_FILTERS, label: 'bug' })
-    ).toEqual([issues[0]]);
+    expect(applyIssueFilters(issues, { ...DEFAULT_ISSUE_FILTERS, label: 'bug' })).toEqual([
+      issues[0],
+    ]);
   });
 
   it('detects active filters', () => {

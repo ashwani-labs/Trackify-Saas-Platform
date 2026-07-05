@@ -148,11 +148,19 @@ const NotificationBell = () => {
               Notifications
             </span>
             <div className="notification-panel__header-actions">
-              <Link to="/notification-preferences" className="btn btn--ghost btn--sm" onClick={() => setOpen(false)}>
+              <Link
+                to="/notification-preferences"
+                className="btn btn--ghost btn--sm"
+                onClick={() => setOpen(false)}
+              >
                 Preferences
               </Link>
               {unreadCount > 0 && (
-                <button type="button" className="btn btn--ghost btn--sm" onClick={handleMarkAllRead}>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  onClick={handleMarkAllRead}
+                >
                   Mark all read
                 </button>
               )}
@@ -187,22 +195,22 @@ const NotificationBell = () => {
 
               const n = entry.notification;
               return (
-              <button
-                key={n.id}
-                type="button"
-                className={`search-result ${!n.read ? 'notification-item--unread' : ''}`}
-                onClick={() => handleSelect(n)}
-              >
-                <div style={{ flex: 1, textAlign: 'left' }}>
-                  <div className="search-result__title">{n.title}</div>
-                  {NOTIFICATION_TYPE_LABELS[n.type] && (
-                    <div className="notification-item__type">
-                      {NOTIFICATION_TYPE_LABELS[n.type]}
-                    </div>
-                  )}
-                  {n.message && <div className="search-result__meta">{n.message}</div>}
-                </div>
-              </button>
+                <button
+                  key={n.id}
+                  type="button"
+                  className={`search-result ${!n.read ? 'notification-item--unread' : ''}`}
+                  onClick={() => handleSelect(n)}
+                >
+                  <div style={{ flex: 1, textAlign: 'left' }}>
+                    <div className="search-result__title">{n.title}</div>
+                    {NOTIFICATION_TYPE_LABELS[n.type] && (
+                      <div className="notification-item__type">
+                        {NOTIFICATION_TYPE_LABELS[n.type]}
+                      </div>
+                    )}
+                    {n.message && <div className="search-result__meta">{n.message}</div>}
+                  </div>
+                </button>
               );
             })}
         </div>

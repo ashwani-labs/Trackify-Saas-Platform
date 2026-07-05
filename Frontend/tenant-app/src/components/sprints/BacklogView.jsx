@@ -143,7 +143,8 @@ const BacklogView = ({ projectId, issues, onCreateSprint }) => {
     try {
       const confirmed = await confirm({
         title: 'Complete sprint?',
-        message: 'Incomplete issues will move back to the backlog. You can start a new sprint afterward.',
+        message:
+          'Incomplete issues will move back to the backlog. You can start a new sprint afterward.',
         confirmLabel: 'Complete sprint',
       });
       if (!confirmed) return;

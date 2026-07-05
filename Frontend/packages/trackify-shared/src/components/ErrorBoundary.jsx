@@ -39,7 +39,11 @@ class ErrorBoundary extends React.Component {
             </p>
 
             <div className="error-boundary__actions">
-              <button type="button" className="btn btn--secondary" onClick={() => (window.location.href = homeHref)}>
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={() => (window.location.href = homeHref)}
+              >
                 <Home size={18} /> Go Home
               </button>
               <button type="button" className="btn btn--primary" onClick={this.handleReset}>

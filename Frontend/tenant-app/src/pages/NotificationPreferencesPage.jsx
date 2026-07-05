@@ -41,7 +41,11 @@ const NotificationPreferencesPage = () => {
         }
       />
 
-      <form className="card workspace-settings-form" style={{ padding: '1.5rem' }} onSubmit={handleSave}>
+      <form
+        className="card workspace-settings-form"
+        style={{ padding: '1.5rem' }}
+        onSubmit={handleSave}
+      >
         <fieldset className="notification-prefs">
           <legend className="sr-only">Notification types</legend>
           {NOTIFICATION_TYPES.map((type) => (

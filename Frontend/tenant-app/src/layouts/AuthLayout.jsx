@@ -31,13 +31,16 @@ const AuthLayout = ({ children, title, subtitle }) => {
             </p>
 
             <ul className="auth-panel__highlights">
-              {HIGHLIGHTS.map(({ icon: Icon, text }) => (
-                <li key={text}>
-                  <CheckCircle2 size={16} className="auth-panel__check" />
-                  <Icon size={16} />
-                  {text}
-                </li>
-              ))}
+              {HIGHLIGHTS.map((item) => {
+                const HighlightIcon = item.icon;
+                return (
+                  <li key={item.text}>
+                    <CheckCircle2 size={16} className="auth-panel__check" />
+                    <HighlightIcon size={16} />
+                    {item.text}
+                  </li>
+                );
+              })}
             </ul>
           </div>
 

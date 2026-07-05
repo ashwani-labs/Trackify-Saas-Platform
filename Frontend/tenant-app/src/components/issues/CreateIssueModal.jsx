@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createIssue } from '../../features/issues/issueSlice';
 import { Modal, Button, Input, Select, Textarea, Alert, useFormFields } from '@trackify/shared';

@@ -4,7 +4,7 @@ import { ROUTES } from '../constants/routes';
 import { useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { useTheme } from '../hooks/useTheme';
-import { useMasterSearch } from '../context/MasterSearchContext';
+import { useMasterSearch } from '../hooks/useMasterSearch';
 import { LayoutDashboard, Users, LogOut, Sun, Moon, Menu, X, Search, Layout } from 'lucide-react';
 
 const DashboardLayout = ({ children }) => {

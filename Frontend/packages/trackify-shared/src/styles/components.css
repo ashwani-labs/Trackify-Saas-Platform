@@ -3070,11 +3070,21 @@
   background: var(--border-main);
 }
 
-.password-strength__bar--1 { background: var(--danger); }
-.password-strength__bar--2 { background: var(--warning); }
-.password-strength__bar--3 { background: var(--warning); }
-.password-strength__bar--4 { background: var(--success); }
-.password-strength__bar--5 { background: var(--success); }
+.password-strength__bar--1 {
+  background: var(--danger);
+}
+.password-strength__bar--2 {
+  background: var(--warning);
+}
+.password-strength__bar--3 {
+  background: var(--warning);
+}
+.password-strength__bar--4 {
+  background: var(--success);
+}
+.password-strength__bar--5 {
+  background: var(--success);
+}
 
 .password-strength__label {
   font-size: 0.75rem;

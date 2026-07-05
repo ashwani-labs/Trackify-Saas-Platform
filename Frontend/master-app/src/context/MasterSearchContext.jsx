@@ -1,9 +1,5 @@
-import { createContext, useContext, useMemo, useState } from 'react';
-
-const MasterSearchContext = createContext({
-  query: '',
-  setQuery: () => {},
-});
+import { useMemo, useState } from 'react';
+import { MasterSearchContext } from './MasterSearchContextCore';
 
 export const MasterSearchProvider = ({ children }) => {
   const [query, setQuery] = useState('');
@@ -12,5 +8,3 @@ export const MasterSearchProvider = ({ children }) => {
 
   return <MasterSearchContext.Provider value={value}>{children}</MasterSearchContext.Provider>;
 };
-
-export const useMasterSearch = () => useContext(MasterSearchContext);

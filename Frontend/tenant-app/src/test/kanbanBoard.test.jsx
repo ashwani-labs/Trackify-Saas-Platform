@@ -18,7 +18,10 @@ const updateIssueMock = vi.fn();
 
 vi.mock('../features/issues/issueSlice', async (importOriginal) => {
   const actual = await importOriginal();
-  const fulfilled = { type: 'issues/update/fulfilled', match: (a) => a.type === 'issues/update/fulfilled' };
+  const fulfilled = {
+    type: 'issues/update/fulfilled',
+    match: (a) => a.type === 'issues/update/fulfilled',
+  };
 
   return {
     ...actual,
@@ -29,7 +32,11 @@ vi.mock('../features/issues/issueSlice', async (importOriginal) => {
         dispatch({ type: fulfilled.type, payload: result });
         return result;
       },
-      { fulfilled, pending: { type: 'issues/update/pending' }, rejected: { type: 'issues/update/rejected' } }
+      {
+        fulfilled,
+        pending: { type: 'issues/update/pending' },
+        rejected: { type: 'issues/update/rejected' },
+      }
     ),
   };
 });

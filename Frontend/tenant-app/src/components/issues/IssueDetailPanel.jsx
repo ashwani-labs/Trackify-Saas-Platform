@@ -49,52 +49,38 @@ const PANEL_TABS = [
 ];
 
 const IssueDetailPanel = () => {
+  const { selectedIssue } = useSelector((s) => s.issues);
+  if (!selectedIssue) return null;
+  return <IssueDetailPanelContent key={selectedIssue.id} issue={selectedIssue} />;
+};
+
+const IssueDetailPanelContent = ({ issue: selectedIssue }) => {
   const dispatch = useDispatch();
   const panelRef = useRef(null);
   const { confirm, dialog } = useConfirmDialog();
-  const {
-    selectedIssue,
-    comments,
-    activity,
-    isCommentLoading,
-    isActivityLoading,
-    isAttachmentLoading,
-  } = useSelector((s) => s.issues);
+  const { comments, activity, isCommentLoading, isActivityLoading, isAttachmentLoading } =
+    useSelector((s) => s.issues);
 
   const [activeTab, setActiveTab] = useState('DETAILS');
   const [commentText, setCommentText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
-    title: '',
-    description: '',
-    status: 'TODO',
-    priority: 'MEDIUM',
-    sprintId: '',
+    title: selectedIssue.title || '',
+    description: selectedIssue.description || '',
+    status: selectedIssue.status || 'TODO',
+    priority: selectedIssue.priority || 'MEDIUM',
+    sprintId: selectedIssue.sprintId || '',
   });
 
   useEffect(() => {
-    if (!selectedIssue?.id) return;
-
-    setActiveTab('DETAILS');
-    setIsEditing(false);
-    setCommentText('');
-    setEditData({
-      title: selectedIssue.title || '',
-      description: selectedIssue.description || '',
-      status: selectedIssue.status || 'TODO',
-      priority: selectedIssue.priority || 'MEDIUM',
-      sprintId: selectedIssue.sprintId || '',
-    });
     dispatch(fetchIssueComments(selectedIssue.id));
     dispatch(fetchIssueActivity(selectedIssue.id));
-  }, [selectedIssue?.id, dispatch]);
+  }, [selectedIssue.id, dispatch]);
 
   const handleClose = useCallback(() => dispatch(clearSelectedIssue()), [dispatch]);
 
-  useFocusTrap(panelRef, Boolean(selectedIssue));
-  useEscapeKey(Boolean(selectedIssue), handleClose);
-
-  if (!selectedIssue) return null;
+  useFocusTrap(panelRef, true);
+  useEscapeKey(true, handleClose);
 
   const issueComments = comments[selectedIssue.id] || [];
   const issueActivity = activity[selectedIssue.id] || [];
@@ -165,7 +151,6 @@ const IssueDetailPanel = () => {
 
       <aside
         ref={panelRef}
-        key={selectedIssue.id}
         className="issue-detail-panel"
         role="dialog"
         aria-modal="true"
@@ -241,22 +226,25 @@ const IssueDetailPanel = () => {
           </div>
 
           <div className="tabs issue-detail-panel__tabs" role="tablist" aria-label="Issue sections">
-            {PANEL_TABS.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === id}
-                className={`tab ${activeTab === id ? 'tab--active' : ''}`}
-                onClick={() => setActiveTab(id)}
-              >
-                <Icon size={16} aria-hidden />
-                {label}
-                {id === 'COMMENTS' && issueComments.length > 0 && (
-                  <span className="issue-detail-panel__tab-count">{issueComments.length}</span>
-                )}
-              </button>
-            ))}
+            {PANEL_TABS.map((tab) => {
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  className={`tab ${activeTab === tab.id ? 'tab--active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  <TabIcon size={16} aria-hidden />
+                  {tab.label}
+                  {tab.id === 'COMMENTS' && issueComments.length > 0 && (
+                    <span className="issue-detail-panel__tab-count">{issueComments.length}</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -453,7 +441,9 @@ const IssueDetailPanel = () => {
 
               <div className="issue-detail-panel__comments">
                 {issueComments.length === 0 ? (
-                  <p className="issue-detail-panel__empty">No comments yet. Start the conversation.</p>
+                  <p className="issue-detail-panel__empty">
+                    No comments yet. Start the conversation.
+                  </p>
                 ) : (
                   issueComments.map((c) => (
                     <div key={c.id} className="issue-detail-panel__comment">

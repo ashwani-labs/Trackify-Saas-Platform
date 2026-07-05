@@ -16,7 +16,7 @@ import {
 import CreateTenantModal from '../components/tenants/CreateTenantModal';
 import TenantDetailDrawer from '../components/tenants/TenantDetailDrawer';
 import Pagination from '../components/common/Pagination';
-import { useMasterSearch } from '../context/MasterSearchContext';
+import { useMasterSearch } from '../hooks/useMasterSearch';
 import { Globe, Activity, RefreshCw, Plus, Trash2 } from 'lucide-react';
 import { PageHeader, Button, Badge, Alert, EmptyState, useConfirmDialog } from '@trackify/shared';
 
@@ -258,10 +258,7 @@ const TenantManagementPage = () => {
 
       <CreateTenantModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
-      <TenantDetailDrawer
-        onToggleStatus={handleToggleStatus}
-        onDelete={handleDeleteTenant}
-      />
+      <TenantDetailDrawer onToggleStatus={handleToggleStatus} onDelete={handleDeleteTenant} />
     </div>
   );
 };

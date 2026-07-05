@@ -13,14 +13,7 @@ import {
   ListTodo,
   Zap,
 } from 'lucide-react';
-import {
-  Alert,
-  Badge,
-  Button,
-  useFocusTrap,
-  useEscapeKey,
-  getTenantTheme,
-} from '@trackify/shared';
+import { Alert, Badge, Button, useFocusTrap, useEscapeKey, getTenantTheme } from '@trackify/shared';
 import {
   clearSelectedTenant,
   selectSelectedTenant,
@@ -60,10 +53,7 @@ const UsageMeter = ({ label, value, limit }) => {
       <span className="tenant-detail-panel__stat-label">{label}</span>
       {hasLimit && (
         <div className="tenant-detail-panel__meter" aria-hidden>
-          <div
-            className="tenant-detail-panel__meter-fill"
-            style={{ width: `${percent}%` }}
-          />
+          <div className="tenant-detail-panel__meter-fill" style={{ width: `${percent}%` }} />
         </div>
       )}
       {hasLimit && (
@@ -253,8 +243,7 @@ const TenantDetailDrawer = ({ onToggleStatus, onDelete }) => {
                         <span
                           className="tenant-detail-panel__swatch"
                           style={{
-                            background:
-                              getTenantTheme(tenant.brandTheme || 'indigo').gradientBrand,
+                            background: getTenantTheme(tenant.brandTheme || 'indigo').gradientBrand,
                           }}
                           aria-hidden
                         />
@@ -292,11 +281,7 @@ const TenantDetailDrawer = ({ onToggleStatus, onDelete }) => {
                   const limits = PLAN_LIMITS[tenant.plan] || PLAN_LIMITS.FREE;
                   return (
                     <div className="tenant-detail-panel__stats tenant-detail-panel__stats--grid">
-                      <UsageMeter
-                        label="Users"
-                        value={tenant.totalUsers}
-                        limit={limits.users}
-                      />
+                      <UsageMeter label="Users" value={tenant.totalUsers} limit={limits.users} />
                       <UsageMeter
                         label="Projects"
                         value={tenant.totalProjects}

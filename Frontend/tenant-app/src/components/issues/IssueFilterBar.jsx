@@ -32,7 +32,10 @@ const IssueFilterBar = () => {
   const [presetName, setPresetName] = useState('');
 
   const assigneeOptions = useMemo(() => {
-    const options = [{ value: 'ALL', label: 'All Assignees' }, { value: 'UNASSIGNED', label: 'Unassigned' }];
+    const options = [
+      { value: 'ALL', label: 'All Assignees' },
+      { value: 'UNASSIGNED', label: 'Unassigned' },
+    ];
     return options.concat(
       [...members]
         .map((member) => ({
@@ -60,7 +63,12 @@ const IssueFilterBar = () => {
     issues.forEach((issue) => {
       (issue.labels || []).forEach((label) => labels.add(label));
     });
-    return [{ value: FILTER_ALL, label: 'All Labels' }, ...Array.from(labels).sort().map((label) => ({ value: label, label }))];
+    return [
+      { value: FILTER_ALL, label: 'All Labels' },
+      ...Array.from(labels)
+        .sort()
+        .map((label) => ({ value: label, label })),
+    ];
   }, [issues]);
 
   const hasActiveFilters = hasActiveIssueFilters(filters);

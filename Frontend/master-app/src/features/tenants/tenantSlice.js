@@ -177,7 +177,10 @@ const tenantSlice = createSlice({
       .addCase(deleteTenantAsync.fulfilled, (state, action) => {
         state.isLoading = false;
         state.list = state.list.filter((t) => t.id !== action.payload);
-        if (state.selectedTenant?.id === action.payload || state.detailTenantId === action.payload) {
+        if (
+          state.selectedTenant?.id === action.payload ||
+          state.detailTenantId === action.payload
+        ) {
           state.selectedTenant = null;
           state.detailTenantId = null;
         }

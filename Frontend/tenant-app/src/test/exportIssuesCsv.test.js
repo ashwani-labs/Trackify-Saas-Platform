@@ -6,8 +6,10 @@ describe('exportIssuesToCsv', () => {
 
   beforeEach(() => {
     clickSpy = vi.fn();
-    global.URL.createObjectURL = vi.fn(() => 'blob:mock');
-    global.URL.revokeObjectURL = vi.fn();
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:mock'),
+      revokeObjectURL: vi.fn(),
+    });
     vi.spyOn(document, 'createElement').mockReturnValue({
       click: clickSpy,
       set href(value) {

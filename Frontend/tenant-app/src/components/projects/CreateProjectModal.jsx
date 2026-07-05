@@ -33,16 +33,14 @@ const PROJECT_TEMPLATES = [
     value: 'marketing',
     label: 'Marketing campaign',
     category: 'Marketing',
-    description:
-      'Plan campaigns, content tasks, and launch milestones across channels.',
+    description: 'Plan campaigns, content tasks, and launch milestones across channels.',
     keyHint: 'MKT',
   },
   {
     value: 'operations',
     label: 'Business operations',
     category: 'Business',
-    description:
-      'Coordinate internal requests, process improvements, and cross-team initiatives.',
+    description: 'Coordinate internal requests, process improvements, and cross-team initiatives.',
     keyHint: 'OPS',
   },
 ];
@@ -69,9 +67,7 @@ const CreateProjectModal = ({ isOpen, onClose }) => {
         template: value,
         category: template.category,
         description: template.description,
-        key: prev.name
-          ? prev.key
-          : template.keyHint || prev.key,
+        key: prev.name ? prev.key : template.keyHint || prev.key,
       }));
       return;
     }

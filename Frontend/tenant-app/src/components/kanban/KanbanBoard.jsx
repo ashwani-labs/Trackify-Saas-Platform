@@ -33,7 +33,10 @@ const KanbanBoard = ({ filteredIssues, onCreateIssue }) => {
   const [dragOverColumn, setDragOverColumn] = useState(null);
   const [liveMessage, setLiveMessage] = useState('');
 
-  const issuesByStatus = useCallback((status) => issues.filter((i) => i.status === status), [issues]);
+  const issuesByStatus = useCallback(
+    (status) => issues.filter((i) => i.status === status),
+    [issues]
+  );
 
   const handleDragStart = (issueId) => {
     setDraggingIssueId(issueId);

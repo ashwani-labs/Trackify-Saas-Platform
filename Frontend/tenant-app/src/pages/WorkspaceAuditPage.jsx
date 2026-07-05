@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import { PageHeader, Button } from '@trackify/shared';
 import api from '../utils/axios';
 import ProjectActivityFeed from '../components/projects/ProjectActivityFeed';

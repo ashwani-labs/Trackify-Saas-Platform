@@ -6,7 +6,16 @@ import Pagination from '../components/common/Pagination';
 import { Globe, Copy, Search, RefreshCw, UserPlus } from 'lucide-react';
 import { registerUser } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
-import { PageHeader, Button, Input, Modal, Badge, Alert, EmptyState, useConfirmDialog } from '@trackify/shared';
+import {
+  PageHeader,
+  Button,
+  Input,
+  Modal,
+  Badge,
+  Alert,
+  EmptyState,
+  useConfirmDialog,
+} from '@trackify/shared';
 import { getTenantRegisterUrl, copyToClipboard } from '../utils/workspaceUrl';
 
 const STATUS_VARIANTS = {
@@ -129,18 +138,18 @@ const TeamPage = () => {
       />
 
       <div className="team-page-sections">
-      {isSoloWorkspace && (
-        <EmptyState
-          icon={<UserPlus size={40} />}
-          title="You're the only member so far"
-          description="Invite teammates to collaborate on projects, or share your self-registration link below so others can join your workspace."
-          action={
-            <Button leftIcon={<UserPlus size={16} />} onClick={() => setIsModalOpen(true)}>
-              Invite Your First Teammate
-            </Button>
-          }
-        />
-      )}
+        {isSoloWorkspace && (
+          <EmptyState
+            icon={<UserPlus size={40} />}
+            title="You're the only member so far"
+            description="Invite teammates to collaborate on projects, or share your self-registration link below so others can join your workspace."
+            action={
+              <Button leftIcon={<UserPlus size={16} />} onClick={() => setIsModalOpen(true)}>
+                Invite Your First Teammate
+              </Button>
+            }
+          />
+        )}
 
         <div className="card team-banner">
           <div className="team-banner__content">
@@ -162,118 +171,124 @@ const TeamPage = () => {
         </div>
 
         <div className="card card--flush">
-        <div className="card-section-header">
-          <h2 className="card-section-title">Members ({allUsersTotalElements ?? 0})</h2>
-          <div className="search-field">
-            <div className="input-wrap">
-              <Search className="input-wrap__icon" size={14} aria-hidden />
-              <input
-                className="input input--with-icon input--sm"
-                placeholder="Filter members..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                aria-label="Filter team members"
-              />
+          <div className="card-section-header">
+            <h2 className="card-section-title">Members ({allUsersTotalElements ?? 0})</h2>
+            <div className="search-field">
+              <div className="input-wrap">
+                <Search className="input-wrap__icon" size={14} aria-hidden />
+                <input
+                  className="input input--with-icon input--sm"
+                  placeholder="Filter members..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  aria-label="Filter team members"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {error && (
-          <Alert variant="danger" className="alert--inset">
-            {error}
-          </Alert>
-        )}
+          {error && (
+            <Alert variant="danger" className="alert--inset">
+              {error}
+            </Alert>
+          )}
 
-        <div className="table-wrapper table-wrapper--embedded">
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: '35%' }}>Member</th>
-                <th style={{ width: '15%' }}>Role</th>
-                <th style={{ width: '15%' }}>Status</th>
-                <th style={{ width: '20%' }}>Joined</th>
-                <th style={{ width: '15%', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading && allUsers.length === 0 ? (
-                [...Array(5)].map((_, i) => (
-                  <tr key={`skel-${i}`}>
-                    <td colSpan={5}>
-                      <div className="skeleton" style={{ height: '40px', width: '100%' }} />
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <>
-                  {filtered.map((u) => (
-                    <tr key={u.id}>
-                      <td>
-                        <div className="member-cell">
-                          <div className="avatar-md" aria-hidden>
-                            {(u.fullName || u.email).charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="member-name">{u.fullName || '—'}</div>
-                            <div className="member-email">{u.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <Badge variant="primary">{u.role}</Badge>
-                      </td>
-                      <td>
-                        <Badge variant={STATUS_VARIANTS[u.status] || 'primary'}>{u.status}</Badge>
-                      </td>
-                      <td className="member-email">{new Date(u.createdAt).toLocaleDateString()}</td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="table-actions">
-                          {u.status !== 'ACTIVE' && u.role !== 'ADMIN' && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => handleStatusChange(u.id, 'ACTIVE', u.fullName || u.email)}
-                            >
-                              Activate
-                            </Button>
-                          )}
-                          {u.status === 'ACTIVE' && u.role !== 'ADMIN' && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="btn--danger-text"
-                              onClick={() => handleStatusChange(u.id, 'INACTIVE', u.fullName || u.email)}
-                            >
-                              Deactivate
-                            </Button>
-                          )}
-                        </div>
+          <div className="table-wrapper table-wrapper--embedded">
+            <table>
+              <thead>
+                <tr>
+                  <th style={{ width: '35%' }}>Member</th>
+                  <th style={{ width: '15%' }}>Role</th>
+                  <th style={{ width: '15%' }}>Status</th>
+                  <th style={{ width: '20%' }}>Joined</th>
+                  <th style={{ width: '15%', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading && allUsers.length === 0 ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={`skel-${i}`}>
+                      <td colSpan={5}>
+                        <div className="skeleton" style={{ height: '40px', width: '100%' }} />
                       </td>
                     </tr>
-                  ))}
-                  {filtered.length === 0 && !isLoading && (
-                    <tr>
-                      <td colSpan={5} className="table-empty">
-                        No team members found.
-                      </td>
-                    </tr>
-                  )}
-                </>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {allUsersTotalPages > 1 && (
-          <div className="card-footer">
-            <Pagination
-              currentPage={allUsersPage}
-              totalPages={allUsersTotalPages}
-              onPageChange={(page) => dispatch(fetchAllUsers({ tenantId, page, size: 10 }))}
-            />
+                  ))
+                ) : (
+                  <>
+                    {filtered.map((u) => (
+                      <tr key={u.id}>
+                        <td>
+                          <div className="member-cell">
+                            <div className="avatar-md" aria-hidden>
+                              {(u.fullName || u.email).charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="member-name">{u.fullName || '—'}</div>
+                              <div className="member-email">{u.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <Badge variant="primary">{u.role}</Badge>
+                        </td>
+                        <td>
+                          <Badge variant={STATUS_VARIANTS[u.status] || 'primary'}>{u.status}</Badge>
+                        </td>
+                        <td className="member-email">
+                          {new Date(u.createdAt).toLocaleDateString()}
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div className="table-actions">
+                            {u.status !== 'ACTIVE' && u.role !== 'ADMIN' && (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() =>
+                                  handleStatusChange(u.id, 'ACTIVE', u.fullName || u.email)
+                                }
+                              >
+                                Activate
+                              </Button>
+                            )}
+                            {u.status === 'ACTIVE' && u.role !== 'ADMIN' && (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className="btn--danger-text"
+                                onClick={() =>
+                                  handleStatusChange(u.id, 'INACTIVE', u.fullName || u.email)
+                                }
+                              >
+                                Deactivate
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {filtered.length === 0 && !isLoading && (
+                      <tr>
+                        <td colSpan={5} className="table-empty">
+                          No team members found.
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+
+          {allUsersTotalPages > 1 && (
+            <div className="card-footer">
+              <Pagination
+                currentPage={allUsersPage}
+                totalPages={allUsersTotalPages}
+                onPageChange={(page) => dispatch(fetchAllUsers({ tenantId, page, size: 10 }))}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <Modal

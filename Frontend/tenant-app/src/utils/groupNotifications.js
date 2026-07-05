@@ -52,7 +52,9 @@ export function groupNotifications(notifications) {
   );
 
   return [...singles, ...grouped].sort(
-    (a, b) => new Date(b.sortAt || b.notification?.createdAt) - new Date(a.sortAt || a.notification?.createdAt)
+    (a, b) =>
+      new Date(b.sortAt || b.notification?.createdAt) -
+      new Date(a.sortAt || a.notification?.createdAt)
   );
 }
 

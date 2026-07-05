@@ -1,5 +1,13 @@
-import React, { useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import React from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from 'recharts';
 import { computeBurndownData } from '../../utils/sprintBurndown';
 
 const CHART_TOOLTIP_STYLE = {

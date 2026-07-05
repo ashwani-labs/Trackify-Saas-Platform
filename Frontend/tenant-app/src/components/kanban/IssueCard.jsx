@@ -19,7 +19,14 @@ const STATUS_LABELS = {
   DONE: 'Done',
 };
 
-const IssueCard = ({ issue, isDragging, onDragStart, onDragEnd, onPriorityChange, onStatusChange }) => {
+const IssueCard = ({
+  issue,
+  isDragging,
+  onDragStart,
+  onDragEnd,
+  onPriorityChange,
+  onStatusChange,
+}) => {
   const dispatch = useDispatch();
   const skipClickRef = useRef(false);
 

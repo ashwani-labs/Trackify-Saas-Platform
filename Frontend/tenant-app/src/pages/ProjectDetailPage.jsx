@@ -6,7 +6,12 @@ import {
   fetchProjectMembers,
   fetchProjectActivity,
 } from '../features/projects/projectSlice';
-import { fetchIssuesByProject, fetchIssueByKey, clearIssues, setFilters } from '../features/issues/issueSlice';
+import {
+  fetchIssuesByProject,
+  fetchIssueByKey,
+  clearIssues,
+  setFilters,
+} from '../features/issues/issueSlice';
 import { fetchSprintsByProject } from '../features/sprints/sprintSlice';
 import KanbanBoard from '../components/kanban/KanbanBoard';
 import CreateIssueModal from '../components/issues/CreateIssueModal';
@@ -155,11 +160,7 @@ const ProjectDetailPage = () => {
         }
         actions={
           <>
-            <Button
-              variant="secondary"
-              leftIcon={<Download size={16} />}
-              onClick={handleExportCsv}
-            >
+            <Button variant="secondary" leftIcon={<Download size={16} />} onClick={handleExportCsv}>
               Export CSV
             </Button>
             <Button

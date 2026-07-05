@@ -32,7 +32,9 @@ const PasswordStrength = ({ password, className = '' }) => {
       </div>
       {label && <span className="password-strength__label">{label}</span>}
       <ul className="password-strength__checks">
-        <li className={checks.length ? 'password-strength__check--ok' : ''}>At least 8 characters</li>
+        <li className={checks.length ? 'password-strength__check--ok' : ''}>
+          At least 8 characters
+        </li>
         <li className={checks.upper ? 'password-strength__check--ok' : ''}>Uppercase letter</li>
         <li className={checks.lower ? 'password-strength__check--ok' : ''}>Lowercase letter</li>
         <li className={checks.number ? 'password-strength__check--ok' : ''}>Number</li>

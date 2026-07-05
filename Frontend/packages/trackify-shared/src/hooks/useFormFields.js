@@ -28,7 +28,9 @@ export function useFormFields(initialValues, validators = {}) {
       if (message) nextErrors[name] = message;
     });
     setErrors(nextErrors);
-    setTouched(Object.keys(validatorsRef.current).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+    setTouched(
+      Object.keys(validatorsRef.current).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+    );
     return Object.keys(nextErrors).length === 0;
   }, [validateField, values]);
 
@@ -80,7 +82,10 @@ export function useFormFields(initialValues, validators = {}) {
     setErrors({});
   }, []);
 
-  const getFieldError = useCallback((name) => (touched[name] ? errors[name] : undefined), [errors, touched]);
+  const getFieldError = useCallback(
+    (name) => (touched[name] ? errors[name] : undefined),
+    [errors, touched]
+  );
 
   const isValid = Object.keys(validatorsRef.current).every((name) => !validateField(name, values));
 

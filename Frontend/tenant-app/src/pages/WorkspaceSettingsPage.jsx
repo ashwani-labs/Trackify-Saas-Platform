@@ -1,7 +1,16 @@
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { PageHeader, Input, Button, Alert, Badge, ThemeSelector, DEFAULT_TENANT_THEME, getTenantTheme } from '@trackify/shared';
+import {
+  PageHeader,
+  Input,
+  Button,
+  Alert,
+  Badge,
+  ThemeSelector,
+  DEFAULT_TENANT_THEME,
+  getTenantTheme,
+} from '@trackify/shared';
 import { Link } from 'react-router-dom';
 import { useFormFields } from '@trackify/shared';
 import { updateWorkspaceBranding } from '../services/workspaceApi';
@@ -96,90 +105,90 @@ const WorkspaceSettingsPage = () => {
       />
 
       <div className="page-sections">
-      {saveError && <Alert className="page-alert">{saveError}</Alert>}
+        {saveError && <Alert className="page-alert">{saveError}</Alert>}
 
-      <div className="stats-grid">
-        <div className="stat-card stat-card--primary">
-          <div className="stat-header">
-            <span className="stat-label">Current plan</span>
+        <div className="stats-grid">
+          <div className="stat-card stat-card--primary">
+            <div className="stat-header">
+              <span className="stat-label">Current plan</span>
+            </div>
+            <div className="stat-value" style={{ fontSize: '1.25rem' }}>
+              <Badge variant="primary">{planInfo.label}</Badge>
+            </div>
           </div>
-          <div className="stat-value" style={{ fontSize: '1.25rem' }}>
-            <Badge variant="primary">{planInfo.label}</Badge>
+          <div className="stat-card">
+            <div className="stat-header">
+              <span className="stat-label">User seats</span>
+            </div>
+            <div className="stat-value">{planInfo.users}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-header">
+              <span className="stat-label">Projects</span>
+            </div>
+            <div className="stat-value">{planInfo.projects}</div>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-header">
-            <span className="stat-label">User seats</span>
-          </div>
-          <div className="stat-value">{planInfo.users}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-header">
-            <span className="stat-label">Projects</span>
-          </div>
-          <div className="stat-value">{planInfo.projects}</div>
-        </div>
-      </div>
 
-      <div className="workspace-settings-links card">
-        <Link to="/workspace-audit" className="workspace-settings-links__item">
-          View workspace audit log
-        </Link>
-        <Link to="/notification-preferences" className="workspace-settings-links__item">
-          Notification preferences
-        </Link>
-      </div>
+        <div className="workspace-settings-links card">
+          <Link to="/workspace-audit" className="workspace-settings-links__item">
+            View workspace audit log
+          </Link>
+          <Link to="/notification-preferences" className="workspace-settings-links__item">
+            Notification preferences
+          </Link>
+        </div>
 
-      <div className="card">
-        <form onSubmit={handleSubmit} className="workspace-settings-form">
-          <Input
-            id="companyName"
-            name="companyName"
-            label="Company name"
-            value={values.companyName}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={getFieldError('companyName')}
-            required
-          />
-          <Input
-            id="logoUrl"
-            name="logoUrl"
-            label="Logo URL"
-            value={values.logoUrl}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={getFieldError('logoUrl')}
-            placeholder="https://example.com/logo.png"
-          />
-          <ThemeSelector
-            value={values.theme}
-            onChange={(theme) => setFieldValue('theme', theme)}
-            label="Workspace theme"
-          />
-          <div className="workspace-settings-form__preview">
-            <span
-              className="tenant-detail-panel__swatch"
-              style={{ background: getTenantTheme(values.theme).gradientBrand }}
-              aria-hidden
+        <div className="card">
+          <form onSubmit={handleSubmit} className="workspace-settings-form">
+            <Input
+              id="companyName"
+              name="companyName"
+              label="Company name"
+              value={values.companyName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={getFieldError('companyName')}
+              required
             />
-            {values.logoUrl ? (
-              <img src={values.logoUrl} alt="" className="tenant-detail-panel__logo" />
-            ) : null}
-            <span className="form-hint">{getTenantTheme(values.theme).label} theme preview</span>
-          </div>
-          {workspaceUrl && (
-            <p className="form-hint">
-              Workspace URL: <code>{workspaceUrl}</code>
-            </p>
-          )}
-          <div className="workspace-settings-form__actions">
-            <Button type="submit" isLoading={saving}>
-              Save branding
-            </Button>
-          </div>
-        </form>
-      </div>
+            <Input
+              id="logoUrl"
+              name="logoUrl"
+              label="Logo URL"
+              value={values.logoUrl}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={getFieldError('logoUrl')}
+              placeholder="https://example.com/logo.png"
+            />
+            <ThemeSelector
+              value={values.theme}
+              onChange={(theme) => setFieldValue('theme', theme)}
+              label="Workspace theme"
+            />
+            <div className="workspace-settings-form__preview">
+              <span
+                className="tenant-detail-panel__swatch"
+                style={{ background: getTenantTheme(values.theme).gradientBrand }}
+                aria-hidden
+              />
+              {values.logoUrl ? (
+                <img src={values.logoUrl} alt="" className="tenant-detail-panel__logo" />
+              ) : null}
+              <span className="form-hint">{getTenantTheme(values.theme).label} theme preview</span>
+            </div>
+            {workspaceUrl && (
+              <p className="form-hint">
+                Workspace URL: <code>{workspaceUrl}</code>
+              </p>
+            )}
+            <div className="workspace-settings-form__actions">
+              <Button type="submit" isLoading={saving}>
+                Save branding
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

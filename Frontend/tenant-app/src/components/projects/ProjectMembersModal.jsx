@@ -161,7 +161,9 @@ const ProjectMembersModal = ({ isOpen, onClose, projectId }) => {
                   type="button"
                   className="theme-toggle"
                   style={{ color: 'var(--danger)', width: '32px', height: '32px' }}
-                  onClick={() => handleRemoveMember(member.userId, member.userName || member.userEmail)}
+                  onClick={() =>
+                    handleRemoveMember(member.userId, member.userName || member.userEmail)
+                  }
                   aria-label={`Remove ${member.userName || member.userEmail}`}
                 >
                   <UserMinus size={18} />

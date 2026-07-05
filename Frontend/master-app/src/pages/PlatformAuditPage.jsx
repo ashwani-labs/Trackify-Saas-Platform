@@ -75,9 +75,7 @@ const PlatformAuditPage = () => {
               ) : (
                 logs.map((log) => (
                   <tr key={log.id}>
-                    <td className="member-email">
-                      {new Date(log.createdAt).toLocaleString()}
-                    </td>
+                    <td className="member-email">{new Date(log.createdAt).toLocaleString()}</td>
                     <td>
                       <Badge variant={actionVariant(log.action)}>{log.action}</Badge>
                     </td>

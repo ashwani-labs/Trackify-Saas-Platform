@@ -94,7 +94,11 @@ const DashboardPage = () => {
   const hasProject = (stats?.totalProjects ?? 0) > 0;
   const hasTeam = (allUsersTotalElements ?? 0) > 1;
 
-  const showOnboarding = isAdmin && !isLoading && !usersLoading && (!hasProject || !hasTeam || (stats?.totalIssues ?? 0) === 0);
+  const showOnboarding =
+    isAdmin &&
+    !isLoading &&
+    !usersLoading &&
+    (!hasProject || !hasTeam || (stats?.totalIssues ?? 0) === 0);
 
   const onboardingSteps = useMemo(
     () => [
@@ -261,228 +265,234 @@ const DashboardPage = () => {
       />
 
       <div className="dashboard-sections">
-      {error && <Alert className="page-alert">{error}</Alert>}
+        {error && <Alert className="page-alert">{error}</Alert>}
 
-      {showOnboarding && (
-        <OnboardingChecklist
-          title="Welcome to your workspace"
-          subtitle="A quick setup checklist — finish these steps to unlock the full Trackify experience."
-          steps={onboardingSteps}
-        />
-      )}
+        {showOnboarding && (
+          <OnboardingChecklist
+            title="Welcome to your workspace"
+            subtitle="A quick setup checklist — finish these steps to unlock the full Trackify experience."
+            steps={onboardingSteps}
+          />
+        )}
 
-      {user?.role === 'ADMIN' && (
-        <div className="card workspace-card">
-          <div className="workspace-card__header">
-            <Globe className="workspace-card__icon" size={20} aria-hidden />
-            <h3 className="workspace-card__title">Workspace Configuration</h3>
-          </div>
-          <div className="workspace-meta-grid">
-            <div className="meta-field">
-              <span className="meta-field__label">Workspace ID</span>
-              <div className="meta-field__row">
-                <code className="code-inline">{tenantId}</code>
-                <Button
-                  variant="ghost"
-                  className="icon-btn"
-                  aria-label="Copy workspace ID"
-                  onClick={() => handleCopy(tenantId, 'ID')}
-                  leftIcon={<Copy size={12} />}
-                />
+        {user?.role === 'ADMIN' && (
+          <div className="card workspace-card">
+            <div className="workspace-card__header">
+              <Globe className="workspace-card__icon" size={20} aria-hidden />
+              <h3 className="workspace-card__title">Workspace Configuration</h3>
+            </div>
+            <div className="workspace-meta-grid">
+              <div className="meta-field">
+                <span className="meta-field__label">Workspace ID</span>
+                <div className="meta-field__row">
+                  <code className="code-inline">{tenantId}</code>
+                  <Button
+                    variant="ghost"
+                    className="icon-btn"
+                    aria-label="Copy workspace ID"
+                    onClick={() => handleCopy(tenantId, 'ID')}
+                    leftIcon={<Copy size={12} />}
+                  />
+                </div>
+              </div>
+              <div className="meta-field">
+                <span className="meta-field__label">Login URL</span>
+                <div className="meta-field__row">
+                  <code className="code-inline">{tenantUrl}</code>
+                  <Button
+                    variant="ghost"
+                    className="icon-btn"
+                    aria-label="Copy login URL"
+                    onClick={() => handleCopy(tenantUrl, 'URL')}
+                    leftIcon={<Copy size={12} />}
+                  />
+                </div>
               </div>
             </div>
-            <div className="meta-field">
-              <span className="meta-field__label">Login URL</span>
-              <div className="meta-field__row">
-                <code className="code-inline">{tenantUrl}</code>
-                <Button
-                  variant="ghost"
-                  className="icon-btn"
-                  aria-label="Copy login URL"
-                  onClick={() => handleCopy(tenantUrl, 'URL')}
-                  leftIcon={<Copy size={12} />}
-                />
-              </div>
-            </div>
           </div>
+        )}
+
+        {isAdmin && (
+          <div className="stats-grid">
+            {statCards.map((card) => (
+              <div key={card.label} className={`stat-card stat-card--${card.accent}`}>
+                <div className="stat-header stat-header--between">
+                  <span className="stat-label">{card.label}</span>
+                  <span className={`stat-card__icon--${card.accent}`}>{card.icon}</span>
+                </div>
+                <div className="stat-value stat-value--lg">
+                  {isLoading ? (
+                    <div className="skeleton" style={{ height: '2rem', width: '40%' }} />
+                  ) : (
+                    card.value
+                  )}
+                </div>
+                <div className="stat-sub">{card.sub}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="stats-grid stats-grid--insights">
+          {insightCards.map((card) => {
+            const content = (
+              <>
+                <div className="stat-header stat-header--between">
+                  <span className="stat-label">{card.label}</span>
+                  <span className={`stat-card__icon--${card.accent}`}>{card.icon}</span>
+                </div>
+                <div className="stat-value">
+                  {isLoading ? (
+                    <div className="skeleton" style={{ height: '1.75rem', width: '30%' }} />
+                  ) : (
+                    card.value
+                  )}
+                </div>
+              </>
+            );
+
+            if (card.onClick) {
+              return (
+                <button
+                  key={card.label}
+                  type="button"
+                  className={`stat-card stat-card--${card.accent} stat-card--interactive`}
+                  onClick={card.onClick}
+                >
+                  {content}
+                </button>
+              );
+            }
+
+            return (
+              <div key={card.label} className={`stat-card stat-card--${card.accent}`}>
+                {content}
+              </div>
+            );
+          })}
         </div>
-      )}
 
-      {isAdmin && (
-      <div className="stats-grid">
-        {statCards.map((card) => (
-          <div key={card.label} className={`stat-card stat-card--${card.accent}`}>
-            <div className="stat-header stat-header--between">
-              <span className="stat-label">{card.label}</span>
-              <span className={`stat-card__icon--${card.accent}`}>{card.icon}</span>
-            </div>
-            <div className="stat-value stat-value--lg">
-              {isLoading ? (
-                <div className="skeleton" style={{ height: '2rem', width: '40%' }} />
-              ) : (
-                card.value
-              )}
-            </div>
-            <div className="stat-sub">{card.sub}</div>
-          </div>
-        ))}
-      </div>
-      )}
+        <div className="dashboard-grid dashboard-grid--widgets">
+          <MyOpenIssuesWidget issues={dashboard?.myOpenIssues} isLoading={isLoading} />
+          <RecentActivityWidget activity={dashboard?.recentActivity} isLoading={isLoading} />
+        </div>
 
-      <div className="stats-grid stats-grid--insights">
-        {insightCards.map((card) => {
-          const content = (
-            <>
-              <div className="stat-header stat-header--between">
-                <span className="stat-label">{card.label}</span>
-                <span className={`stat-card__icon--${card.accent}`}>{card.icon}</span>
-              </div>
-              <div className="stat-value">
+        {isAdmin && (
+          <div className="dashboard-grid">
+            <div className="card chart-card">
+              <h3 className="chart-title">Issue Status Distribution</h3>
+              <div className="chart-container">
                 {isLoading ? (
-                  <div className="skeleton" style={{ height: '1.75rem', width: '30%' }} />
+                  <div className="skeleton chart-empty" />
+                ) : !hasIssueChartData ? (
+                  <div className="chart-empty">
+                    <p>No issues yet.</p>
+                    <Button size="sm" onClick={() => navigate('/projects')}>
+                      Create a project
+                    </Button>
+                  </div>
                 ) : (
-                  card.value
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={issueDistributionData}
+                        innerRadius={70}
+                        outerRadius={90}
+                        paddingAngle={4}
+                        dataKey="value"
+                        onClick={(_, index) => handleStatusChartClick(issueDistributionData[index])}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {issueDistributionData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
+                      <Legend
+                        verticalAlign="bottom"
+                        iconType="circle"
+                        wrapperStyle={{ fontSize: '0.8rem', paddingTop: '1rem' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
                 )}
               </div>
-            </>
-          );
-
-          if (card.onClick) {
-            return (
-              <button
-                key={card.label}
-                type="button"
-                className={`stat-card stat-card--${card.accent} stat-card--interactive`}
-                onClick={card.onClick}
-              >
-                {content}
-              </button>
-            );
-          }
-
-          return (
-            <div key={card.label} className={`stat-card stat-card--${card.accent}`}>
-              {content}
             </div>
-          );
-        })}
-      </div>
 
-      <div className="dashboard-grid dashboard-grid--widgets">
-        <MyOpenIssuesWidget issues={dashboard?.myOpenIssues} isLoading={isLoading} />
-        <RecentActivityWidget activity={dashboard?.recentActivity} isLoading={isLoading} />
-      </div>
-
-      {isAdmin && (
-      <div className="dashboard-grid">
-        <div className="card chart-card">
-          <h3 className="chart-title">Issue Status Distribution</h3>
-          <div className="chart-container">
-            {isLoading ? (
-              <div className="skeleton chart-empty" />
-            ) : !hasIssueChartData ? (
-              <div className="chart-empty">
-                <p>No issues yet.</p>
-                <Button size="sm" onClick={() => navigate('/projects')}>
-                  Create a project
-                </Button>
+            <div className="card chart-card">
+              <h3 className="chart-title">Issues by Priority</h3>
+              <div className="chart-container">
+                {isLoading ? (
+                  <div className="skeleton chart-empty" />
+                ) : !hasPriorityChartData ? (
+                  <div className="chart-empty">
+                    <p>No priority data yet.</p>
+                    <Button size="sm" onClick={() => navigate('/projects')}>
+                      Go to projects
+                    </Button>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={priorityData}
+                      margin={{ top: 20, right: 20, left: 0, bottom: 0 }}
+                    >
+                      <XAxis
+                        dataKey="name"
+                        stroke="var(--text-muted)"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis hide allowDecimals={false} />
+                      <Tooltip
+                        cursor={{ fill: 'transparent' }}
+                        contentStyle={CHART_TOOLTIP_STYLE}
+                      />
+                      <Bar
+                        dataKey="count"
+                        name="Issues"
+                        radius={[4, 4, 0, 0]}
+                        barSize={36}
+                        onClick={(entry) => handlePriorityChartClick(entry)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {priorityData.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={issueDistributionData}
-                    innerRadius={70}
-                    outerRadius={90}
-                    paddingAngle={4}
-                    dataKey="value"
-                    onClick={(_, index) => handleStatusChartClick(issueDistributionData[index])}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {issueDistributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
-                  <Legend
-                    verticalAlign="bottom"
-                    iconType="circle"
-                    wrapperStyle={{ fontSize: '0.8rem', paddingTop: '1rem' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        <RecentProjectsWidget projects={dashboard?.recentProjects} isLoading={isLoading} />
+
+        <section className="dashboard-quick-access">
+          <h2 className="section-title">Quick Access</h2>
+          <div className="quick-actions-grid">
+            <div className="action-card action-card__body" onClick={() => navigate('/projects')}>
+              <div className="action-card__icon action-card__icon--primary">
+                <FolderKanban size={24} />
+              </div>
+              <span className="action-card__title">Projects</span>
+              <p className="action-card__desc">Manage project boards and track team velocity.</p>
+            </div>
+
+            {user?.role === 'ADMIN' && (
+              <div className="action-card action-card__body" onClick={() => navigate('/team')}>
+                <div className="action-card__icon action-card__icon--accent">
+                  <Users size={24} />
+                </div>
+                <span className="action-card__title">Team Management</span>
+                <p className="action-card__desc">Invite members and manage permissions.</p>
+              </div>
             )}
           </div>
-        </div>
-
-        <div className="card chart-card">
-          <h3 className="chart-title">Issues by Priority</h3>
-          <div className="chart-container">
-            {isLoading ? (
-              <div className="skeleton chart-empty" />
-            ) : !hasPriorityChartData ? (
-              <div className="chart-empty">
-                <p>No priority data yet.</p>
-                <Button size="sm" onClick={() => navigate('/projects')}>
-                  Go to projects
-                </Button>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={priorityData} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
-                  <XAxis
-                    dataKey="name"
-                    stroke="var(--text-muted)"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis hide allowDecimals={false} />
-                  <Tooltip cursor={{ fill: 'transparent' }} contentStyle={CHART_TOOLTIP_STYLE} />
-                  <Bar
-                    dataKey="count"
-                    name="Issues"
-                    radius={[4, 4, 0, 0]}
-                    barSize={36}
-                    onClick={(entry) => handlePriorityChartClick(entry)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {priorityData.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-      </div>
-      )}
-
-      <RecentProjectsWidget projects={dashboard?.recentProjects} isLoading={isLoading} />
-
-      <section className="dashboard-quick-access">
-        <h2 className="section-title">Quick Access</h2>
-        <div className="quick-actions-grid">
-          <div className="action-card action-card__body" onClick={() => navigate('/projects')}>
-            <div className="action-card__icon action-card__icon--primary">
-              <FolderKanban size={24} />
-            </div>
-            <span className="action-card__title">Projects</span>
-            <p className="action-card__desc">Manage project boards and track team velocity.</p>
-          </div>
-
-          {user?.role === 'ADMIN' && (
-            <div className="action-card action-card__body" onClick={() => navigate('/team')}>
-              <div className="action-card__icon action-card__icon--accent">
-                <Users size={24} />
-              </div>
-              <span className="action-card__title">Team Management</span>
-              <p className="action-card__desc">Invite members and manage permissions.</p>
-            </div>
-          )}
-        </div>
-      </section>
+        </section>
       </div>
     </div>
   );

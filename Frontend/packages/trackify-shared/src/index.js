@@ -16,7 +16,10 @@ export { default as ErrorBoundary } from './components/ErrorBoundary.jsx';
 export { default as EmptyState } from './components/EmptyState.jsx';
 export { default as OnboardingChecklist } from './components/OnboardingChecklist.jsx';
 export { default as PageHeader } from './components/PageHeader.jsx';
-export { default as PasswordStrength, getPasswordStrength } from './components/PasswordStrength.jsx';
+export {
+  default as PasswordStrength,
+  getPasswordStrength,
+} from './components/PasswordStrength.jsx';
 export { default as KeyboardShortcutsPanel } from './components/KeyboardShortcutsPanel.jsx';
 export { default as ThemeSelector } from './components/ThemeSelector.jsx';
 export { useFocusTrap, useEscapeKey } from './hooks/useFocusTrap.js';
