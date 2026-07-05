@@ -12,6 +12,7 @@ import com.trackify.project.repository.ActivityEventRepository;
 import com.trackify.project.repository.IssueRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,7 +57,7 @@ class ActivityServiceTest {
         .thenReturn(new PageImpl<>(List.of(statusEvent, sprintEvent)));
 
     Issue issue = Issue.builder().id(100L).issueKey("PROJ-42").build();
-    when(issueRepository.findAllById(List.of(100L))).thenReturn(List.of(issue));
+    when(issueRepository.findAllById(Set.of(100L))).thenReturn(List.of(issue));
 
     Page<ActivityEventResponse> page = activityService.getProjectActivity(10L, pageable);
 
@@ -80,7 +81,7 @@ class ActivityServiceTest {
     Pageable pageable = PageRequest.of(0, 25);
     when(activityEventRepository.findAllByOrderByCreatedAtDesc(pageable))
         .thenReturn(new PageImpl<>(List.of(event)));
-    when(issueRepository.findAllById(List.of(200L)))
+    when(issueRepository.findAllById(Set.of(200L)))
         .thenReturn(List.of(Issue.builder().id(200L).issueKey("OPS-7").build()));
 
     Page<ActivityEventResponse> page = activityService.getWorkspaceActivity(pageable);

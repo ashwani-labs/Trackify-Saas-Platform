@@ -72,8 +72,8 @@ class DashboardServiceTest {
             .createdAt(LocalDateTime.now())
             .build();
 
-    when(projectService.getProjectStats(5L, "USER")).thenReturn(summary);
     when(projectRepository.findProjectIdsByUserId(5L)).thenReturn(List.of(10L));
+    when(projectService.getProjectStatsForScope(false, List.of(10L))).thenReturn(summary);
     when(notificationService.getUnreadCount(5L)).thenReturn(2L);
     when(issueRepository.countByAssigneeIdAndStatusNot(5L, IssueStatus.DONE)).thenReturn(1L);
     when(sprintRepository.countByStatusAndProjectIds(SprintStatus.ACTIVE, List.of(10L)))

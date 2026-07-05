@@ -14,6 +14,7 @@ import com.trackify.project.entity.Notification;
 import com.trackify.project.entity.Project;
 import com.trackify.project.enums.NotificationReferenceType;
 import com.trackify.project.enums.NotificationType;
+import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.NotificationRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,12 +33,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 class NotificationServiceTest {
 
   @Mock private NotificationRepository notificationRepository;
+  @Mock private IssueRepository issueRepository;
+  @Mock private NotificationStreamService notificationStreamService;
   @Mock private JdbcTemplate jdbcTemplate;
 
   @InjectMocks private NotificationService notificationService;
 
   @Test
   void notifyIssueAssigned_persistsNotification() {
+    when(notificationRepository.countByUserIdAndReadAtIsNull(7L)).thenReturn(1L);
     Project project = Project.builder().id(3L).name("Alpha").build();
     Issue issue = Issue.builder().id(9L).title("Fix login").project(project).build();
 
@@ -78,6 +82,7 @@ class NotificationServiceTest {
     when(jdbcTemplate.queryForList(
             "SELECT id FROM users WHERE role = 'ADMIN' AND status = 'ACTIVE'", Long.class))
         .thenReturn(List.of(1L, 2L));
+    when(notificationRepository.countByUserIdAndReadAtIsNull(any())).thenReturn(1L);
 
     notificationService.notifyUserApprovalPending(99L, "new@example.com", "New User");
 
@@ -86,6 +91,7 @@ class NotificationServiceTest {
 
   @Test
   void notifyIssueComment_notifiesAssigneeAndReporterExcludingActor() {
+    when(notificationRepository.countByUserIdAndReadAtIsNull(any())).thenReturn(1L);
     Project project = Project.builder().id(3L).name("Alpha").build();
     Issue issue =
         Issue.builder()
@@ -104,6 +110,7 @@ class NotificationServiceTest {
 
   @Test
   void notifyIssueComment_skipsActorWhenTheyAreAssignee() {
+    when(notificationRepository.countByUserIdAndReadAtIsNull(8L)).thenReturn(1L);
     Project project = Project.builder().id(3L).name("Alpha").build();
     Issue issue =
         Issue.builder()
@@ -125,6 +132,7 @@ class NotificationServiceTest {
 
   @Test
   void notifyIssueStatusChanged_notifiesStakeholders() {
+    when(notificationRepository.countByUserIdAndReadAtIsNull(any())).thenReturn(1L);
     Project project = Project.builder().id(3L).name("Alpha").build();
     Issue issue =
         Issue.builder()
