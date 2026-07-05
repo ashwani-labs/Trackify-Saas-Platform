@@ -10,7 +10,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUT_DIR = path.resolve(__dirname, '../Docs/screenshots');
+const OUT_DIR = path.resolve(__dirname, '../docs/screenshots');
 
 const MASTER_URL = process.env.MASTER_URL || 'http://localhost:5173';
 const TENANT_URL = process.env.TENANT_URL || 'http://localhost:5174';

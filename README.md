@@ -4,7 +4,7 @@ Trackify is a **multi-tenant SaaS platform** for project and issue management �
 
 The platform combines a **Spring Boot microservices backend**, **per-tenant MySQL databases**, an **API gateway**, and **two React applications**: one for platform administrators and one for tenant users.
 
-![Trackify tenant landing page](./Docs/screenshots/tenant-landing.png)
+![Trackify tenant landing page](./docs/screenshots/tenant-landing.png)
 
 ## At a glance
 
@@ -13,7 +13,7 @@ The platform combines a **Spring Boot microservices backend**, **per-tenant MySQ
 | **Backend** | Java 17, Spring Boot 3.3, MySQL, JWT, Flyway (master DB) |
 | **Frontend** | React 19, Vite 8, Redux Toolkit, shared design system |
 | **Status** | v1 feature-complete |
-| **Docs** | [`Docs/`](./Docs/) — [setup guide](./Docs/SETUP.md), screenshots |
+| **Docs** | [`docs/`](./docs/) — [setup guide](./docs/SETUP.md), screenshots |
 
 ## Screenshots
 
@@ -23,7 +23,7 @@ All images below are **captured from the running application** (not generated). 
 
 | Landing | Login |
 |---------|-------|
-| ![Tenant landing](./Docs/screenshots/tenant-landing.png) | ![Tenant login](./Docs/screenshots/tenant-login.png) |
+| ![Tenant landing](./docs/screenshots/tenant-landing.png) | ![Tenant login](./docs/screenshots/tenant-login.png) |
 
 Marketing landing page and split-panel auth for workspace users.
 
@@ -31,13 +31,13 @@ Marketing landing page and split-panel auth for workspace users.
 
 | Dashboard | Tenant management |
 |-----------|-------------------|
-| ![Master dashboard](./Docs/screenshots/master-dashboard.png) | ![Master tenants](./Docs/screenshots/master-tenants.png) |
+| ![Master dashboard](./docs/screenshots/master-dashboard.png) | ![Master tenants](./docs/screenshots/master-tenants.png) |
 
 Platform overview with growth charts, plus centralized tenant provisioning and lifecycle controls.
 
 | Master login |
 |--------------|
-| ![Master login](./Docs/screenshots/master-login.png) |
+| ![Master login](./docs/screenshots/master-login.png) |
 
 Dedicated master-panel sign-in with light/dark theme support.
 
@@ -64,7 +64,7 @@ Trackify helps organizations onboard into **isolated workspaces**, manage teams,
 trackify-saas-platform/
 ├── Backend/          # Spring Boot microservices
 ├── Frontend/         # React apps + shared package
-└── Docs/             # Documentation + screenshots
+└── docs/             # Documentation + screenshots
 ```
 
 | Layer | Components |
@@ -97,7 +97,7 @@ trackify-saas-platform/
 │   ├── packages/trackify-shared/
 │   ├── master-app/
 │   └── tenant-app/
-├── Docs/
+├── docs/
 │   ├── SETUP.md              # Local development setup (start here)
 │   └── screenshots/          # README captures (Playwright)
 ├── scripts/
@@ -107,7 +107,7 @@ trackify-saas-platform/
 
 ## Quick start
 
-See **[Docs/SETUP.md](./Docs/SETUP.md)** for the full local setup guide (prerequisites, env, service startup order, first login, and troubleshooting).
+See **[docs/SETUP.md](./docs/SETUP.md)** for the full local setup guide (prerequisites, env, service startup order, first login, and troubleshooting).
 
 ### Prerequisites
 
@@ -150,7 +150,7 @@ CI runs on every push/PR to `main` (`.github/workflows/ci.yml`).
 | Shared design system + dual apps | Playwright screenshot script for docs |
 | GitHub Actions CI | Integration/E2E tests planned post-v1 |
 
-Full merits/demerits and architecture notes are in the repository source; see [Docs/SETUP.md](./Docs/SETUP.md) for running the stack locally.
+Full merits/demerits and architecture notes are in the repository source; see [docs/SETUP.md](./docs/SETUP.md) for running the stack locally.
 
 ## Troubleshooting
 

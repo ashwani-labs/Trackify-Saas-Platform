@@ -237,7 +237,7 @@ npx playwright install chromium
 npm run screenshots
 ```
 
-Images are written to `Docs/screenshots/`. For automated tenant dashboard captures:
+Images are written to `docs/screenshots/`. For automated tenant dashboard captures:
 
 - Set `TENANT_EMAIL` and `TENANT_PASSWORD`, **or**
 - Set `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD=admin123`, restart `tenant-service`, and re-run with `SCREENSHOT_RECREATE=1`
