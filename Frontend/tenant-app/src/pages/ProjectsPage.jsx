@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchProjects, clearProjectError } from '../features/projects/projectSlice';
 import CreateProjectModal from '../components/projects/CreateProjectModal';
+import ProjectCard from '../components/projects/ProjectCard';
 import Pagination from '../components/common/Pagination';
 import { Plus, FolderKanban, Users } from 'lucide-react';
 import { ROLES, Button, Alert, EmptyState, PageHeader } from '@trackify/shared';

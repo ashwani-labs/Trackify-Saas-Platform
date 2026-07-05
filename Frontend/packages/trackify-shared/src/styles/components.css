@@ -1065,7 +1065,8 @@
   height: 40px;
 }
 
-.input--with-icon {
+.input--with-icon,
+.input.select-input {
   padding-left: 2.25rem;
 }
 

@@ -9,6 +9,7 @@ const Input = ({
   size = 'md',
   className = '',
   inputClassName = '',
+  error,
   ...rest
 }) => (
   <div className={`form-group ${className}`}>
@@ -25,8 +26,10 @@ const Input = ({
       value={value}
       onChange={onChange}
       required={required}
+      aria-invalid={error ? 'true' : undefined}
       {...rest}
     />
+    {error && <span className="field-error">{error}</span>}
   </div>
 );
 

@@ -4,19 +4,43 @@ import { createTenantAsync } from '../../features/tenants/tenantSlice';
 import { Globe, Mail, Briefcase } from 'lucide-react';
 import { Alert, Button, Input, Modal } from '@trackify/shared';
 
+const INITIAL_FORM = {
+  name: '',
+  code: '',
+  adminEmail: '',
+  plan: 'FREE',
+  companyName: '',
+  logoUrl: '',
+  primaryColor: '#6366f1',
+};
+
 const CreateTenantModal = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
-  const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    adminEmail: '',
-    plan: 'FREE',
-    companyName: '',
-    logoUrl: '',
-    primaryColor: '#6366f1',
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const resetForm = () => {
+    setFormData(INITIAL_FORM);
+    setErrors({});
+  };
+
+  const handleClose = () => {
+    if (isSubmitting) return;
+    resetForm();
+    onClose();
+  };
+
+  const updateField = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
 
   const validate = () => {
     const newErrors = {};
@@ -28,8 +52,14 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
     }
     if (!formData.adminEmail.trim()) {
       newErrors.adminEmail = 'Admin email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.adminEmail)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.adminEmail)) {
       newErrors.adminEmail = 'Invalid email address';
+    }
+    if (formData.logoUrl.trim() && !/^https?:\/\/.+/i.test(formData.logoUrl.trim())) {
+      newErrors.logoUrl = 'Enter a valid URL starting with http:// or https://';
+    }
+    if (formData.primaryColor && !/^#[0-9A-Fa-f]{6}$/.test(formData.primaryColor)) {
+      newErrors.primaryColor = 'Enter a valid hex color (e.g. #6366f1)';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -42,6 +72,7 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
     try {
       await dispatch(createTenantAsync(formData)).unwrap();
+      resetForm();
       onClose();
     } catch (err) {
       setErrors({ form: err || 'Failed to create tenant' });
@@ -53,11 +84,11 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="Provision New Organization"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="secondary" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button type="submit" form="create-tenant-form" isLoading={isSubmitting}>
@@ -78,7 +109,7 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
           label="Organization name"
           placeholder="e.g. Acme Corp"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e) => updateField('name', e.target.value)}
           error={errors.name}
         />
 
@@ -96,7 +127,7 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
               value={formData.code}
               onChange={(e) => {
                 const val = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '');
-                setFormData({ ...formData, code: val });
+                updateField('code', val);
               }}
             />
             <span className="input-suffix">.trackify.io</span>
@@ -116,7 +147,7 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
               className="input input--with-icon"
               placeholder="admin@organization.com"
               value={formData.adminEmail}
-              onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+              onChange={(e) => updateField('adminEmail', e.target.value)}
             />
           </div>
           {errors.adminEmail && <span className="field-error">{errors.adminEmail}</span>}
@@ -128,7 +159,7 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
             label="Company display name"
             placeholder="e.g. Acme Corporation"
             value={formData.companyName}
-            onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+            onChange={(e) => updateField('companyName', e.target.value)}
           />
 
           <div className="form-group">
@@ -141,15 +172,16 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
                 type="color"
                 className="input"
                 value={formData.primaryColor}
-                onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                onChange={(e) => updateField('primaryColor', e.target.value)}
               />
               <input
                 type="text"
                 className="input input--flex"
                 value={formData.primaryColor}
-                onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                onChange={(e) => updateField('primaryColor', e.target.value)}
               />
             </div>
+            {errors.primaryColor && <span className="field-error">{errors.primaryColor}</span>}
           </div>
         </div>
 
@@ -158,7 +190,8 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
           label="Company logo URL"
           placeholder="https://example.com/logo.png"
           value={formData.logoUrl}
-          onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+          onChange={(e) => updateField('logoUrl', e.target.value)}
+          error={errors.logoUrl}
         />
         <span className="field-hint--sm">
           Paste a direct link to your organization&apos;s logo.
@@ -172,9 +205,9 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
             <Briefcase className="input-wrap__icon" size={16} aria-hidden />
             <select
               id="tenant-plan"
-              className="input select-input"
+              className="input input--with-icon select-input"
               value={formData.plan}
-              onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
+              onChange={(e) => updateField('plan', e.target.value)}
             >
               <option value="FREE">Free Tier</option>
               <option value="PREMIUM">Premium Tier</option>
@@ -187,4 +220,5 @@ const CreateTenantModal = ({ isOpen, onClose }) => {
   );
 };
 
+export { INITIAL_FORM };
 export default CreateTenantModal;
