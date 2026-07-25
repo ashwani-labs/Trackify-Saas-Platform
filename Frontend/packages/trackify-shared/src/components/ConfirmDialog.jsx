@@ -1,3 +1,4 @@
+import React from 'react';
 import Modal from './Modal.jsx';
 import Button from './Button.jsx';
 

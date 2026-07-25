@@ -11,7 +11,6 @@ import { ROLES } from '@trackify/shared';
 import { ThemeProvider } from './context/ThemeContext';
 import TenantBrandingEffect from './components/common/TenantBrandingEffect';
 
-// ── Lazy-loaded pages ────────────────────────────────────────────────────────
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));

@@ -1,6 +1,7 @@
 package com.trackify.project.config;
 
 import com.trackify.common.security.JwtUtil;
+import com.trackify.common.security.SecurityConstants;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,14 +32,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       @Nonnull FilterChain filterChain)
       throws ServletException, IOException {
 
-    final String authHeader = request.getHeader("Authorization");
+    final String jwt =
+        SecurityConstants.extractBearerToken(
+            request.getHeader(SecurityConstants.AUTHORIZATION_HEADER));
 
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    if (jwt == null) {
       filterChain.doFilter(request, response);
       return;
     }
 
-    String jwt = authHeader.substring(7);
     String userEmail = jwtUtil.extractSubject(jwt);
 
     if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {

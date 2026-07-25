@@ -1,8 +1,8 @@
 # Trackify — Local Setup Guide
 
-This guide walks you through running the full Trackify stack on your machine for development.
+Run the full Trackify stack on your machine for development.
 
-**Related:** [README](../README.md) · [.env.example](../.env.example)
+**Related:** [README](../README.md) · [Architecture](./ARCHITECTURE.md) · [.env.example](../.env.example)
 
 ---
 
@@ -10,45 +10,43 @@ This guide walks you through running the full Trackify stack on your machine for
 
 | Component | Port | Purpose |
 |-----------|------|---------|
-| `api-gateway` | 8080 | Single entry point, JWT validation, rate limiting, Swagger UI |
-| `auth-service` | 8081 | Login, JWT issuance, master DB (Flyway migrations) |
-| `tenant-service` | 8082 | Tenant provisioning, user lookup, workspace admin APIs |
-| `project-service` | 8083 | Projects, issues, sprints, notifications, attachments |
-| `notification-service` | 8084 | Email delivery (optional locally) |
+| `api-gateway` | 8080 | Entry point, JWT, rate limiting, Swagger |
+| `auth-service` | 8081 | Login, JWT issuance, master Flyway |
+| `tenant-service` | 8082 | Tenant provisioning, users, branding |
+| `project-service` | 8083 | Projects, issues, sprints, in-app notifications |
+| `notification-service` | 8084 | Email (optional locally) |
 | `master-app` | 5173 | Platform admin UI |
-| `tenant-app` | 5174 | Workspace / marketing UI |
+| `tenant-app` | 5174 | Workspace UI |
 
 ```text
 Browser
-  ├── master-app (5173)  ──┐
-  └── tenant-app (5174)  ──┼──► api-gateway (8080)
-                           │         ├── auth-service (8081)     → trackify_master
-                           │         ├── tenant-service (8082)   → trackify_master + tenant DBs
-                           │         └── project-service (8083)    → per-tenant MySQL
-                           └── notification-service (8084)  ← optional
+  ├── master-app (:5173) ──┐
+  └── tenant-app (:5174) ──┼──► api-gateway (:8080)
+                           │         ├── auth-service (:8081)      → trackify_master
+                           │         ├── tenant-service (:8082)    → master + tenant DBs
+                           │         └── project-service (:8083)   → per-tenant MySQL
+                           └── notification-service (:8084)  ← optional
 ```
 
 ---
 
 ## Prerequisites
 
-Install these before you start:
-
-| Tool | Version | Notes |
+| Tool | Version | Check |
 |------|---------|-------|
 | **JDK** | 17 | `java -version` |
 | **Maven** | 3.9+ | `mvn -version` |
-| **Node.js** | 20+ | `node -version` |
+| **Node.js** | 20+ | `node -v` |
 | **MySQL** | 8.x | Running on `localhost:3306` |
 
-On Windows, ensure `JAVA_HOME` points to your JDK 17 install if Maven reports it missing.
+On Windows, set `JAVA_HOME` to JDK 17 if Maven cannot find Java.
 
 ---
 
-## 1. Clone and install dependencies
+## 1. Clone and install
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/ashwani-labs/trackify-saas-platform.git
 cd trackify-saas-platform
 ```
 
@@ -61,8 +59,6 @@ npm install
 
 ### Backend
 
-No global install required — Maven resolves dependencies on first build.
-
 ```bash
 cd Backend
 mvn -pl common-lib install
@@ -70,17 +66,17 @@ mvn -pl common-lib install
 
 ---
 
-## 2. Configure environment
+## 2. Environment
 
-Copy the example env file to the **repository root**:
+Copy the example file to the **repository root**:
 
 ```bash
 cp .env.example .env
 ```
 
-Every backend service imports this file automatically via `trackify-env-imports.yml` (searches `.env` in the repo root regardless of which service directory you start from).
+Backend services load this file via `trackify-env-imports.yml` (walks up from the service directory). Vite apps load `VITE_*` from the same root (`envDir` in each app’s `vite.config.js`).
 
-### Minimum required variables
+### Minimum required
 
 ```env
 JWT_SECRET=replace-with-a-long-random-secret-at-least-32-chars
@@ -90,90 +86,86 @@ SPRING_DATASOURCE_PASSWORD=root
 VITE_API_BASE_URL=http://localhost:8080
 ```
 
-| Variable | Why it matters |
-|----------|----------------|
-| `JWT_SECRET` | Must be **identical** on gateway and all backend services or login/API calls fail |
-| `INTERNAL_API_KEY` | Used for service-to-service calls (e.g. tenant → project notifications) |
-| `SPRING_DATASOURCE_*` | MySQL credentials for `trackify_master` and tenant database provisioning |
-| `VITE_API_BASE_URL` | Where the React apps send API requests (gateway URL) |
+| Variable | Why |
+|----------|-----|
+| `JWT_SECRET` | Must match on gateway and every backend service |
+| `INTERNAL_API_KEY` | Tenant → project internal notifications |
+| `SPRING_DATASOURCE_*` | MySQL for master DB and provisioning |
+| `VITE_API_BASE_URL` | Frontend API base (gateway) |
 
-### Optional variables
+### Optional
 
 | Variable | Default | Use |
 |----------|---------|-----|
-| `RATE_LIMIT_ENABLED` | `true` | Gateway rate limiting |
-| `RATE_LIMIT_RPM` | `120` | Requests per minute per client |
-| `STORAGE_PROVIDER` | `local` | `local` or `s3` for issue attachments |
-| `MAIL_*` | unset | SMTP for real emails; without it, emails log to the notification-service console |
-| `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD` | unset | Local only — use a known password when provisioning tenants (handy for demos/screenshots) |
+| `RATE_LIMIT_ENABLED` / `RATE_LIMIT_RPM` | `true` / `120` | Gateway throttling |
+| `STORAGE_PROVIDER` | `local` | `local` or `s3` attachments |
+| `MAIL_*` | empty | SMTP; unset → console logs in notification-service |
+| `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD` | unset | Known password when provisioning tenants |
+| `VITE_TENANT_APP_PORT` | `5174` | Workspace URL helpers in the UI |
 
-Never commit `.env` to version control.
+Never commit `.env`.
 
 ---
 
-## 3. Start MySQL
+## 3. MySQL
 
-Ensure MySQL 8 is running and accepting connections on `localhost:3306`.
+Start MySQL 8 on `localhost:3306`.
 
-The master database `trackify_master` is created automatically on first `auth-service` boot (`createDatabaseIfNotExist=true` in the JDBC URL). Flyway migrations in `auth-service` apply the master schema.
+`trackify_master` is created on first `auth-service` boot (`createDatabaseIfNotExist=true`). Flyway applies master migrations.
 
-**Tenant databases** (`trackify_tenant_<code>`) are created when you provision an organization from the master app.
+Tenant databases (`trackify_tenant_<code>`) are created when you provision an organization from the master app.
 
 ---
 
 ## 4. Start the backend
 
-Open **separate terminals** (or use your IDE run configurations). Start services in this order:
+Use separate terminals (or IDE run configs). Order matters:
 
-### Terminal 1 — Auth service (run Flyway first)
+### Auth (Flyway first)
 
 ```bash
 cd Backend
 mvn -pl auth-service -am spring-boot:run
 ```
 
-Wait until you see the app listening on port **8081**. On first boot:
+Port **8081**. First boot:
 
-- Flyway runs `V1__master_schema.sql` and `V2__add_tenant_brand_theme.sql`
-- A default master user is seeded: `master@trackify.com` / `admin123`
+- Runs Flyway (`V1__master_schema.sql`, `V2__add_tenant_brand_theme.sql`)
+- Seeds master user: `master@trackify.com` / `admin123`
 
-### Terminal 2 — Tenant service
+### Tenant
 
 ```bash
-cd Backend
 mvn -pl tenant-service -am spring-boot:run
 ```
 
 Port **8082**.
 
-### Terminal 3 — Project service
+### Project
 
 ```bash
-cd Backend
 mvn -pl project-service -am spring-boot:run
 ```
 
-Port **8083**. Connects to per-tenant databases; runs schema upgrades for legacy tenant DBs on demand.
+Port **8083**. Runs `TenantSchemaUpgrader` for existing tenant DBs as needed.
 
-### Terminal 4 — API gateway
+### Gateway
 
 ```bash
-cd Backend
 mvn -pl api-gateway -am spring-boot:run
 ```
 
-Port **8080**. Start this **after** the three services above so routes can reach healthy upstreams.
+Port **8080**. Start after the three services above.
 
-### Terminal 5 — Notification service (optional)
+### Notification (optional)
 
 ```bash
-cd Backend
 mvn -pl notification-service -am spring-boot:run
 ```
 
-Port **8084**. Without this service, welcome/invitation emails are skipped or fail silently; local SMTP is optional because unsent emails are logged to the console when `MAIL_USERNAME` / `MAIL_PASSWORD` are unset.
+Port **8084**. Without it, emails fail softly; with empty `MAIL_USERNAME`/`MAIL_PASSWORD`, messages are logged to the console.
 
-### Verify backend
+### Verify
 
 | Check | URL |
 |-------|-----|
@@ -184,74 +176,60 @@ Port **8084**. Without this service, welcome/invitation emails are skipped or fa
 
 ## 5. Start the frontend
 
-From the `Frontend` directory:
-
 ```bash
-# Terminal A — tenant workspace app
-npm run dev:tenant    # http://localhost:5174
+cd Frontend
 
-# Terminal B — master admin app
+npm run dev:tenant    # http://localhost:5174
 npm run dev:master    # http://localhost:5173
 ```
 
-Both apps read `VITE_API_BASE_URL` from the repo-root `.env`. If API calls fail, confirm it is set to `http://localhost:8080`.
+Both apps read `VITE_API_BASE_URL` from the repo-root `.env`.
 
-For per-tenant subdomain testing locally, `tenant-service` uses `http://<code>.lvh.me:5174` in the `local` profile (`lvh.me` resolves to `127.0.0.1`).
+For local subdomain-style tenant URLs, `tenant-service` local profile uses `http://<code>.lvh.me:5174` (`lvh.me` → `127.0.0.1`).
 
 ---
 
-## 6. First-time walkthrough
+## 6. First walkthrough
 
 ### Master admin
 
 1. Open http://localhost:5173
-2. Log in with `master@trackify.com` / `admin123`
-3. Go to **Tenants** → **Create Tenant**
-4. Fill organization name, domain code (e.g. `acme`), and admin email
-5. Submit — provisioning creates a dedicated MySQL database and admin user
+2. Log in: `master@trackify.com` / `admin123`
+3. **Tenants** → **Create Tenant**
+4. Submit — creates a MySQL database and admin user
 
-The tenant admin password is **random** unless you set `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD` in `.env` and restart `tenant-service` before provisioning.
-
-Welcome email includes login details when `notification-service` is running (or check its console logs when SMTP is not configured).
+Tenant admin password is random unless `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD` is set and `tenant-service` was restarted.
 
 ### Tenant workspace
 
 1. Open http://localhost:5174
-2. Log in with the tenant admin email and password from provisioning
-3. Create a project, add issues, and explore the Kanban board
+2. Log in with the provisioned admin credentials
+3. Create a project and issues; open the Kanban board
 
-### Register additional users
+### Additional users
 
-Users can self-register at `/register` on the tenant app (they need the tenant ID from an admin). New accounts stay **pending** until a workspace admin approves them under **Team approvals**.
-
----
-
-## 7. Capture README screenshots (optional)
-
-With the full stack running:
-
-```bash
-cd Frontend
-npm install --no-save playwright@1.52.0
-npx playwright install chromium
-npm run screenshots
-```
-
-Images are written to `docs/screenshots/`. For automated tenant dashboard captures:
-
-- Set `TENANT_EMAIL` and `TENANT_PASSWORD`, **or**
-- Set `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD=admin123`, restart `tenant-service`, and re-run with `SCREENSHOT_RECREATE=1`
+Self-register at `/register` (needs the organization code). Accounts stay **pending** until an admin approves them under team approvals.
 
 ---
 
-## 8. Build and test
+## 7. Database notes
+
+| Topic | Detail |
+|-------|--------|
+| Migrations | Master: Flyway in `auth-service` |
+| Tenant template | SQL under `tenant-service` resources |
+| Legacy tenants | `project-service` `TenantSchemaUpgrader` |
+| Seed data | Master user on first auth boot; tenants via UI |
+
+---
+
+## 8. Testing
 
 ```bash
-# Backend unit tests
-cd Backend
-mvn -B test
+# Backend
+cd Backend && mvn -B test
 
-# Frontend lint, test, production build
+# Frontend
 cd Frontend
 npm ci
 npm run lint
@@ -259,7 +237,15 @@ npm run test
 npm run build
 ```
 
-CI runs the same checks on push/PR to `main` (`.github/workflows/ci.yml`).
+CI mirrors this on push/PR to `main` (`.github/workflows/ci.yml`).
+
+---
+
+## 9. Production-oriented setup
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md). Locally you use the `local` Spring profile by default; production uses `prod` + environment variables.
+
+Docker Compose is not included yet — run JARs and static builds directly, or containerize yourself.
 
 ---
 
@@ -267,31 +253,34 @@ CI runs the same checks on push/PR to `main` (`.github/workflows/ci.yml`).
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| `401` / JWT errors on API calls | Mismatched `JWT_SECRET` | Use the same value in `.env` and restart **all** backend services |
-| `Connection refused` to MySQL | MySQL not running | Start MySQL on `3306`; verify `SPRING_DATASOURCE_USERNAME` / `PASSWORD` |
-| Maven: `JAVA_HOME` not defined | JDK not on PATH | Set `JAVA_HOME` to JDK 17 and add `%JAVA_HOME%\bin` to `PATH` |
-| Frontend cannot reach API | Wrong API URL | Set `VITE_API_BASE_URL=http://localhost:8080` in `.env`; restart Vite dev servers |
-| Tenant login fails after provision | Random admin password | Check welcome email / notification logs, or use `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD` |
-| Missing theme / branding columns | Flyway not applied | Restart `auth-service` so `V2__add_tenant_brand_theme.sql` runs |
-| Legacy tenant DB schema errors | Old tenant database | Restart `project-service` (runs `TenantSchemaUpgrader`) |
-| Emails not delivered | SMTP not configured | Start `notification-service`; set `MAIL_*` in `.env`, or read console output locally |
-| Gateway 502 / upstream errors | Service not started | Ensure auth, tenant, and project services are up before the gateway |
+| `401` / JWT errors | Mismatched `JWT_SECRET` | Same value in `.env`; restart **all** backend services |
+| MySQL connection refused | DB down / wrong creds | Start MySQL; check `SPRING_DATASOURCE_*` |
+| `JAVA_HOME` missing | JDK not configured | Point `JAVA_HOME` at JDK 17 |
+| Frontend cannot reach API | Wrong base URL | `VITE_API_BASE_URL=http://localhost:8080` in root `.env`; restart Vite |
+| Unknown tenant password | Random provision password | Notification logs, or `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD` |
+| Missing branding columns | Flyway not applied | Restart `auth-service` |
+| Legacy tenant schema errors | Old DB | Restart `project-service` |
+| Emails missing | SMTP / service down | Start notification-service; set `MAIL_*` or read console |
+| Gateway 502 | Upstream down | Start auth, tenant, project before gateway |
 
 ---
 
-## Service profiles
+## Verification checklist
 
-All services default to the **`local`** Spring profile (`application-local.yml`). Production overrides live in `application-prod.yml` per service.
-
-When deploying, set production secrets via environment variables — do not rely on defaults in `application-local.yml`.
+- [ ] `http://localhost:8080/actuator/health` returns UP
+- [ ] Swagger loads at `/swagger-ui.html`
+- [ ] Master login works
+- [ ] Creating a tenant succeeds (DB appears in MySQL)
+- [ ] Tenant login works
+- [ ] Creating a project / issue works on the Kanban board
 
 ---
 
 ## Quick reference
 
-| App | URL | Default credentials |
-|-----|-----|---------------------|
-| Master app | http://localhost:5173 | `master@trackify.com` / `admin123` |
-| Tenant app | http://localhost:5174 | Set at tenant provisioning |
-| API gateway | http://localhost:8080 | — |
+| App | URL | Credentials |
+|-----|-----|-------------|
+| Master | http://localhost:5173 | `master@trackify.com` / `admin123` |
+| Tenant | http://localhost:5174 | From provisioning |
+| Gateway | http://localhost:8080 | — |
 | Swagger | http://localhost:8080/swagger-ui.html | — |

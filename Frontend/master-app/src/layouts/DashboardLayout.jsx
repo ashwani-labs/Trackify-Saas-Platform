@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import { useDispatch } from 'react-redux';
@@ -26,8 +26,7 @@ const DashboardLayout = ({ children }) => {
   ];
 
   return (
-    <div className="layout-container" style={{ flexDirection: 'column' }}>
-      {/* Top Navigation */}
+    <div className="layout-container layout-container--column">
       <header className="top-bar">
         <button
           type="button"
@@ -38,41 +37,19 @@ const DashboardLayout = ({ children }) => {
           <Menu size={20} />
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+        <div className="top-bar__brand-group">
+          <button
+            type="button"
+            className="top-bar__brand"
             onClick={() => navigate(ROUTES.DASHBOARD)}
           >
-            <div
-              style={{
-                padding: '0.4rem',
-                background: 'var(--primary)',
-                borderRadius: '3px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
+            <span className="top-bar__brand-icon">
               <Layout size={18} color="white" />
-            </div>
-            <span
-              style={{
-                fontSize: '1.125rem',
-                fontWeight: '700',
-                color: 'var(--text-main)',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              Trackify <span style={{ color: 'var(--text-muted)', fontWeight: '400' }}>Master</span>
             </span>
-          </div>
-
-          <nav
-            className="hide-mobile"
-            style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}
-          >
-            {/* Global Nav Links can go here in Jira, but we'll keep them in sidebar for now or move some here */}
-          </nav>
+            <span className="top-bar__brand-text">
+              Trackify <span className="top-bar__brand-muted">Master</span>
+            </span>
+          </button>
         </div>
 
         <div className="hide-mobile master-search">
@@ -89,41 +66,31 @@ const DashboardLayout = ({ children }) => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: 'auto' }}>
+        <div className="top-bar__actions">
           <button
-            className="btn btn-primary hide-mobile"
-            style={{ height: '32px', padding: '0 0.75rem' }}
+            type="button"
+            className="btn btn--primary hide-mobile top-bar__create"
+            onClick={() => navigate(ROUTES.TENANTS)}
           >
-            Create
+            Create tenant
           </button>
 
           <button
             type="button"
-            className="theme-toggle"
+            className="theme-toggle top-bar__icon-btn"
             onClick={toggleTheme}
-            style={{ width: '32px', height: '32px' }}
             aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           >
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </button>
 
-          <div
-            className="avatar-circle"
-            style={{
-              width: '28px',
-              height: '28px',
-              fontSize: '0.75rem',
-              cursor: 'pointer',
-              border: '2px solid transparent',
-            }}
-          >
+          <div className="avatar-circle top-bar__avatar" title="Master admin" aria-hidden>
             M
           </div>
         </div>
       </header>
 
-      <div style={{ display: 'flex', flex: 1 }}>
-        {/* Sidebar */}
+      <div className="layout-body">
         <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
           <div className="sidebar-header show-mobile">
             <span className="logo-text">Trackify</span>
@@ -137,18 +104,8 @@ const DashboardLayout = ({ children }) => {
             </button>
           </div>
 
-          <div style={{ padding: '1.5rem 0.75rem 0.5rem' }}>
-            <span
-              style={{
-                fontSize: '0.7rem',
-                fontWeight: '700',
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                paddingLeft: '0.75rem',
-              }}
-            >
-              Administration
-            </span>
+          <div className="sidebar-section-label">
+            <span>Administration</span>
           </div>
 
           <nav className="nav-menu">
@@ -166,29 +123,23 @@ const DashboardLayout = ({ children }) => {
           </nav>
 
           <div className="sidebar-footer">
-            <button
-              className="nav-item"
-              onClick={handleLogout}
-              style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
+            <button type="button" className="nav-item nav-item--button" onClick={handleLogout}>
               <LogOut size={18} />
               <span>Sign out</span>
             </button>
           </div>
         </aside>
 
-        {/* Main Content */}
         <main className="main-content">
           <div className="page-body">{children}</div>
         </main>
       </div>
 
-      {/* Mobile Overlay */}
       {mobileOpen && (
         <div
-          className="modal-overlay"
-          style={{ zIndex: 45 }}
+          className="modal-overlay modal-overlay--nav"
           onClick={() => setMobileOpen(false)}
+          aria-hidden
         />
       )}
     </div>

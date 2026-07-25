@@ -13,6 +13,7 @@ import com.trackify.auth.entity.UserLookup;
 import com.trackify.auth.repository.MasterUserRepository;
 import com.trackify.auth.repository.TenantRepository;
 import com.trackify.auth.repository.UserLookupRepository;
+import com.trackify.common.client.EmailNotificationClient;
 import com.trackify.common.enums.Role;
 import com.trackify.common.exception.AppException;
 import com.trackify.common.security.JwtUtil;
@@ -36,6 +37,7 @@ class AuthServiceTest {
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private JwtUtil jwtUtil;
   @Mock private JdbcTemplate jdbcTemplate;
+  @Mock private EmailNotificationClient emailNotificationClient;
 
   @InjectMocks private AuthService authService;
 

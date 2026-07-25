@@ -1,6 +1,5 @@
 package com.trackify.tenant.dto;
 
-import com.trackify.common.enums.TenantStatus;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -10,6 +10,9 @@
     "./styles/base.css": "./src/styles/base.css",
     "./styles/components.css": "./src/styles/components.css"
   },
+  "scripts": {
+    "test": "vitest run"
+  },
   "dependencies": {
     "lucide-react": "^1.7.0"
   },

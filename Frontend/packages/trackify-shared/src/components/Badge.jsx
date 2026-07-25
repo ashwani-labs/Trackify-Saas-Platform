@@ -1,3 +1,4 @@
+import React from 'react';
 const VARIANT_MAP = {
   success: 'success',
   warning: 'warning',

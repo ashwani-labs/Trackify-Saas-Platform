@@ -3,10 +3,8 @@ import { unwrapApiData } from '@trackify/shared';
 import { getToken } from '../utils/tokenUtils';
 import { API_BASE_URL } from '../config/api';
 
-// Base API definition — all master app API calls go through here
 export const authApi = createApi({
   reducerPath: 'authApi',
-
   baseQuery: fetchBaseQuery({
     baseUrl: API_BASE_URL,
     prepareHeaders: (headers) => {
@@ -18,9 +16,7 @@ export const authApi = createApi({
       return headers;
     },
   }),
-
   endpoints: (builder) => ({
-    // POST /auth/login
     login: builder.mutation({
       query: (credentials) => ({
         url: '/auth/login',
@@ -29,20 +25,7 @@ export const authApi = createApi({
       }),
       transformResponse: (response) => unwrapApiData({ data: response }),
     }),
-
-    // POST /auth/logout  (future)
-    logoutApi: builder.mutation({
-      query: () => ({
-        url: '/auth/logout',
-        method: 'POST',
-      }),
-    }),
-
-    // GET /auth/me — fetch current master user profile (future)
-    getProfile: builder.query({
-      query: () => '/auth/me',
-    }),
   }),
 });
 
-export const { useLoginMutation, useLogoutApiMutation, useGetProfileQuery } = authApi;
+export const { useLoginMutation } = authApi;

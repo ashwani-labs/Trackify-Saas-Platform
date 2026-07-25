@@ -11,7 +11,3 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
-
-tenant:
-  datasource:
-    host-override: localhost

@@ -9,7 +9,7 @@ import {
   BarChart3,
   ArrowRight,
   CheckCircle2,
-  Sparkles,
+  Bell,
   Moon,
   Sun,
 } from 'lucide-react';
@@ -19,42 +19,34 @@ import { useTheme } from '../hooks/useTheme';
 const FEATURES = [
   {
     icon: Kanban,
-    title: 'Visual Kanban Boards',
-    description:
-      'Drag-and-drop issue tracking with customizable workflows that keep your team aligned.',
+    title: 'Kanban boards',
+    description: 'Move issues across columns, update status inline, and keep work visible.',
   },
   {
     icon: Users,
-    title: 'Multi-Tenant Workspaces',
-    description:
-      'Isolated workspaces for every team with role-based access and seamless collaboration.',
+    title: 'Isolated workspaces',
+    description: 'Each organization gets its own database, roles, and branding.',
   },
   {
     icon: Zap,
-    title: 'Sprint Planning',
-    description: 'Plan sprints, manage backlogs, and ship faster with built-in agile tooling.',
+    title: 'Sprints & backlog',
+    description: 'Plan iterations, groom the backlog, and track delivery without another tool.',
   },
   {
     icon: BarChart3,
-    title: 'Real-Time Analytics',
-    description: 'Track velocity, issue distribution, and team progress with live dashboards.',
+    title: 'Workspace dashboards',
+    description: 'See open work, recent activity, and progress filters that match your role.',
   },
   {
     icon: Shield,
-    title: 'Enterprise Security',
-    description: 'JWT authentication, tenant isolation, and admin approval workflows built in.',
+    title: 'Role-based access',
+    description: 'JWT auth with admin approval for new members and platform-level controls.',
   },
   {
-    icon: Sparkles,
-    title: 'Smart Notifications',
-    description: 'Stay in the loop with contextual alerts for assignments, updates, and mentions.',
+    icon: Bell,
+    title: 'Notifications',
+    description: 'In-app alerts for assignments and approvals, with optional email delivery.',
   },
-];
-
-const STATS = [
-  { value: '10x', label: 'Faster issue triage' },
-  { value: '99.9%', label: 'Uptime SLA' },
-  { value: '50+', label: 'Teams onboarded' },
 ];
 
 const LandingPage = () => {
@@ -100,47 +92,33 @@ const LandingPage = () => {
       </header>
 
       <section className="landing-hero">
-        <div className="landing-hero__badge">
-          <Sparkles size={14} />
-          <span>Project management, reimagined</span>
-        </div>
         <h1 className="landing-hero__title">
-          Ship faster with
-          <span className="landing-hero__gradient"> clarity &amp; control</span>
+          Trackify
+          <span className="landing-hero__gradient"> for project teams</span>
         </h1>
         <p className="landing-hero__subtitle">
-          Trackify brings kanban boards, sprint planning, and team analytics into one beautiful
-          workspace — so your team can focus on building, not chasing status updates.
+          Multi-tenant project and issue tracking with Kanban boards, sprints, and workspace
+          isolation — built for organizations that need their own space.
         </p>
         <div className="landing-hero__cta">
           <Link to={isAuthenticated ? dashboardPath : '/register'}>
             <Button size="lg" rightIcon={<ArrowRight size={18} />}>
-              {isAuthenticated ? 'Go to dashboard' : 'Start for free'}
+              {isAuthenticated ? 'Go to dashboard' : 'Create an account'}
             </Button>
           </Link>
           <Link to={isAuthenticated ? dashboardPath : '/login'}>
             <Button variant="outline" size="lg">
-              {isAuthenticated ? 'Open workspace' : 'Sign in to workspace'}
+              {isAuthenticated ? 'Open workspace' : 'Sign in'}
             </Button>
           </Link>
-        </div>
-
-        <div className="landing-hero__stats">
-          {STATS.map((stat) => (
-            <div key={stat.label} className="landing-stat">
-              <span className="landing-stat__value">{stat.value}</span>
-              <span className="landing-stat__label">{stat.label}</span>
-            </div>
-          ))}
         </div>
       </section>
 
       <section id="features" className="landing-section">
         <div className="landing-section__header">
-          <span className="landing-section__eyebrow">Features</span>
-          <h2 className="landing-section__title">Everything your team needs to deliver</h2>
+          <h2 className="landing-section__title">What you get</h2>
           <p className="landing-section__subtitle">
-            From backlog grooming to release day — Trackify covers the full project lifecycle.
+            Boards, sprints, team approvals, and admin tooling in one stack.
           </p>
         </div>
         <div className="landing-features">
@@ -158,34 +136,34 @@ const LandingPage = () => {
 
       <section id="how-it-works" className="landing-section landing-section--alt">
         <div className="landing-section__header">
-          <span className="landing-section__eyebrow">How it works</span>
-          <h2 className="landing-section__title">Up and running in minutes</h2>
+          <h2 className="landing-section__title">How it works</h2>
         </div>
         <ol className="landing-steps">
           <li className="landing-step">
             <span className="landing-step__num">1</span>
             <div>
-              <h3 className="landing-step__title">Create your workspace</h3>
+              <h3 className="landing-step__title">Provision a workspace</h3>
               <p className="landing-step__desc">
-                Register with your workspace ID and get instant access to your team&apos;s hub.
+                A platform admin creates an organization; Trackify stands up a dedicated database
+                and admin user.
               </p>
             </div>
           </li>
           <li className="landing-step">
             <span className="landing-step__num">2</span>
             <div>
-              <h3 className="landing-step__title">Set up projects &amp; boards</h3>
+              <h3 className="landing-step__title">Invite the team</h3>
               <p className="landing-step__desc">
-                Create projects, configure kanban columns, and invite teammates to collaborate.
+                Members register or get invited, then an admin approves access before they can work.
               </p>
             </div>
           </li>
           <li className="landing-step">
             <span className="landing-step__num">3</span>
             <div>
-              <h3 className="landing-step__title">Track, ship, repeat</h3>
+              <h3 className="landing-step__title">Run projects</h3>
               <p className="landing-step__desc">
-                Manage sprints, monitor dashboards, and deliver with full visibility.
+                Create projects, plan sprints, and move issues across the board.
               </p>
             </div>
           </li>
@@ -194,19 +172,19 @@ const LandingPage = () => {
 
       <section className="landing-cta">
         <div className="landing-cta__content">
-          <h2 className="landing-cta__title">Ready to transform how your team works?</h2>
+          <h2 className="landing-cta__title">Ready to open a workspace?</h2>
           <p className="landing-cta__subtitle">
-            Join teams who ship faster with Trackify. No credit card required.
+            Register with your organization ID, or ask your admin for an invite.
           </p>
           <ul className="landing-cta__checks">
             <li>
-              <CheckCircle2 size={16} /> Free workspace setup
+              <CheckCircle2 size={16} /> Per-tenant database isolation
             </li>
             <li>
-              <CheckCircle2 size={16} /> Unlimited projects
+              <CheckCircle2 size={16} /> Kanban, sprints, and dashboards
             </li>
             <li>
-              <CheckCircle2 size={16} /> Role-based access control
+              <CheckCircle2 size={16} /> Admin approval for new users
             </li>
           </ul>
           <Link to={isAuthenticated ? dashboardPath : '/register'}>

@@ -11,6 +11,7 @@ import com.trackify.auth.entity.UserLookup;
 import com.trackify.auth.repository.MasterUserRepository;
 import com.trackify.auth.repository.TenantRepository;
 import com.trackify.auth.repository.UserLookupRepository;
+import com.trackify.common.client.EmailNotificationClient;
 import com.trackify.common.exception.AppException;
 import com.trackify.common.security.JwtUtil;
 import java.util.Map;
@@ -33,18 +34,12 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
   private final JdbcTemplate jdbcTemplate;
-
-  @Value("${tenant.datasource.host-override:}")
-  private String dbHostOverride;
-
-  @Value("${services.notification-url:http://localhost:8084}")
-  private String notificationUrl;
+  private final EmailNotificationClient emailNotificationClient;
 
   @Value("${tenant.app-url-pattern:http://%s.trackify.com:5174}")
   private String appUrlPattern;
 
   public LoginResponse login(LoginRequest request) {
-    // 1. Try Platform Master User
     Optional<MasterUser> masterUserOpt = masterUserRepository.findByEmail(request.getEmail());
     if (masterUserOpt.isPresent()) {
       MasterUser user = masterUserOpt.get();
@@ -61,7 +56,6 @@ public class AuthService {
           .build();
     }
 
-    // 2. Try Tenant User (via lookup)
     UserLookup lookup =
         userLookupRepository
             .findByEmail(request.getEmail())
@@ -93,7 +87,9 @@ public class AuthService {
         .logoUrl(tenant.getLogoUrl())
         .primaryColor(tenant.getPrimaryColor())
         .brandTheme(
-            tenant.getBrandTheme() != null ? tenant.getBrandTheme() : com.trackify.common.theme.TenantThemes.DEFAULT)
+            tenant.getBrandTheme() != null
+                ? tenant.getBrandTheme()
+                : com.trackify.common.theme.TenantThemes.DEFAULT)
         .plan(tenant.getPlan() != null ? tenant.getPlan().name() : null)
         .build();
   }
@@ -166,36 +162,18 @@ public class AuthService {
   }
 
   private void sendPasswordResetEmail(String email, String token, String domain) {
-    try {
-      org.springframework.web.client.RestTemplate restTemplate =
-          new org.springframework.web.client.RestTemplate();
-      java.util.Map<String, String> request = new java.util.HashMap<>();
-      request.put("to", email);
-      request.put("subject", "Trackify - Password Reset Request");
+    String resetUrl =
+        String.format(appUrlPattern, domain) + "/reset-password?token=" + token + "&email=" + email;
 
-      String resetUrl =
-          String.format(appUrlPattern, domain)
-              + "/reset-password?token="
-              + token
-              + "&email="
-              + email;
+    String body =
+        "Hello,\n\nWe received a request to reset your password for your Trackify account.\n\n"
+            + "Click the link below to set a new password:\n"
+            + resetUrl
+            + "\n\n"
+            + "If you did not request this, please ignore this email.\n\nBest,\nTrackify Team";
 
-      String body =
-          "Hello,\n\nWe received a request to reset your password for your Trackify account.\n\n"
-              + "Click the link below to set a new password:\n"
-              + resetUrl
-              + "\n\n"
-              + "If you did not request this, please ignore this email.\n\nBest,\nTrackify Team";
-
-      request.put("body", body);
-
-      org.springframework.http.ResponseEntity<String> response =
-          restTemplate.postForEntity(
-              notificationUrl + "/api/notifications/email", request, String.class);
-      log.info("Password reset email sent to {}", email);
-    } catch (Exception e) {
-      log.error("Failed to send password reset email: {}", e.getMessage());
-    }
+    emailNotificationClient.send(email, "Trackify - Password Reset Request", body);
+    log.info("Password reset email requested for {}", email);
   }
 
   public void resetPassword(ResetPasswordRequest request) {

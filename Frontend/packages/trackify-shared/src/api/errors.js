@@ -1,6 +1,3 @@
-/**
- * Extract user-facing message from backend ErrorResponse or ApiResponse error body.
- */
 export function getApiErrorMessage(error, fallback = 'Something went wrong') {
   const data = error?.response?.data;
   if (!data) {
@@ -14,10 +11,8 @@ export function getApiErrorMessage(error, fallback = 'Something went wrong') {
   return fallback;
 }
 
-/** For Redux thunks: rejectWithValue(getApiErrorPayload(error, 'Failed to ...')) */
-export function getApiErrorPayload(error, fallback) {
-  return getApiErrorMessage(error, fallback);
-}
+/** Alias used by Redux thunks: rejectWithValue(getApiErrorPayload(...)) */
+export const getApiErrorPayload = getApiErrorMessage;
 
 /**
  * Unwrap ApiResponse envelope: { success, message, data } → data

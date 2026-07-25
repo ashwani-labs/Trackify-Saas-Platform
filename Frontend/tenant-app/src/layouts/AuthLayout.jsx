@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 import { LayoutDashboard, Kanban, Users, BarChart3, CheckCircle2 } from 'lucide-react';
 
 const HIGHLIGHTS = [
-  { icon: Kanban, text: 'Visual kanban boards' },
-  { icon: Users, text: 'Multi-tenant workspaces' },
-  { icon: BarChart3, text: 'Real-time analytics' },
+  { icon: Kanban, text: 'Kanban boards & issue tracking' },
+  { icon: Users, text: 'Isolated multi-tenant workspaces' },
+  { icon: BarChart3, text: 'Dashboards and sprint planning' },
 ];
 
 const AuthLayout = ({ children, title, subtitle }) => {
@@ -21,13 +21,13 @@ const AuthLayout = ({ children, title, subtitle }) => {
 
           <div className="auth-panel__content">
             <h2 className="auth-panel__headline">
-              Project management
+              Your team&apos;s
               <br />
-              <span className="auth-panel__gradient">built for modern teams</span>
+              <span className="auth-panel__gradient">project workspace</span>
             </h2>
             <p className="auth-panel__desc">
-              Plan sprints, track issues, and collaborate — all in one workspace designed for speed
-              and clarity.
+              Sign in to manage projects, issues, and sprints in your organization&apos;s dedicated
+              workspace.
             </p>
 
             <ul className="auth-panel__highlights">
@@ -44,7 +44,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
             </ul>
           </div>
 
-          <p className="auth-panel__footer">Trusted by teams who ship faster with Trackify</p>
+          <p className="auth-panel__footer">Trackify · multi-tenant project management</p>
         </div>
       </aside>
 

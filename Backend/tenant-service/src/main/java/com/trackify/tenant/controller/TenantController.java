@@ -47,7 +47,8 @@ public class TenantController {
   }
 
   @GetMapping("/audit-logs")
-  public ResponseEntity<ApiResponse<Page<PlatformAuditLogResponse>>> getAuditLogs(Pageable pageable) {
+  public ResponseEntity<ApiResponse<Page<PlatformAuditLogResponse>>> getAuditLogs(
+      Pageable pageable) {
     return ResponseEntity.ok(ApiResponse.ok(tenantService.getPlatformAuditLogs(pageable)));
   }
 

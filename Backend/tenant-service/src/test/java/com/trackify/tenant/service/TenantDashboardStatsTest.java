@@ -22,7 +22,12 @@ class TenantDashboardStatsTest {
   @Mock private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
   @Mock private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
   @Mock private com.trackify.tenant.repository.UserLookupRepository userLookupRepository;
+
+  @Mock
+  private com.trackify.tenant.repository.PlatformAuditLogRepository platformAuditLogRepository;
+
   @Mock private com.trackify.tenant.client.ProjectNotificationClient projectNotificationClient;
+  @Mock private com.trackify.common.client.EmailNotificationClient emailNotificationClient;
 
   @InjectMocks private TenantService tenantService;
 

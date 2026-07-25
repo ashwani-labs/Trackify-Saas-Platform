@@ -14,7 +14,6 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // Called after successful login API response
     setCredentials(state, action) {
       const { token, role, tenant_id } = action.payload;
       state.token = token;
@@ -26,7 +25,6 @@ const authSlice = createSlice({
       saveRole(role);
     },
 
-    // Clear everything on logout
     logout(state) {
       state.token = null;
       state.role = null;
@@ -35,19 +33,10 @@ const authSlice = createSlice({
       state.error = null;
       clearToken();
     },
-
-    // Set a local auth error
-    setAuthError(state, action) {
-      state.error = action.payload;
-    },
-
-    clearAuthError(state) {
-      state.error = null;
-    },
   },
 });
 
-export const { setCredentials, logout, setAuthError, clearAuthError } = authSlice.actions;
+export const { setCredentials, logout } = authSlice.actions;
 
 // Selectors
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;

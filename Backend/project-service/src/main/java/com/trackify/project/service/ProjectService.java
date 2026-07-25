@@ -68,8 +68,7 @@ public class ProjectService {
 
   public ProjectStatsResponse getProjectStats(Long userId, String role) {
     boolean isAdmin = "ADMIN".equalsIgnoreCase(role) || "MASTER".equalsIgnoreCase(role);
-    List<Long> projectIds =
-        isAdmin ? List.of() : projectRepository.findProjectIdsByUserId(userId);
+    List<Long> projectIds = isAdmin ? List.of() : projectRepository.findProjectIdsByUserId(userId);
     return getProjectStatsForScope(isAdmin, projectIds);
   }
 

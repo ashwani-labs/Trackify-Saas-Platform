@@ -1,5 +1,6 @@
 package com.trackify.tenant.service;
 
+import com.trackify.common.client.EmailNotificationClient;
 import com.trackify.common.enums.Role;
 import com.trackify.common.enums.TenantStatus;
 import com.trackify.common.enums.UserStatus;
@@ -8,16 +9,16 @@ import com.trackify.common.plan.PlanLimits;
 import com.trackify.common.theme.TenantThemes;
 import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.CreateTenantRequest;
-import com.trackify.tenant.dto.TenantDashboardStatsResponse;
-import com.trackify.tenant.dto.TenantGrowthPoint;
 import com.trackify.tenant.dto.PlatformAuditLogResponse;
+import com.trackify.tenant.dto.TenantDashboardStatsResponse;
 import com.trackify.tenant.dto.TenantDetailResponse;
+import com.trackify.tenant.dto.TenantGrowthPoint;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.dto.UpdateTenantBrandingRequest;
 import com.trackify.tenant.dto.UpdateTenantStatusRequest;
-import com.trackify.tenant.entity.PlatformAuditLog;
 import com.trackify.tenant.dto.UserRegistrationRequest;
 import com.trackify.tenant.dto.UserResponse;
+import com.trackify.tenant.entity.PlatformAuditLog;
 import com.trackify.tenant.entity.Tenant;
 import com.trackify.tenant.entity.UserLookup;
 import com.trackify.tenant.repository.PlatformAuditLogRepository;
@@ -58,15 +59,13 @@ public class TenantService {
   private final JdbcTemplate jdbcTemplate;
   private final PasswordEncoder passwordEncoder;
   private final ProjectNotificationClient projectNotificationClient;
+  private final EmailNotificationClient emailNotificationClient;
 
   @Value("${tenant.app-url-pattern:http://%s.trackify.com:5174}")
   private String appUrlPattern;
 
   @Value("${tenant.datasource.default-host:localhost}")
   private String defaultDbHost;
-
-  @Value("${services.notification-url:http://localhost:8084}")
-  private String notificationUrl;
 
   @Value("${trackify.dev.fixed-admin-password:}")
   private String fixedAdminPassword;
@@ -159,9 +158,7 @@ public class TenantService {
     }
     if (request.getLogoUrl() != null) {
       String logoUrl = request.getLogoUrl().trim();
-      if (!logoUrl.isEmpty()
-          && !logoUrl.startsWith("http://")
-          && !logoUrl.startsWith("https://")) {
+      if (!logoUrl.isEmpty() && !logoUrl.startsWith("http://") && !logoUrl.startsWith("https://")) {
         throw AppException.badRequest("Logo URL must start with http:// or https://");
       }
       tenant.setLogoUrl(logoUrl.isEmpty() ? null : logoUrl);
@@ -365,10 +362,7 @@ public class TenantService {
     tenant.setStatus(request.getStatus());
     tenant = tenantRepository.save(tenant);
     recordAudit(
-        "TENANT_STATUS_UPDATED",
-        null,
-        tenant,
-        "Status changed to " + request.getStatus().name());
+        "TENANT_STATUS_UPDATED", null, tenant, "Status changed to " + request.getStatus().name());
     return mapToResponse(tenant);
   }
 
@@ -512,99 +506,49 @@ public class TenantService {
   }
 
   private void sendApprovalEmail(String email, String fullName) {
-    try {
-      org.springframework.web.client.RestTemplate restTemplate =
-          new org.springframework.web.client.RestTemplate();
-      java.util.Map<String, String> request = new java.util.HashMap<>();
-      request.put("to", email);
-      request.put("subject", "Account Approved");
-      request.put(
-          "body",
-          "Hello "
-              + fullName
-              + ",\n\nYour account has been approved. You can now log in.\n\nBest,\nTrackify Team");
-
-      org.springframework.http.ResponseEntity<String> response =
-          restTemplate.postForEntity(
-              notificationUrl + "/api/notifications/email", request, String.class);
-      log.info("Approval email response status: {}", response.getStatusCode());
-    } catch (Exception e) {
-      log.error(
-          "Failed to send approval email to notification service: {} (URL: {})",
-          e.getMessage(),
-          notificationUrl);
-    }
+    emailNotificationClient.send(
+        email,
+        "Account Approved",
+        "Hello "
+            + fullName
+            + ",\n\nYour account has been approved. You can now log in.\n\nBest,\nTrackify Team");
   }
 
   private void sendInviteEmail(String email, String tenantName, String password, String domain) {
-    try {
-      org.springframework.web.client.RestTemplate restTemplate =
-          new org.springframework.web.client.RestTemplate();
-      java.util.Map<String, String> request = new java.util.HashMap<>();
-      request.put("to", email);
-      request.put("subject", "You've been invited to join " + tenantName + " on Trackify");
-
-      String tenantUrl = String.format(appUrlPattern, domain);
-
-      String body =
-          String.format(
-              "Hello,\n\n"
-                  + "You have been added as a team member to '%s' on Trackify.\n\n"
-                  + "Login Details:\n"
-                  + "App URL: %s\n"
-                  + "Email: %s\n"
-                  + "Temporary Password: %s\n\n"
-                  + "Please log in and change your password after your first login.\n\n"
-                  + "Best,\n"
-                  + "The Trackify Team",
-              tenantName, tenantUrl, email, password);
-      request.put("body", body);
-
-      restTemplate.postForEntity(
-          notificationUrl + "/api/notifications/email", request, String.class);
-      log.info("Invitation email sent successfully to {}", email);
-    } catch (Exception e) {
-      log.error("Failed to send invitation email: {}", e.getMessage());
-    }
+    String tenantUrl = String.format(appUrlPattern, domain);
+    String body =
+        String.format(
+            "Hello,\n\n"
+                + "You have been added as a team member to '%s' on Trackify.\n\n"
+                + "Login Details:\n"
+                + "App URL: %s\n"
+                + "Email: %s\n"
+                + "Temporary Password: %s\n\n"
+                + "Please log in and change your password after your first login.\n\n"
+                + "Best,\n"
+                + "The Trackify Team",
+            tenantName, tenantUrl, email, password);
+    emailNotificationClient.send(
+        email, "You've been invited to join " + tenantName + " on Trackify", body);
   }
 
   private void sendWelcomeEmail(String email, String tenantName, String password, String domain) {
-    try {
-      org.springframework.web.client.RestTemplate restTemplate =
-          new org.springframework.web.client.RestTemplate();
-      java.util.Map<String, String> request = new java.util.HashMap<>();
-      request.put("to", email);
-      request.put("subject", "Welcome to Trackify - Your Cloud Instance is Ready!");
-
-      String tenantUrl = String.format(appUrlPattern, domain);
-
-      String body =
-          String.format(
-              "Hello,\n\n"
-                  + "Your Trackify instance for '%s' has been successfully provisioned.\n\n"
-                  + "Login Details:\n"
-                  + "Domain: %s\n"
-                  + "Email: %s\n"
-                  + "Password: %s\n\n"
-                  + "You can access your instance at: %s\n\n"
-                  + "Please change your password after your first login.\n\n"
-                  + "Best Regards,\n"
-                  + "The Trackify Team",
-              tenantName, domain, email, password, tenantUrl);
-
-      request.put("body", body);
-
-      org.springframework.http.ResponseEntity<String> response =
-          restTemplate.postForEntity(
-              notificationUrl + "/api/notifications/email", request, String.class);
-      log.info("Welcome email response status: {}", response.getStatusCode());
-      log.info("Welcome email sent to: {}", email);
-    } catch (Exception e) {
-      log.error(
-          "Failed to send welcome email to notification service: {} (URL: {})",
-          e.getMessage(),
-          notificationUrl);
-    }
+    String tenantUrl = String.format(appUrlPattern, domain);
+    String body =
+        String.format(
+            "Hello,\n\n"
+                + "Your Trackify instance for '%s' has been successfully provisioned.\n\n"
+                + "Login Details:\n"
+                + "Domain: %s\n"
+                + "Email: %s\n"
+                + "Password: %s\n\n"
+                + "You can access your instance at: %s\n\n"
+                + "Please change your password after your first login.\n\n"
+                + "Best Regards,\n"
+                + "The Trackify Team",
+            tenantName, domain, email, password, tenantUrl);
+    emailNotificationClient.send(
+        email, "Welcome to Trackify - Your Cloud Instance is Ready!", body);
   }
 
   private JdbcTemplate getTenantJdbcTemplate(Tenant tenant) {

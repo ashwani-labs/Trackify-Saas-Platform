@@ -1,3 +1,4 @@
+import React from 'react';
 const SCORE_LABELS = ['Very weak', 'Weak', 'Fair', 'Good', 'Strong'];
 
 export function getPasswordStrength(password = '') {

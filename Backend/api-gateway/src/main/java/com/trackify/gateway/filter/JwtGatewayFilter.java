@@ -1,6 +1,7 @@
 package com.trackify.gateway.filter;
 
 import com.trackify.common.security.JwtUtil;
+import com.trackify.common.security.SecurityConstants;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -43,9 +44,11 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
       return;
     }
 
-    final String authHeader = request.getHeader("Authorization");
+    final String token =
+        SecurityConstants.extractBearerToken(
+            request.getHeader(SecurityConstants.AUTHORIZATION_HEADER));
 
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    if (token == null) {
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       response
           .getWriter()
@@ -53,8 +56,6 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
       response.setContentType("application/json");
       return;
     }
-
-    final String token = authHeader.substring(7);
 
     if (!jwtUtil.isTokenValid(token)) {
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

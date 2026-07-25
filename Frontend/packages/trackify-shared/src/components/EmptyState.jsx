@@ -1,3 +1,4 @@
+import React from 'react';
 const EmptyState = ({ icon, title, description, action, className = '' }) => (
   <div className={`card empty-state ${className}`.trim()}>
     {icon && <div className="empty-state__icon">{icon}</div>}

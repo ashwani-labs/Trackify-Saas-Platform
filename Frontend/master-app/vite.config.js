@@ -7,9 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig({
-  esbuild: {
-    jsxInject: `import React from 'react'`,
-  },
+  envDir: path.resolve(__dirname, '../..'),
   plugins: [
     react({
       babel: {

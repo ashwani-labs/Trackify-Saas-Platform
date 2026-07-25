@@ -178,10 +178,7 @@ class TenantSchemaUpgraderTest {
             eq("issue_key")))
         .thenReturn(1);
     when(jdbc.queryForObject(
-            contains("information_schema.columns"),
-            eq(Integer.class),
-            eq("issues"),
-            eq("labels")))
+            contains("information_schema.columns"), eq(Integer.class), eq("issues"), eq("labels")))
         .thenReturn(1);
   }
 }

@@ -5,12 +5,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+import com.trackify.common.client.EmailNotificationClient;
 import com.trackify.common.enums.Plan;
 import com.trackify.common.enums.TenantStatus;
 import com.trackify.common.exception.AppException;
+import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.TenantResponse;
 import com.trackify.tenant.entity.Tenant;
+import com.trackify.tenant.repository.PlatformAuditLogRepository;
 import com.trackify.tenant.repository.TenantRepository;
 import com.trackify.tenant.repository.UserLookupRepository;
 import java.util.Optional;
@@ -22,14 +25,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class TenantServiceTest {
 
   @Mock private TenantRepository tenantRepository;
+  @Mock private PlatformAuditLogRepository platformAuditLogRepository;
   @Mock private UserLookupRepository userLookupRepository;
   @Mock private JdbcTemplate jdbcTemplate;
   @Mock private PasswordEncoder passwordEncoder;
+  @Mock private ProjectNotificationClient projectNotificationClient;
+  @Mock private EmailNotificationClient emailNotificationClient;
 
   @InjectMocks private TenantService tenantService;
 
@@ -37,6 +44,9 @@ class TenantServiceTest {
 
   @BeforeEach
   void setUp() {
+    ReflectionTestUtils.setField(tenantService, "appUrlPattern", "http://%s.trackify.com:5174");
+    ReflectionTestUtils.setField(tenantService, "defaultDbHost", "localhost");
+
     createRequest = new CreateTenantRequest();
     createRequest.setName("Acme Corp");
     createRequest.setCode("acme");

@@ -1,3 +1,4 @@
+import React from 'react';
 import { TENANT_THEME_LIST } from '../themes/tenantThemes.js';
 
 const ThemeSelector = ({ value, onChange, name = 'theme', label = 'Workspace theme' }) => {

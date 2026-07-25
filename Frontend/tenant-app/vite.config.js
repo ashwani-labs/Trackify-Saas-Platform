@@ -7,9 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig({
-  esbuild: {
-    jsxInject: `import React from 'react'`,
-  },
+  envDir: path.resolve(__dirname, '../..'),
   plugins: [
     react({
       babel: {
@@ -29,8 +27,8 @@ export default defineConfig({
   },
   server: {
     port: 5174,
-    host: true, // Listen on all network interfaces
-    allowedHosts: true, // Allow any hostname (e.g., techno.trackify.com)
+    host: true,
+    allowedHosts: true,
   },
   test: {
     environment: 'jsdom',

@@ -11,10 +11,6 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
 
-tenant:
-  datasource:
-    host-override: ${TENANT_DATASOURCE_HOST_OVERRIDE:db}
-
 logging:
   level:
     root: WARN

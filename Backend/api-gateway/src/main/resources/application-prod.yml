@@ -1,6 +1,11 @@
 jwt:
   secret: ${JWT_SECRET}
 
+services:
+  auth-url: ${SERVICES_AUTH_URL:http://auth-service:8081}
+  tenant-url: ${SERVICES_TENANT_URL:http://tenant-service:8082}
+  project-url: ${SERVICES_PROJECT_URL:http://project-service:8083}
+
 trackify:
   rate-limit:
     enabled: true
