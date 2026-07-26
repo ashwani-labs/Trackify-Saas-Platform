@@ -2,6 +2,7 @@ package com.trackify.auth.service;
 
 import com.trackify.auth.config.StorageProperties;
 import com.trackify.common.exception.AppException;
+import com.trackify.common.util.SafeNames;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -34,7 +35,7 @@ public class FileStorageService {
       throw AppException.badRequest("Failed to store empty file.");
     }
 
-    String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+    String originalFilename = SafeNames.cleanOriginalFilename(file);
     String extension = StringUtils.getFilenameExtension(originalFilename);
     String fileName = UUID.randomUUID().toString() + (extension != null ? "." + extension : "");
 

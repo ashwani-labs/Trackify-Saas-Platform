@@ -25,7 +25,7 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.csrf(AbstractHttpConfigurer::disable)
+    http.csrf(AbstractHttpConfigurer::disable) // NOSONAR S4502 - JWT bearer, stateless API
         .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(

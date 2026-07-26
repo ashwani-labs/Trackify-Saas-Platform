@@ -9,12 +9,8 @@ public final class TenantThemes {
 
   private static final Map<String, String> PRIMARY_BY_THEME =
       Map.of(
-          "indigo", "#6366f1",
-          "ocean", "#0ea5e9",
-          "emerald", "#059669",
-          "rose", "#e11d48",
-          "amber", "#d97706",
-          "violet", "#7c3aed");
+          DEFAULT, "#6366f1", "ocean", "#0ea5e9", "emerald", "#059669", "rose", "#e11d48", "amber",
+          "#d97706", "violet", "#7c3aed");
 
   private TenantThemes() {}
 

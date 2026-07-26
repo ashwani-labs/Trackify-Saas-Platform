@@ -2,6 +2,7 @@ package com.trackify.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import lombok.Builder;
 import lombok.Data;
 
@@ -23,7 +24,7 @@ public class ErrorResponse {
         .error(error)
         .message(message)
         .path(path)
-        .timestamp(LocalDateTime.now())
+        .timestamp(LocalDateTime.now(ZoneOffset.UTC))
         .build();
   }
 }

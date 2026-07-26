@@ -9,6 +9,7 @@ import com.trackify.project.enums.NotificationType;
 import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.NotificationRepository;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
+
+  private static final String DEFAULT_PROJECT_NAME = "a project";
 
   private final NotificationRepository notificationRepository;
   private final IssueRepository issueRepository;
@@ -68,7 +71,8 @@ public class NotificationService {
       return;
     }
 
-    String projectName = issue.getProject() != null ? issue.getProject().getName() : "a project";
+    String projectName =
+        issue.getProject() != null ? issue.getProject().getName() : DEFAULT_PROJECT_NAME;
     Notification notification =
         Notification.builder()
             .userId(assigneeId)
@@ -92,7 +96,8 @@ public class NotificationService {
     }
 
     String issueLabel = formatIssueLabel(issue);
-    String projectName = issue.getProject() != null ? issue.getProject().getName() : "a project";
+    String projectName =
+        issue.getProject() != null ? issue.getProject().getName() : DEFAULT_PROJECT_NAME;
     notifyIssueStakeholders(
         issue,
         actorUserId,
@@ -112,7 +117,8 @@ public class NotificationService {
     }
 
     String issueLabel = formatIssueLabel(issue);
-    String projectName = issue.getProject() != null ? issue.getProject().getName() : "a project";
+    String projectName =
+        issue.getProject() != null ? issue.getProject().getName() : DEFAULT_PROJECT_NAME;
     notifyIssueStakeholders(
         issue,
         actorUserId,
@@ -138,7 +144,7 @@ public class NotificationService {
   @Transactional
   public NotificationResponse markAsRead(Long notificationId, Long userId) {
     Notification notification = findOwnedNotification(notificationId, userId);
-    notification.setReadAt(LocalDateTime.now());
+    notification.setReadAt(LocalDateTime.now(ZoneOffset.UTC));
     return mapToResponse(notificationRepository.save(notification));
   }
 
@@ -151,7 +157,7 @@ public class NotificationService {
 
   @Transactional
   public void markAllAsRead(Long userId) {
-    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
     notificationRepository
         .findAllByUserIdAndReadAtIsNull(userId)
         .forEach(

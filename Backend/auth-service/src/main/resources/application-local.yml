@@ -11,3 +11,8 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET:trackify-local-dev-jwt-secret-min-32-chars!}
+
+trackify:
+  dev:
+    # Local seed for master@trackify.com — override via TRACKIFY_DEV_MASTER_PASSWORD
+    master-seed-password: ${TRACKIFY_DEV_MASTER_PASSWORD:admin123}

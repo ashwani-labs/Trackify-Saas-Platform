@@ -13,6 +13,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class InternalApiFilter extends OncePerRequestFilter {
 
+  private static final String APPLICATION_JSON = "application/json";
+
   @Value("${trackify.internal-api-key:}")
   private String internalApiKey;
 
@@ -31,7 +33,7 @@ public class InternalApiFilter extends OncePerRequestFilter {
         || providedKey == null
         || !internalApiKey.equals(providedKey)) {
       response.setStatus(HttpStatus.UNAUTHORIZED.value());
-      response.setContentType("application/json");
+      response.setContentType(APPLICATION_JSON);
       response.getWriter().write("{\"success\":false,\"message\":\"Invalid internal API key\"}");
       return;
     }
@@ -39,7 +41,7 @@ public class InternalApiFilter extends OncePerRequestFilter {
     String tenantHeader = request.getHeader("X-Tenant-Id");
     if (tenantHeader == null || tenantHeader.isBlank()) {
       response.setStatus(HttpStatus.BAD_REQUEST.value());
-      response.setContentType("application/json");
+      response.setContentType(APPLICATION_JSON);
       response.getWriter().write("{\"success\":false,\"message\":\"X-Tenant-Id header required\"}");
       return;
     }
@@ -49,7 +51,7 @@ public class InternalApiFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } catch (NumberFormatException e) {
       response.setStatus(HttpStatus.BAD_REQUEST.value());
-      response.setContentType("application/json");
+      response.setContentType(APPLICATION_JSON);
       response.getWriter().write("{\"success\":false,\"message\":\"Invalid X-Tenant-Id\"}");
     } finally {
       TenantContext.clear();

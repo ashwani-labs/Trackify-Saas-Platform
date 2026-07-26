@@ -2,6 +2,7 @@ package com.trackify.tenant.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import lombok.*;
 
 @Entity
@@ -36,6 +37,6 @@ public class PlatformAuditLog {
 
   @PrePersist
   void onCreate() {
-    if (createdAt == null) createdAt = LocalDateTime.now();
+    if (createdAt == null) createdAt = LocalDateTime.now(ZoneOffset.UTC);
   }
 }

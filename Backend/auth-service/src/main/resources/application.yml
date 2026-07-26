@@ -20,8 +20,8 @@ spring:
     locations: classpath:db/migration
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 8MB
+      max-request-size: 8MB
 
 jwt:
   expiration: 86400000

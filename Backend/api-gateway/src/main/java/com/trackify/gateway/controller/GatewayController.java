@@ -4,6 +4,7 @@ import com.trackify.common.web.CorrelationIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.Enumeration;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -34,51 +36,29 @@ public class GatewayController {
   @Value("${services.project-url}")
   private String projectUrl;
 
-  @RequestMapping("/**")
+  @RequestMapping(
+      value = "/**",
+      method = {
+        RequestMethod.GET,
+        RequestMethod.POST,
+        RequestMethod.PUT,
+        RequestMethod.PATCH,
+        RequestMethod.DELETE,
+        RequestMethod.HEAD,
+        RequestMethod.OPTIONS
+      })
   public ResponseEntity<byte[]> proxyRequest(HttpServletRequest request, HttpMethod method) {
     String path = request.getRequestURI();
-    String queryParams = request.getQueryString() != null ? "?" + request.getQueryString() : "";
-    String targetBaseUrl;
-
-    if (path.startsWith("/auth")) {
-      targetBaseUrl = authUrl;
-    } else if (path.startsWith("/tenants")) {
-      targetBaseUrl = tenantUrl;
-    } else if (path.startsWith("/internal")) {
-      targetBaseUrl = projectUrl;
-    } else if (path.startsWith("/projects")
-        || path.startsWith("/issues")
-        || path.startsWith("/activity")
-        || path.startsWith("/search")
-        || path.startsWith("/notifications")
-        || path.startsWith("/dashboard")) {
-      targetBaseUrl = projectUrl;
-    } else {
+    Optional<String> targetBaseUrl = resolveTargetBaseUrl(path);
+    if (targetBaseUrl.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
 
-    String targetUrl = targetBaseUrl + path + queryParams;
+    String queryParams = request.getQueryString() != null ? "?" + request.getQueryString() : "";
+    String targetUrl = targetBaseUrl.get() + path + queryParams;
 
     HttpHeaders headers = new HttpHeaders();
-    String correlationId = request.getHeader(CorrelationIdFilter.HEADER);
-    if (correlationId == null || correlationId.isBlank()) {
-      correlationId = MDC.get(CorrelationIdFilter.MDC_KEY);
-    }
-    if (correlationId != null && !correlationId.isBlank()) {
-      headers.add(CorrelationIdFilter.HEADER, correlationId);
-    }
-
-    Enumeration<String> headerNames = request.getHeaderNames();
-    while (headerNames.hasMoreElements()) {
-      String headerName = headerNames.nextElement();
-      if (shouldSkipRequestHeader(headerName)) {
-        continue;
-      }
-      Enumeration<String> values = request.getHeaders(headerName);
-      while (values.hasMoreElements()) {
-        headers.add(headerName, values.nextElement());
-      }
-    }
+    String correlationId = copyRequestHeaders(request, headers);
 
     byte[] bodyBytes = null;
     if (request.getContentLengthLong() > 0
@@ -112,6 +92,48 @@ public class GatewayController {
           .header("Content-Type", "application/json")
           .body(errorJson.getBytes());
     }
+  }
+
+  private Optional<String> resolveTargetBaseUrl(String path) {
+    if (path.startsWith("/auth")) {
+      return Optional.of(authUrl);
+    }
+    if (path.startsWith("/tenants")) {
+      return Optional.of(tenantUrl);
+    }
+    if (path.startsWith("/internal")
+        || path.startsWith("/projects")
+        || path.startsWith("/issues")
+        || path.startsWith("/activity")
+        || path.startsWith("/search")
+        || path.startsWith("/notifications")
+        || path.startsWith("/dashboard")) {
+      return Optional.of(projectUrl);
+    }
+    return Optional.empty();
+  }
+
+  private String copyRequestHeaders(HttpServletRequest request, HttpHeaders headers) {
+    String correlationId = request.getHeader(CorrelationIdFilter.HEADER);
+    if (correlationId == null || correlationId.isBlank()) {
+      correlationId = MDC.get(CorrelationIdFilter.MDC_KEY);
+    }
+    if (correlationId != null && !correlationId.isBlank()) {
+      headers.add(CorrelationIdFilter.HEADER, correlationId);
+    }
+
+    Enumeration<String> headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      String headerName = headerNames.nextElement();
+      if (shouldSkipRequestHeader(headerName)) {
+        continue;
+      }
+      Enumeration<String> values = request.getHeaders(headerName);
+      while (values.hasMoreElements()) {
+        headers.add(headerName, values.nextElement());
+      }
+    }
+    return correlationId;
   }
 
   private boolean shouldSkipRequestHeader(String headerName) {

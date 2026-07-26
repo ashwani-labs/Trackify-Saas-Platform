@@ -12,7 +12,6 @@ import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
 import com.trackify.project.repository.SprintRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class SprintService {
+
+  private static final String SPRINT_NOT_FOUND_PREFIX = "Sprint not found with id: ";
 
   private final SprintRepository sprintRepository;
   private final ProjectRepository projectRepository;
@@ -49,9 +50,7 @@ public class SprintService {
   }
 
   public List<SprintResponse> getSprintsByProject(Long projectId) {
-    return sprintRepository.findByProjectId(projectId).stream()
-        .map(this::mapToResponse)
-        .collect(Collectors.toList());
+    return sprintRepository.findByProjectId(projectId).stream().map(this::mapToResponse).toList();
   }
 
   @Transactional
@@ -59,7 +58,7 @@ public class SprintService {
     Sprint sprint =
         sprintRepository
             .findById(id)
-            .orElseThrow(() -> AppException.notFound("Sprint not found with id: " + id));
+            .orElseThrow(() -> AppException.notFound(SPRINT_NOT_FOUND_PREFIX + id));
 
     sprint.setName(request.getName());
     sprint.setGoal(request.getGoal());
@@ -74,7 +73,7 @@ public class SprintService {
     Sprint sprint =
         sprintRepository
             .findById(id)
-            .orElseThrow(() -> AppException.notFound("Sprint not found with id: " + id));
+            .orElseThrow(() -> AppException.notFound(SPRINT_NOT_FOUND_PREFIX + id));
 
     if (sprint.getStatus() != SprintStatus.PLANNED) {
       throw new IllegalStateException("Only PLANNED sprints can be started.");
@@ -99,7 +98,7 @@ public class SprintService {
     Sprint sprint =
         sprintRepository
             .findById(id)
-            .orElseThrow(() -> AppException.notFound("Sprint not found with id: " + id));
+            .orElseThrow(() -> AppException.notFound(SPRINT_NOT_FOUND_PREFIX + id));
 
     if (sprint.getStatus() != SprintStatus.ACTIVE) {
       throw new IllegalStateException("Only ACTIVE sprints can be completed.");
@@ -111,7 +110,7 @@ public class SprintService {
     List<Issue> unfinishedIssues =
         issueRepository.findAllBySprintId(id).stream()
             .filter(issue -> issue.getStatus() != IssueStatus.DONE)
-            .collect(Collectors.toList());
+            .toList();
 
     if (!unfinishedIssues.isEmpty()) {
       Sprint nextSprint =

@@ -23,6 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProjectService {
 
+  private static final String ROLE_ADMIN = "ADMIN";
+  private static final String ROLE_MASTER = "MASTER";
+  private static final String PROJECT_NOT_FOUND = "Project not found";
+
   private final ProjectRepository projectRepository;
   private final IssueRepository issueRepository;
   private final ActivityEventRepository activityEventRepository;
@@ -67,13 +71,17 @@ public class ProjectService {
   }
 
   public ProjectStatsResponse getProjectStats(Long userId, String role) {
-    boolean isAdmin = "ADMIN".equalsIgnoreCase(role) || "MASTER".equalsIgnoreCase(role);
+    boolean isAdmin = ROLE_ADMIN.equalsIgnoreCase(role) || ROLE_MASTER.equalsIgnoreCase(role);
     List<Long> projectIds = isAdmin ? List.of() : projectRepository.findProjectIdsByUserId(userId);
     return getProjectStatsForScope(isAdmin, projectIds);
   }
 
   public ProjectStatsResponse getProjectStatsForScope(boolean isAdmin, List<Long> projectIds) {
-    long totalProjects, todoCount, inProgressCount, doneCount, totalIssues;
+    long totalProjects;
+    long todoCount;
+    long inProgressCount;
+    long doneCount;
+    long totalIssues;
 
     if (isAdmin) {
       totalProjects = projectRepository.count();
@@ -110,7 +118,7 @@ public class ProjectService {
 
   public Page<ProjectResponse> getAllProjects(Pageable pageable, Long userId, String role) {
     log.info("Fetching projects for user: {} with role: {}", userId, role);
-    if ("ADMIN".equalsIgnoreCase(role) || "MASTER".equalsIgnoreCase(role)) {
+    if (ROLE_ADMIN.equalsIgnoreCase(role) || ROLE_MASTER.equalsIgnoreCase(role)) {
       return projectRepository.findAll(pageable).map(this::mapToResponse);
     }
     return projectRepository.findByMemberUserId(userId, pageable).map(this::mapToResponse);
@@ -118,11 +126,9 @@ public class ProjectService {
 
   public ProjectResponse getProjectById(Long id, Long userId, String role) {
     Project project =
-        projectRepository
-            .findById(id)
-            .orElseThrow(() -> AppException.notFound("Project not found"));
+        projectRepository.findById(id).orElseThrow(() -> AppException.notFound(PROJECT_NOT_FOUND));
 
-    if (!"ADMIN".equalsIgnoreCase(role) && !"MASTER".equalsIgnoreCase(role)) {
+    if (!ROLE_ADMIN.equalsIgnoreCase(role) && !ROLE_MASTER.equalsIgnoreCase(role)) {
       List<Long> memberProjectIds = projectRepository.findProjectIdsByUserId(userId);
       if (!memberProjectIds.contains(id)) {
         throw AppException.forbidden("You do not have access to this project");
@@ -135,9 +141,7 @@ public class ProjectService {
   @Transactional
   public ProjectResponse updateProject(Long id, ProjectRequest request) {
     Project project =
-        projectRepository
-            .findById(id)
-            .orElseThrow(() -> AppException.notFound("Project not found"));
+        projectRepository.findById(id).orElseThrow(() -> AppException.notFound(PROJECT_NOT_FOUND));
 
     project.setName(request.getName());
     project.setDescription(request.getDescription());
@@ -149,7 +153,7 @@ public class ProjectService {
   @Transactional
   public void deleteProject(Long id) {
     if (!projectRepository.existsById(id)) {
-      throw AppException.notFound("Project not found");
+      throw AppException.notFound(PROJECT_NOT_FOUND);
     }
     projectRepository.deleteById(id);
   }

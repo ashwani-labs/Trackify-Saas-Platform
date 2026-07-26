@@ -30,6 +30,10 @@ class SearchServiceTest {
   @Mock private IssueRepository issueRepository;
   @Mock private JdbcTemplate jdbcTemplate;
 
+  @Mock
+  private org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+      namedParameterJdbcTemplate;
+
   @InjectMocks private SearchService searchService;
 
   @Test

@@ -1,6 +1,7 @@
 package com.trackify.project.service;
 
 import com.trackify.common.exception.AppException;
+import com.trackify.common.util.SafeNames;
 import com.trackify.project.config.StorageProperties;
 import java.util.Locale;
 import java.util.Set;
@@ -43,8 +44,8 @@ public class FileUploadValidator {
               + " MB.");
     }
 
-    String extension =
-        StringUtils.getFilenameExtension(StringUtils.cleanPath(file.getOriginalFilename()));
+    String cleanedPath = SafeNames.cleanOriginalFilename(file);
+    String extension = StringUtils.getFilenameExtension(cleanedPath);
     if (extension != null && BLOCKED_EXTENSIONS.contains(extension.toLowerCase(Locale.ROOT))) {
       throw AppException.badRequest("File type is not allowed.");
     }

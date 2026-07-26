@@ -7,7 +7,6 @@ import com.trackify.project.entity.ProjectMember;
 import com.trackify.project.repository.ProjectMemberRepository;
 import com.trackify.project.repository.ProjectRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,7 @@ public class ProjectMemberService {
     }
     return memberRepository.findAllByProjectId(projectId).stream()
         .map(this::mapToResponse)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Transactional

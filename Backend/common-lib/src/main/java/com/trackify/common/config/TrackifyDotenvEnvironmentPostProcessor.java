@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -27,6 +28,7 @@ public class TrackifyDotenvEnvironmentPostProcessor implements EnvironmentPostPr
 
   private static final String ENV_FILE = ".env";
   private static final String PROPERTY_SOURCE_NAME = "trackifyDotenv";
+  private static final String JWT_SECRET_KEY = "JWT_SECRET";
 
   @Override
   public void postProcessEnvironment(
@@ -46,19 +48,22 @@ public class TrackifyDotenvEnvironmentPostProcessor implements EnvironmentPostPr
         throw new IllegalStateException("Failed to load " + envFile, e);
       }
       properties.forEach((key, value) -> source.put(key.toString(), value.toString()));
-      LOGGER.info(
-          () ->
-              "Loaded "
-                  + envFile
-                  + " ("
-                  + source.size()
-                  + " entries, JWT_SECRET present: "
-                  + source.containsKey("JWT_SECRET")
-                  + ")");
+      if (LOGGER.isLoggable(Level.INFO)) {
+        LOGGER.info(
+            "Loaded "
+                + envFile
+                + " ("
+                + source.size()
+                + " entries, "
+                + JWT_SECRET_KEY
+                + " present: "
+                + source.containsKey(JWT_SECRET_KEY)
+                + ")");
+      }
     }
 
     String jwtSecret = resolveJwtSecret(environment, source);
-    source.put("JWT_SECRET", jwtSecret);
+    source.put(JWT_SECRET_KEY, jwtSecret);
     source.put("jwt.secret", jwtSecret);
 
     environment.getPropertySources().addFirst(new MapPropertySource(PROPERTY_SOURCE_NAME, source));
@@ -66,23 +71,26 @@ public class TrackifyDotenvEnvironmentPostProcessor implements EnvironmentPostPr
 
   private static String resolveJwtSecret(
       ConfigurableEnvironment environment, Map<String, Object> dotenv) {
-    Object fromDotenv = dotenv.get("JWT_SECRET");
+    Object fromDotenv = dotenv.get(JWT_SECRET_KEY);
     if (fromDotenv != null && JwtSecretSupport.isStrongEnough(fromDotenv.toString())) {
       return fromDotenv.toString();
     }
 
-    String fromOsEnv = environment.getProperty("JWT_SECRET");
+    String fromOsEnv = environment.getProperty(JWT_SECRET_KEY);
     if (JwtSecretSupport.isStrongEnough(fromOsEnv)) {
       return fromOsEnv;
     }
 
-    if (fromOsEnv != null && !fromOsEnv.isBlank()) {
+    if (fromOsEnv != null && !fromOsEnv.isBlank() && LOGGER.isLoggable(Level.WARNING)) {
       LOGGER.warning(
-          "JWT_SECRET is too short ("
+          JWT_SECRET_KEY
+              + " is too short ("
               + fromOsEnv.length()
               + " characters / "
               + (JwtSecretSupport.secretKeyByteLength(fromOsEnv) * 8)
-              + " bits). Using local dev default. Remove JWT_SECRET from your IDE run configuration.");
+              + " bits). Using local dev default. Remove "
+              + JWT_SECRET_KEY
+              + " from your IDE run configuration.");
     }
 
     return JwtSecretSupport.LOCAL_DEV_SECRET;

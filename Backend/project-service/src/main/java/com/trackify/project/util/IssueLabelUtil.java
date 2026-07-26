@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class IssueLabelUtil {
 
@@ -36,7 +35,7 @@ public final class IssueLabelUtil {
     return Arrays.stream(labels.split(","))
         .map(IssueLabelUtil::normalize)
         .filter(value -> !value.isEmpty())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   public static String normalize(String label) {

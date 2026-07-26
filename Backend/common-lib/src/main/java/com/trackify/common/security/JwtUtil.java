@@ -5,7 +5,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -53,12 +53,16 @@ public class JwtUtil {
   }
 
   public String generateToken(String subject, Map<String, Object> extraClaims) {
+    Instant now = Instant.now();
+    Instant expiresAt = now.plusMillis(jwtProperties.getExpiration());
+    // Use NumericDate (epoch seconds) so we stay on java.time; JJWT builder Date helpers are
+    // legacy-only in 0.12.x.
     return Jwts.builder()
         .claims(extraClaims)
         .subject(subject)
         .issuer(jwtProperties.getIssuer())
-        .issuedAt(new Date())
-        .expiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
+        .claim(Claims.ISSUED_AT, now.getEpochSecond())
+        .claim(Claims.EXPIRATION, expiresAt.getEpochSecond())
         .signWith(getSigningKey())
         .compact();
   }
@@ -130,8 +134,8 @@ public class JwtUtil {
         });
   }
 
-  public Date extractExpiration(String token) {
-    return extractClaim(token, Claims::getExpiration);
+  public Instant extractExpiration(String token) {
+    return extractClaim(token, JwtUtil::readExpiration);
   }
 
   public <T> T extractClaim(String token, Function<Claims, T> resolver) {
@@ -139,10 +143,20 @@ public class JwtUtil {
   }
 
   private boolean isTokenExpired(String token) {
-    return extractExpiration(token).before(new Date());
+    return extractExpiration(token).isBefore(Instant.now());
   }
 
   private Claims parseClaims(String token) {
     return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
+  }
+
+  /** Reads JWT NumericDate {@code exp} as epoch seconds (java.time only). */
+  private static Instant readExpiration(Claims claims) {
+    Object exp = claims.get(Claims.EXPIRATION);
+    if (exp instanceof Number number) {
+      return Instant.ofEpochSecond(number.longValue());
+    }
+    throw new IllegalArgumentException(
+        "JWT missing or invalid exp claim: " + (exp == null ? "null" : exp.getClass().getName()));
   }
 }

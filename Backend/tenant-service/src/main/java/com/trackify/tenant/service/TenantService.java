@@ -7,6 +7,7 @@ import com.trackify.common.enums.UserStatus;
 import com.trackify.common.exception.AppException;
 import com.trackify.common.plan.PlanLimits;
 import com.trackify.common.theme.TenantThemes;
+import com.trackify.common.util.SafeNames;
 import com.trackify.tenant.client.ProjectNotificationClient;
 import com.trackify.tenant.dto.CreateTenantRequest;
 import com.trackify.tenant.dto.PlatformAuditLogResponse;
@@ -29,12 +30,12 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +53,15 @@ import org.springframework.util.StreamUtils;
 @Service
 @RequiredArgsConstructor
 public class TenantService {
+
+  private static final String TENANT_NOT_FOUND = "Tenant not found";
+  private static final String SQL_COUNT_USERS = "SELECT COUNT(*) FROM users";
+  private static final String COL_CREATED_AT = "created_at";
+  private static final String LABEL_DATABASE_NAME = "database name";
+  private static final String LABEL_DATABASE_USERNAME = "database username";
+  private static final String SQL_DROP_USER_IF_EXISTS = "DROP USER IF EXISTS ";
+  private static final String MYSQL_HOST_ANY = "@'%'";
+  private static final String MYSQL_HOST_LOCALHOST = "@'localhost'";
 
   private final TenantRepository tenantRepository;
   private final PlatformAuditLogRepository platformAuditLogRepository;
@@ -151,7 +161,7 @@ public class TenantService {
   @Transactional
   public TenantResponse updateTenantBranding(Long id, UpdateTenantBrandingRequest request) {
     Tenant tenant =
-        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
+        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound(TENANT_NOT_FOUND));
 
     if (request.getCompanyName() != null) {
       tenant.setCompanyName(request.getCompanyName().trim());
@@ -210,7 +220,7 @@ public class TenantService {
   @Transactional
   public void deleteTenant(Long id) {
     Tenant tenant =
-        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
+        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound(TENANT_NOT_FOUND));
 
     if (tenant.getStatus() != TenantStatus.INACTIVE) {
       throw AppException.badRequest("Only INACTIVE organizations can be deleted permanently");
@@ -220,11 +230,12 @@ public class TenantService {
 
     // 1. Drop the tenant database and user
     try {
-      jdbcTemplate.execute("DROP DATABASE IF EXISTS " + tenant.getDbName());
-      jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'%%'", tenant.getDbUsername()));
-      jdbcTemplate.execute(
-          String.format("DROP USER IF EXISTS '%s'@'localhost'", tenant.getDbUsername()));
-      jdbcTemplate.execute("FLUSH PRIVILEGES");
+      String safeDb = SafeNames.requireMysqlIdentifier(tenant.getDbName(), LABEL_DATABASE_NAME);
+      String safeUser =
+          SafeNames.requireMysqlIdentifier(tenant.getDbUsername(), LABEL_DATABASE_USERNAME);
+      dropDatabaseIfExists(safeDb);
+      dropMysqlUserHosts(safeUser);
+      flushPrivileges();
     } catch (Exception e) {
       log.error("Failed to drop database or user for {}: {}", tenant.getDbName(), e.getMessage());
       // Proceeding with metadata deletion even if DB drop fails (it might not have been created)
@@ -251,13 +262,13 @@ public class TenantService {
     long inactive = tenantRepository.countByStatus(TenantStatus.INACTIVE);
 
     List<Tenant> tenants = tenantRepository.findAll();
-    YearMonth start = YearMonth.now().minusMonths(effectiveMonths - 1L);
+    YearMonth start = YearMonth.now(ZoneOffset.UTC).minusMonths(effectiveMonths - 1L);
     DateTimeFormatter labelFormat = DateTimeFormatter.ofPattern("MMM yy");
     List<TenantGrowthPoint> growth = new ArrayList<>();
     List<TenantGrowthPoint> provisioning = new ArrayList<>();
 
     for (YearMonth cursor = start;
-        !cursor.isAfter(YearMonth.now());
+        !cursor.isAfter(YearMonth.now(ZoneOffset.UTC));
         cursor = cursor.plusMonths(1)) {
       LocalDateTime startOfMonth = cursor.atDay(1).atStartOfDay();
       LocalDateTime endOfMonth = cursor.atEndOfMonth().atTime(23, 59, 59);
@@ -291,13 +302,13 @@ public class TenantService {
 
   public TenantResponse getTenantById(Long id) {
     Tenant tenant =
-        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
+        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound(TENANT_NOT_FOUND));
     return mapToResponse(tenant);
   }
 
   public TenantDetailResponse getTenantDetail(Long id) {
     Tenant tenant =
-        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
+        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound(TENANT_NOT_FOUND));
 
     long totalUsers = 0;
     long activeUsers = 0;
@@ -308,13 +319,11 @@ public class TenantService {
 
     try {
       JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
-      Long total = tenantJdbc.queryForObject("SELECT COUNT(*) FROM users", Long.class);
+      Long total = tenantJdbc.queryForObject(SQL_COUNT_USERS, Long.class);
       Long active =
-          tenantJdbc.queryForObject(
-              "SELECT COUNT(*) FROM users WHERE status = 'ACTIVE'", Long.class);
+          tenantJdbc.queryForObject(SQL_COUNT_USERS + " WHERE status = 'ACTIVE'", Long.class);
       Long pending =
-          tenantJdbc.queryForObject(
-              "SELECT COUNT(*) FROM users WHERE status = 'PENDING'", Long.class);
+          tenantJdbc.queryForObject(SQL_COUNT_USERS + " WHERE status = 'PENDING'", Long.class);
       Long projects = tenantJdbc.queryForObject("SELECT COUNT(*) FROM projects", Long.class);
       Long issues = tenantJdbc.queryForObject("SELECT COUNT(*) FROM issues", Long.class);
       Long sprints =
@@ -357,7 +366,7 @@ public class TenantService {
   @Transactional
   public TenantResponse updateTenantStatus(Long id, UpdateTenantStatusRequest request) {
     Tenant tenant =
-        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound("Tenant not found"));
+        tenantRepository.findById(id).orElseThrow(() -> AppException.notFound(TENANT_NOT_FOUND));
 
     tenant.setStatus(request.getStatus());
     tenant = tenantRepository.save(tenant);
@@ -377,14 +386,14 @@ public class TenantService {
     Tenant tenant =
         tenantRepository
             .findById(request.getTenantId())
-            .orElseThrow(() -> AppException.notFound("Tenant not found"));
+            .orElseThrow(() -> AppException.notFound(TENANT_NOT_FOUND));
 
     if (tenant.getStatus() != TenantStatus.ACTIVE) {
       throw AppException.forbidden("Tenant is not active");
     }
 
     JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
-    Long existingUsers = tenantJdbc.queryForObject("SELECT COUNT(*) FROM users", Long.class);
+    Long existingUsers = tenantJdbc.queryForObject(SQL_COUNT_USERS, Long.class);
     if (existingUsers != null && existingUsers >= PlanLimits.maxUsers(tenant.getPlan())) {
       throw AppException.forbidden("User seat limit reached for your subscription plan.");
     }
@@ -443,19 +452,18 @@ public class TenantService {
     Tenant tenant =
         tenantRepository
             .findById(tenantId)
-            .orElseThrow(() -> AppException.notFound("Tenant not found"));
+            .orElseThrow(() -> AppException.notFound(TENANT_NOT_FOUND));
 
     JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
     Long total =
-        tenantJdbc.queryForObject(
-            "SELECT COUNT(*) FROM users WHERE status = 'PENDING'", Long.class);
+        tenantJdbc.queryForObject(SQL_COUNT_USERS + " WHERE status = 'PENDING'", Long.class);
 
     String sql = "SELECT * FROM users WHERE status = 'PENDING' LIMIT ? OFFSET ?";
     List<Map<String, Object>> users =
         tenantJdbc.queryForList(sql, pageable.getPageSize(), pageable.getOffset());
 
     List<UserResponse> userResponses =
-        users.stream().map(map -> mapToUserResponse(map, tenantId)).collect(Collectors.toList());
+        users.stream().map(map -> mapToUserResponse(map, tenantId)).toList();
 
     return new org.springframework.data.domain.PageImpl<>(
         userResponses, pageable, total != null ? total : 0);
@@ -465,17 +473,17 @@ public class TenantService {
     Tenant tenant =
         tenantRepository
             .findById(tenantId)
-            .orElseThrow(() -> AppException.notFound("Tenant not found"));
+            .orElseThrow(() -> AppException.notFound(TENANT_NOT_FOUND));
 
     JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
-    Long total = tenantJdbc.queryForObject("SELECT COUNT(*) FROM users", Long.class);
+    Long total = tenantJdbc.queryForObject(SQL_COUNT_USERS, Long.class);
 
     String sql = "SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?";
     List<Map<String, Object>> users =
         tenantJdbc.queryForList(sql, pageable.getPageSize(), pageable.getOffset());
 
     List<UserResponse> userResponses =
-        users.stream().map(map -> mapToUserResponse(map, tenantId)).collect(Collectors.toList());
+        users.stream().map(map -> mapToUserResponse(map, tenantId)).toList();
 
     return new org.springframework.data.domain.PageImpl<>(
         userResponses, pageable, total != null ? total : 0);
@@ -486,7 +494,7 @@ public class TenantService {
     Tenant tenant =
         tenantRepository
             .findById(tenantId)
-            .orElseThrow(() -> AppException.notFound("Tenant not found"));
+            .orElseThrow(() -> AppException.notFound(TENANT_NOT_FOUND));
 
     JdbcTemplate tenantJdbc = getTenantJdbcTemplate(tenant);
     try {
@@ -509,25 +517,36 @@ public class TenantService {
     emailNotificationClient.send(
         email,
         "Account Approved",
-        "Hello "
-            + fullName
-            + ",\n\nYour account has been approved. You can now log in.\n\nBest,\nTrackify Team");
+        """
+        Hello %s,
+
+        Your account has been approved. You can now log in.
+
+        Best,
+        Trackify Team
+        """
+            .formatted(fullName));
   }
 
   private void sendInviteEmail(String email, String tenantName, String password, String domain) {
     String tenantUrl = String.format(appUrlPattern, domain);
     String body =
-        String.format(
-            "Hello,\n\n"
-                + "You have been added as a team member to '%s' on Trackify.\n\n"
-                + "Login Details:\n"
-                + "App URL: %s\n"
-                + "Email: %s\n"
-                + "Temporary Password: %s\n\n"
-                + "Please log in and change your password after your first login.\n\n"
-                + "Best,\n"
-                + "The Trackify Team",
-            tenantName, tenantUrl, email, password);
+        """
+        Hello,
+
+        You have been added as a team member to '%s' on Trackify.
+
+        Login Details:
+        App URL: %s
+        Email: %s
+        Temporary Password: %s
+
+        Please log in and change your password after your first login.
+
+        Best,
+        The Trackify Team
+        """
+            .formatted(tenantName, tenantUrl, email, password);
     emailNotificationClient.send(
         email, "You've been invited to join " + tenantName + " on Trackify", body);
   }
@@ -535,27 +554,34 @@ public class TenantService {
   private void sendWelcomeEmail(String email, String tenantName, String password, String domain) {
     String tenantUrl = String.format(appUrlPattern, domain);
     String body =
-        String.format(
-            "Hello,\n\n"
-                + "Your Trackify instance for '%s' has been successfully provisioned.\n\n"
-                + "Login Details:\n"
-                + "Domain: %s\n"
-                + "Email: %s\n"
-                + "Password: %s\n\n"
-                + "You can access your instance at: %s\n\n"
-                + "Please change your password after your first login.\n\n"
-                + "Best Regards,\n"
-                + "The Trackify Team",
-            tenantName, domain, email, password, tenantUrl);
+        """
+        Hello,
+
+        Your Trackify instance for '%s' has been successfully provisioned.
+
+        Login Details:
+        Domain: %s
+        Email: %s
+        Password: %s
+
+        You can access your instance at: %s
+
+        Please change your password after your first login.
+
+        Best Regards,
+        The Trackify Team
+        """
+            .formatted(tenantName, domain, email, password, tenantUrl);
     emailNotificationClient.send(
         email, "Welcome to Trackify - Your Cloud Instance is Ready!", body);
   }
 
   private JdbcTemplate getTenantJdbcTemplate(Tenant tenant) {
+    String safeDb = SafeNames.requireMysqlIdentifier(tenant.getDbName(), LABEL_DATABASE_NAME);
     String dbUrl =
         String.format(
             "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true",
-            tenant.getDbHost(), tenant.getDbPort(), tenant.getDbName());
+            tenant.getDbHost(), tenant.getDbPort(), safeDb);
 
     DriverManagerDataSource dataSource = new DriverManagerDataSource();
     dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
@@ -567,16 +593,18 @@ public class TenantService {
   }
 
   private UserResponse mapToUserResponse(Map<String, Object> map, Long tenantId) {
+    Object created = map.get(COL_CREATED_AT);
+    LocalDateTime createdAt =
+        created instanceof Timestamp timestamp
+            ? timestamp.toLocalDateTime()
+            : (LocalDateTime) created;
     return UserResponse.builder()
         .id((Long) map.get("id"))
         .email((String) map.get("email"))
         .fullName((String) map.get("full_name"))
         .role(Role.valueOf((String) map.get("role")))
         .status(UserStatus.valueOf((String) map.get("status")))
-        .createdAt(
-            map.get("created_at") instanceof Timestamp
-                ? ((Timestamp) map.get("created_at")).toLocalDateTime()
-                : (LocalDateTime) map.get("created_at"))
+        .createdAt(createdAt)
         .tenantId(tenantId)
         .build();
   }
@@ -590,29 +618,18 @@ public class TenantService {
     try {
       log.info("Provisioning database: {}", dbName);
 
+      String safeDb = SafeNames.requireMysqlIdentifier(dbName, LABEL_DATABASE_NAME);
+      String safeUser = SafeNames.requireMysqlIdentifier(dbUsername, LABEL_DATABASE_USERNAME);
+
       // 1. Create Database and User with root privileges
-      jdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + dbName);
+      createDatabaseIfNotExists(safeDb);
 
       // Drop and Recreate user to ensure fresh credentials and permissions for both % and localhost
       // This solves the 'stale password' issue when re-provisioning tenants
-      try {
-        jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'%%'", dbUsername));
-        jdbcTemplate.execute(String.format("DROP USER IF EXISTS '%s'@'localhost'", dbUsername));
-      } catch (Exception e) {
-        log.warn("Non-critical error dropping user during provisioning: {}", e.getMessage());
-      }
-
-      jdbcTemplate.execute(
-          String.format("CREATE USER '%s'@'%%' IDENTIFIED BY '%s'", dbUsername, dbPassword));
-      jdbcTemplate.execute(
-          String.format("CREATE USER '%s'@'localhost' IDENTIFIED BY '%s'", dbUsername, dbPassword));
-
-      jdbcTemplate.execute(
-          String.format("GRANT ALL PRIVILEGES ON %s.* TO '%s'@'%%'", dbName, dbUsername));
-      jdbcTemplate.execute(
-          String.format("GRANT ALL PRIVILEGES ON %s.* TO '%s'@'localhost'", dbName, dbUsername));
-
-      jdbcTemplate.execute("FLUSH PRIVILEGES");
+      dropMysqlUserIfExists(dbUsername);
+      createMysqlUserWithPassword(safeUser, dbPassword);
+      grantAllOnDatabase(safeDb, safeUser);
+      flushPrivileges();
 
       // 2. Create schema (V1 is the full current schema; legacy DBs upgrade via
       // TenantSchemaUpgrader on connect)
@@ -621,17 +638,21 @@ public class TenantService {
 
       // 3. Create Admin User
       String hashedPassword = passwordEncoder.encode(adminPassword);
-      String insertAdminUser =
-          String.format(
-              "INSERT INTO %s.users (email, password, full_name, role, status) VALUES (?, ?, ?, 'ADMIN', 'ACTIVE')",
-              dbName);
-
-      jdbcTemplate.update(insertAdminUser, adminEmail, hashedPassword, "Admin User");
+      insertTenantAdminUser(safeDb, adminEmail, hashedPassword);
 
       log.info("Provisioned database successfully: {}", dbName);
     } catch (Exception e) {
       log.error("Failed to provision database {}: {}", dbName, e.getMessage());
       throw AppException.internalError("Failed to provision tenant database: " + e.getMessage());
+    }
+  }
+
+  private void dropMysqlUserIfExists(String dbUsername) {
+    String safeUser = SafeNames.requireMysqlIdentifier(dbUsername, LABEL_DATABASE_USERNAME);
+    try {
+      dropMysqlUserHosts(safeUser);
+    } catch (Exception e) {
+      log.warn("Non-critical error dropping user during provisioning: {}", e.getMessage());
     }
   }
 
@@ -653,15 +674,69 @@ public class TenantService {
 
   private String loadSqlTemplate(String classpathLocation, String dbName) {
     try {
+      String safeDb = SafeNames.requireMysqlIdentifier(dbName, LABEL_DATABASE_NAME);
       ClassPathResource resource = new ClassPathResource(classpathLocation);
       String rawSql = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
-      return rawSql.replace("{{DB_NAME}}", dbName);
+      return rawSql.replace("{{DB_NAME}}", safeDb);
     } catch (IOException e) {
       throw AppException.internalError(
           "Failed to load tenant schema template: " + classpathLocation);
     }
   }
 
+  /** Identifiers are validated via {@link SafeNames} before concatenation. */
+  @SuppressWarnings("java:S2077")
+  private void dropDatabaseIfExists(String safeDb) {
+    jdbcTemplate.execute("DROP DATABASE IF EXISTS " + safeDb);
+  }
+
+  @SuppressWarnings("java:S2077")
+  private void createDatabaseIfNotExists(String safeDb) {
+    jdbcTemplate.execute("CREATE DATABASE IF NOT EXISTS " + safeDb);
+  }
+
+  @SuppressWarnings("java:S2077")
+  private void dropMysqlUserHosts(String safeUser) {
+    String quotedUser = SafeNames.quoteMysqlLiteral(safeUser);
+    jdbcTemplate.execute(SQL_DROP_USER_IF_EXISTS + quotedUser + MYSQL_HOST_ANY);
+    jdbcTemplate.execute(SQL_DROP_USER_IF_EXISTS + quotedUser + MYSQL_HOST_LOCALHOST);
+  }
+
+  @SuppressWarnings("java:S2077")
+  private void createMysqlUserWithPassword(String safeUser, String dbPassword) {
+    String quotedUser = SafeNames.quoteMysqlLiteral(safeUser);
+    String quotedPassword = SafeNames.quoteMysqlLiteral(dbPassword);
+    jdbcTemplate.execute(
+        "CREATE USER " + quotedUser + MYSQL_HOST_ANY + " IDENTIFIED BY " + quotedPassword);
+    jdbcTemplate.execute(
+        "CREATE USER " + quotedUser + MYSQL_HOST_LOCALHOST + " IDENTIFIED BY " + quotedPassword);
+  }
+
+  @SuppressWarnings("java:S2077")
+  private void grantAllOnDatabase(String safeDb, String safeUser) {
+    String quotedUser = SafeNames.quoteMysqlLiteral(safeUser);
+    jdbcTemplate.execute(
+        "GRANT ALL PRIVILEGES ON " + safeDb + ".* TO " + quotedUser + MYSQL_HOST_ANY);
+    jdbcTemplate.execute(
+        "GRANT ALL PRIVILEGES ON " + safeDb + ".* TO " + quotedUser + MYSQL_HOST_LOCALHOST);
+  }
+
+  private void flushPrivileges() {
+    jdbcTemplate.execute("FLUSH PRIVILEGES");
+  }
+
+  @SuppressWarnings("java:S2077")
+  private void insertTenantAdminUser(String safeDb, String adminEmail, String hashedPassword) {
+    jdbcTemplate.update(
+        "INSERT INTO "
+            + safeDb
+            + ".users (email, password, full_name, role, status) VALUES (?, ?, ?, 'ADMIN', 'ACTIVE')",
+        adminEmail,
+        hashedPassword,
+        "Admin User");
+  }
+
+  @SuppressWarnings("java:S2077")
   private void executeSqlStatements(String sqlScript) {
     for (String sql : sqlScript.split(";")) {
       if (!sql.trim().isEmpty()) {

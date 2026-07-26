@@ -28,7 +28,7 @@ public class ActivityService {
   @Transactional
   public void recordStatusChanged(
       Long projectId, Long issueId, Long actorUserId, String fromStatus, String toStatus) {
-    record(
+    recordEvent(
         projectId,
         issueId,
         actorUserId,
@@ -39,25 +39,25 @@ public class ActivityService {
   @Transactional
   public void recordAssigneeChanged(
       Long projectId, Long issueId, Long actorUserId, Long fromAssignee, Long toAssignee) {
-    String summary =
-        toAssignee == null
-            ? "Assignee cleared"
-            : "Assignee changed"
-                + (fromAssignee != null ? " from user #" + fromAssignee : "")
-                + " to user #"
-                + toAssignee;
-    record(projectId, issueId, actorUserId, ActivityEventType.ASSIGNEE_CHANGED, summary);
+    String summary;
+    if (toAssignee == null) {
+      summary = "Assignee cleared";
+    } else {
+      String fromPart = fromAssignee != null ? " from user #" + fromAssignee : "";
+      summary = "Assignee changed" + fromPart + " to user #" + toAssignee;
+    }
+    recordEvent(projectId, issueId, actorUserId, ActivityEventType.ASSIGNEE_CHANGED, summary);
   }
 
   @Transactional
   public void recordCommentAdded(Long projectId, Long issueId, Long actorUserId) {
-    record(projectId, issueId, actorUserId, ActivityEventType.COMMENT_ADDED, "Comment added");
+    recordEvent(projectId, issueId, actorUserId, ActivityEventType.COMMENT_ADDED, "Comment added");
   }
 
   @Transactional
   public void recordSprintStarted(
       Long projectId, Long sprintId, Long actorUserId, String sprintName) {
-    record(
+    recordEvent(
         projectId,
         null,
         actorUserId,
@@ -68,7 +68,7 @@ public class ActivityService {
   @Transactional
   public void recordSprintCompleted(
       Long projectId, Long sprintId, Long actorUserId, String sprintName) {
-    record(
+    recordEvent(
         projectId,
         null,
         actorUserId,
@@ -79,7 +79,7 @@ public class ActivityService {
   public List<ActivityEventResponse> getIssueActivity(Long issueId) {
     return activityEventRepository.findAllByIssueIdOrderByCreatedAtDesc(issueId).stream()
         .map(event -> mapToResponse(event, null))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   public Page<ActivityEventResponse> getProjectActivity(Long projectId, Pageable pageable) {
@@ -108,7 +108,7 @@ public class ActivityService {
         .collect(Collectors.toMap(Issue::getId, Issue::getIssueKey));
   }
 
-  private void record(
+  private void recordEvent(
       Long projectId, Long issueId, Long actorUserId, ActivityEventType type, String summary) {
     activityEventRepository.save(
         ActivityEvent.builder()

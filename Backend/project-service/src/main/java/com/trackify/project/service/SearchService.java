@@ -8,16 +8,16 @@ import com.trackify.project.entity.Issue;
 import com.trackify.project.entity.Project;
 import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +31,7 @@ public class SearchService {
   private final ProjectRepository projectRepository;
   private final IssueRepository issueRepository;
   private final JdbcTemplate jdbcTemplate;
+  private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
   @Transactional(readOnly = true)
   public GlobalSearchResponse search(String query, int limit, Long userId, String role) {
@@ -66,7 +67,7 @@ public class SearchService {
       }
       matches = projectRepository.searchByTermAndProjectIds(projectIds, term, pageable);
     }
-    return matches.stream().map(this::mapProject).collect(Collectors.toList());
+    return matches.stream().map(this::mapProject).toList();
   }
 
   private List<IssueResponse> searchIssues(
@@ -87,10 +88,7 @@ public class SearchService {
           .forEach(issue -> merged.put(issue.getId(), issue));
     }
 
-    return merged.values().stream()
-        .limit(pageable.getPageSize())
-        .map(this::mapIssue)
-        .collect(Collectors.toList());
+    return merged.values().stream().limit(pageable.getPageSize()).map(this::mapIssue).toList();
   }
 
   private List<Issue> searchIssuesForMember(String term, Long userId, Pageable pageable) {
@@ -122,24 +120,22 @@ public class SearchService {
       return List.of();
     }
 
-    String placeholders = projectIds.stream().map(id -> "?").collect(Collectors.joining(","));
-    List<Object> params = new ArrayList<>();
-    params.add(pattern);
-    params.add(pattern);
-    params.addAll(projectIds);
-    params.add(limit);
+    MapSqlParameterSource params =
+        new MapSqlParameterSource()
+            .addValue("pattern", pattern)
+            .addValue("projectIds", projectIds)
+            .addValue("limit", limit);
 
-    return jdbcTemplate.query(
+    return namedParameterJdbcTemplate.query(
         """
         SELECT DISTINCT i.id FROM issues i
         INNER JOIN users u ON u.id = i.assignee_id
-        WHERE (LOWER(u.email) LIKE ? OR LOWER(COALESCE(u.full_name, '')) LIKE ?)
-        AND i.project_id IN (%s)
-        LIMIT ?
-        """
-            .formatted(placeholders),
-        (rs, rowNum) -> rs.getLong("id"),
-        params.toArray());
+        WHERE (LOWER(u.email) LIKE :pattern OR LOWER(COALESCE(u.full_name, '')) LIKE :pattern)
+        AND i.project_id IN (:projectIds)
+        LIMIT :limit
+        """,
+        params,
+        (rs, rowNum) -> rs.getLong("id"));
   }
 
   private List<SearchUserResult> searchUsers(String term, boolean elevated, int limit) {

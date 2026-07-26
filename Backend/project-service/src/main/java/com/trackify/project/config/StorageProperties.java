@@ -13,8 +13,8 @@ public class StorageProperties {
   /** Local folder location when provider=local */
   private String location = "upload-dir";
 
-  /** Maximum upload size in bytes (default 10 MB) */
-  private long maxFileSizeBytes = 10 * 1024 * 1024;
+  /** Maximum upload size in bytes (default 8 MB — Sonar content-length guidance) */
+  private long maxFileSizeBytes = 8L * 1024 * 1024;
 
   private S3 s3 = new S3();
 

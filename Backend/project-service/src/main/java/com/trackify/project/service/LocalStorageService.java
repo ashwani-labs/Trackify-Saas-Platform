@@ -1,6 +1,7 @@
 package com.trackify.project.service;
 
 import com.trackify.common.exception.AppException;
+import com.trackify.common.util.SafeNames;
 import com.trackify.project.config.StorageProperties;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,7 @@ public class LocalStorageService implements StorageService {
 
   @Override
   public String store(MultipartFile file) {
-    String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+    String originalFilename = SafeNames.cleanOriginalFilename(file);
     String extension = StringUtils.getFilenameExtension(originalFilename);
     String fileKey = UUID.randomUUID().toString();
     if (extension != null) {

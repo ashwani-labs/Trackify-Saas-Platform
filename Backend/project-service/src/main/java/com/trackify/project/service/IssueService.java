@@ -24,7 +24,6 @@ import com.trackify.project.util.ProjectKeyUtil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -36,6 +35,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @Service
 public class IssueService {
+
+  private static final String ISSUE_NOT_FOUND = "Issue not found";
 
   private final IssueRepository issueRepository;
   private final ProjectRepository projectRepository;
@@ -116,9 +117,7 @@ public class IssueService {
   }
 
   public List<IssueResponse> getIssuesByProject(Long projectId) {
-    return issueRepository.findAllByProjectId(projectId).stream()
-        .map(this::mapToResponse)
-        .collect(Collectors.toList());
+    return issueRepository.findAllByProjectId(projectId).stream().map(this::mapToResponse).toList();
   }
 
   public org.springframework.data.domain.Page<IssueResponse> getIssuesByProject(
@@ -128,7 +127,7 @@ public class IssueService {
 
   public IssueResponse getIssueById(Long id) {
     Issue issue =
-        issueRepository.findById(id).orElseThrow(() -> AppException.notFound("Issue not found"));
+        issueRepository.findById(id).orElseThrow(() -> AppException.notFound(ISSUE_NOT_FOUND));
     return mapToResponse(issue);
   }
 
@@ -136,14 +135,14 @@ public class IssueService {
     Issue issue =
         issueRepository
             .findByIssueKey(issueKey)
-            .orElseThrow(() -> AppException.notFound("Issue not found"));
+            .orElseThrow(() -> AppException.notFound(ISSUE_NOT_FOUND));
     return mapToResponse(issue);
   }
 
   @Transactional
   public IssueResponse updateIssue(Long id, IssueRequest request, Long actorUserId) {
     Issue issue =
-        issueRepository.findById(id).orElseThrow(() -> AppException.notFound("Issue not found"));
+        issueRepository.findById(id).orElseThrow(() -> AppException.notFound(ISSUE_NOT_FOUND));
 
     Long previousAssignee = issue.getAssigneeId();
     IssueStatus previousStatus = issue.getStatus();
@@ -194,7 +193,7 @@ public class IssueService {
   @Transactional
   public void deleteIssue(Long id) {
     if (!issueRepository.existsById(id)) {
-      throw AppException.notFound("Issue not found");
+      throw AppException.notFound(ISSUE_NOT_FOUND);
     }
     issueRepository.deleteById(id);
   }
@@ -202,9 +201,7 @@ public class IssueService {
   @Transactional
   public CommentResponse addComment(Long issueId, CommentRequest request, Long userId) {
     Issue issue =
-        issueRepository
-            .findById(issueId)
-            .orElseThrow(() -> AppException.notFound("Issue not found"));
+        issueRepository.findById(issueId).orElseThrow(() -> AppException.notFound(ISSUE_NOT_FOUND));
 
     IssueComment comment =
         IssueComment.builder().issue(issue).userId(userId).content(request.getContent()).build();
@@ -218,7 +215,7 @@ public class IssueService {
   public List<CommentResponse> getIssueComments(Long issueId) {
     return commentRepository.findAllByIssueIdOrderByCreatedAtDesc(issueId).stream()
         .map(this::mapToCommentResponse)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   // --- Attachments ---
@@ -226,9 +223,7 @@ public class IssueService {
   @Transactional
   public IssueAttachmentResponse addAttachment(Long issueId, MultipartFile file, Long uploaderId) {
     Issue issue =
-        issueRepository
-            .findById(issueId)
-            .orElseThrow(() -> AppException.notFound("Issue not found"));
+        issueRepository.findById(issueId).orElseThrow(() -> AppException.notFound(ISSUE_NOT_FOUND));
 
     fileUploadValidator.validate(file);
     String fileKey = storageService.store(file);
@@ -250,7 +245,7 @@ public class IssueService {
   public List<IssueAttachmentResponse> getIssueAttachments(Long issueId) {
     return attachmentRepository.findAllByIssueId(issueId).stream()
         .map(this::mapToAttachmentResponse)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   public Resource downloadAttachment(Long attachmentId) {
@@ -335,9 +330,7 @@ public class IssueService {
         .updatedAt(issue.getUpdatedAt())
         .attachments(
             issue.getAttachments() != null
-                ? issue.getAttachments().stream()
-                    .map(this::mapToAttachmentResponse)
-                    .collect(Collectors.toList())
+                ? issue.getAttachments().stream().map(this::mapToAttachmentResponse).toList()
                 : Collections.emptyList())
         .build();
   }

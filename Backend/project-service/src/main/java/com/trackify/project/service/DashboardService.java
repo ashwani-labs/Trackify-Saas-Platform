@@ -17,10 +17,10 @@ import com.trackify.project.repository.IssueRepository;
 import com.trackify.project.repository.ProjectRepository;
 import com.trackify.project.repository.SprintRepository;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,7 +52,8 @@ public class DashboardService {
     List<Long> projectIds =
         isAdmin ? Collections.emptyList() : projectRepository.findProjectIdsByUserId(userId);
 
-    LocalDateTime since = days != null && days > 0 ? LocalDateTime.now().minusDays(days) : null;
+    LocalDateTime since =
+        days != null && days > 0 ? LocalDateTime.now(ZoneOffset.UTC).minusDays(days) : null;
     ProjectStatsResponse summary = buildSummary(isAdmin, projectIds, since);
     long unreadNotifications = notificationService.getUnreadCount(userId);
     long assignedToMeCount =
@@ -142,7 +143,7 @@ public class DashboardService {
                     .priority(priority)
                     .count(countByPriority(isAdmin, projectIds, priority, since))
                     .build())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private long countByPriority(
@@ -170,7 +171,7 @@ public class DashboardService {
     Pageable pageable = PageRequest.of(0, MY_ISSUES_LIMIT);
     return issueRepository.findMyOpenIssues(userId, IssueStatus.DONE, pageable).stream()
         .map(this::mapIssueItem)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<DashboardActivityItem> loadRecentActivity(
@@ -192,7 +193,7 @@ public class DashboardService {
               : activityEventRepository.findByProjectIdInAndCreatedAtAfterOrderByCreatedAtDesc(
                   projectIds, since, pageable);
     }
-    return page.getContent().stream().map(this::mapActivityItem).collect(Collectors.toList());
+    return page.getContent().stream().map(this::mapActivityItem).toList();
   }
 
   private List<ProjectResponse> loadRecentProjects(
@@ -209,7 +210,7 @@ public class DashboardService {
     }
     return page.getContent().stream()
         .map(project -> projectService.getProjectById(project.getId(), userId, role))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private DashboardIssueItem mapIssueItem(Issue issue) {

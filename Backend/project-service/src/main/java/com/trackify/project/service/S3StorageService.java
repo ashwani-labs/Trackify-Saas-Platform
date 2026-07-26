@@ -1,6 +1,7 @@
 package com.trackify.project.service;
 
 import com.trackify.common.exception.AppException;
+import com.trackify.common.util.SafeNames;
 import com.trackify.project.config.StorageProperties;
 import java.io.IOException;
 import java.net.URI;
@@ -50,7 +51,7 @@ public class S3StorageService implements StorageService {
 
   @Override
   public String store(MultipartFile file) {
-    String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+    String originalFilename = SafeNames.cleanOriginalFilename(file);
     String extension = StringUtils.getFilenameExtension(originalFilename);
     String fileKey = UUID.randomUUID().toString();
     if (extension != null) {
@@ -108,6 +109,6 @@ public class S3StorageService implements StorageService {
     if (prefix == null || prefix.isBlank()) {
       return fileKey;
     }
-    return prefix.replaceAll("/+$", "") + "/" + fileKey;
+    return StringUtils.trimTrailingCharacter(prefix, '/') + "/" + fileKey;
   }
 }

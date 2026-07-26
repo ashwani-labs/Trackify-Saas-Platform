@@ -1,5 +1,6 @@
 package com.trackify.project.config;
 
+import com.trackify.common.util.SafeNames;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
 import java.util.Map;
@@ -104,7 +105,8 @@ public class DataSourceConfig implements WebMvcConfigurer {
               "SELECT db_name, db_host, db_port, db_username, db_password FROM tenants WHERE id = ?",
               tenantId);
 
-      String dbName = (String) tenant.get("db_name");
+      String dbName =
+          SafeNames.requireMysqlIdentifier((String) tenant.get("db_name"), "database name");
       String host = (String) tenant.get("db_host");
       Integer port = (Integer) tenant.get("db_port");
       String username = (String) tenant.get("db_username");
@@ -115,7 +117,22 @@ public class DataSourceConfig implements WebMvcConfigurer {
               "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true",
               host, port, dbName);
 
-      HikariDataSource ds = new HikariDataSource();
+      registerTenantPool(tenantId, dbName, url, username, password, routingDataSource);
+    } catch (Exception e) {
+      log.error("Failed to initialize DataSource for tenant {}: {}", tenantId, e.getMessage());
+    }
+  }
+
+  private void registerTenantPool(
+      Long tenantId,
+      String dbName,
+      String url,
+      String username,
+      String password,
+      TenantRoutingDataSource routingDataSource) {
+    HikariDataSource ds = new HikariDataSource();
+    boolean registered = false;
+    try {
       ds.setJdbcUrl(url);
       ds.setUsername(username);
       ds.setPassword(password);
@@ -124,10 +141,14 @@ public class DataSourceConfig implements WebMvcConfigurer {
       ds.setMaximumPoolSize(5);
 
       routingDataSource.registerTenantDataSource(tenantId, ds);
+      registered = true;
       tenantSchemaUpgrader.upgradeIfNeeded(tenantId, ds);
 
       log.info("Successfully added tenant database: {}", dbName);
     } catch (Exception e) {
+      if (!registered) {
+        ds.close();
+      }
       log.error("Failed to initialize DataSource for tenant {}: {}", tenantId, e.getMessage());
     }
   }
