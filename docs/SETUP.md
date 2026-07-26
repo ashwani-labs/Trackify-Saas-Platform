@@ -101,6 +101,7 @@ VITE_API_BASE_URL=http://localhost:8080
 | `STORAGE_PROVIDER` | `local` | `local` or `s3` attachments |
 | `MAIL_*` | empty | SMTP; unset → console logs in notification-service |
 | `TRACKIFY_DEV_FIXED_ADMIN_PASSWORD` | unset | Known password when provisioning tenants |
+| `TRACKIFY_DEV_MASTER_PASSWORD` | `admin123` (local profile) | Seeds `master@trackify.com` on first auth-service boot |
 | `VITE_TENANT_APP_PORT` | `5174` | Workspace URL helpers in the UI |
 
 Never commit `.env`.
