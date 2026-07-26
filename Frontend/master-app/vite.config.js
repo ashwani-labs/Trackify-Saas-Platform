@@ -8,8 +8,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // https://vite.dev/config/
 export default defineConfig({
   envDir: path.resolve(__dirname, '../..'),
+  // Vitest can emit classic JSX unless this is set (plugin-react oxc defaults are skipped).
+  oxc: {
+    jsx: {
+      runtime: 'automatic',
+    },
+  },
+  esbuild: {
+    jsx: 'automatic',
+  },
   plugins: [
     react({
+      jsxRuntime: 'automatic',
       babel: {
         plugins: ['babel-plugin-react-compiler'],
       },
